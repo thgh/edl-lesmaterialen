@@ -39,6 +39,12 @@ export default async function HomePage() {
             Go to admin panel
           </a>
           <a
+            className="import"
+            href="/import-xslx"
+          >
+            Import XLSX File
+          </a>
+          <a
             className="docs"
             href="https://payloadcms.com/docs"
             rel="noopener noreferrer"

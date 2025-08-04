@@ -5,17 +5,17 @@
   "license": "MIT",
   "type": "module",
   "scripts": {
-    "build": "cross-env NODE_OPTIONS=\"--no-deprecation --max-old-space-size=8000\" next build",
-    "dev": "cross-env NODE_OPTIONS=--no-deprecation next dev",
-    "devsafe": "rm -rf .next && cross-env NODE_OPTIONS=--no-deprecation next dev",
-    "generate:importmap": "cross-env NODE_OPTIONS=--no-deprecation payload generate:importmap",
-    "generate:types": "cross-env NODE_OPTIONS=--no-deprecation payload generate:types",
-    "lint": "cross-env NODE_OPTIONS=--no-deprecation next lint",
-    "payload": "cross-env NODE_OPTIONS=--no-deprecation payload",
-    "start": "cross-env NODE_OPTIONS=--no-deprecation next start",
+    "build": "NODE_OPTIONS=\"--no-deprecation --max-old-space-size=8000\" next build",
+    "dev": "NODE_OPTIONS=--no-deprecation next dev -p 25077",
+    "devsafe": "rm -rf .next && NODE_OPTIONS=--no-deprecation next dev -p 25077",
+    "generate:importmap": "NODE_OPTIONS=--no-deprecation payload generate:importmap",
+    "types": "NODE_OPTIONS=--no-deprecation payload generate:types",
+    "lint": "NODE_OPTIONS=--no-deprecation next lint",
+    "payload": "NODE_OPTIONS=--no-deprecation payload",
+    "start": "NODE_OPTIONS=--no-deprecation next start",
     "test": "pnpm run test:int && pnpm run test:e2e",
-    "test:e2e": "cross-env NODE_OPTIONS=\"--no-deprecation --no-experimental-strip-types\" pnpm exec playwright test",
-    "test:int": "cross-env NODE_OPTIONS=--no-deprecation vitest run --config ./vitest.config.mts"
+    "test:e2e": "NODE_OPTIONS=\"--no-deprecation --no-experimental-strip-types\" pnpm exec playwright test",
+    "test:int": "NODE_OPTIONS=--no-deprecation vitest run --config ./vitest.config.mts"
   },
   "dependencies": {
     "@payloadcms/db-mongodb": "3.47.0",
@@ -29,7 +29,8 @@
     "next": "15.3.2",
     "payload": "3.47.0",
     "react": "19.1.0",
-    "sharp": "0.34.2"
+    "sharp": "0.34.2",
+    "xlsx": "^0.18.5"
   },
   "devDependencies": {
     "@playwright/test": "1.50.0",
@@ -44,6 +45,8 @@
     "playwright": "1.50.0",
     "playwright-core": "1.50.0",
     "prettier": "^3.4.2",
+    "prettier-plugin-organize-imports": "^4.2.0",
+    "prettier-plugin-tailwindcss": "^0.6.14",
     "typescript": "5.7.3",
     "vite-tsconfig-paths": "5.1.4",
     "vitest": "3.2.3"

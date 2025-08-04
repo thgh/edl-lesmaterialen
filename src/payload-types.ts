@@ -67,16 +67,26 @@ export interface Config {
   };
   blocks: {};
   collections: {
+    'course-materials': CourseMaterial;
+    'course-material-attachments': CourseMaterialAttachment;
+    'material-types': MaterialType;
+    competences: Competence;
+    'school-types': SchoolType;
+    topics: Topic;
     users: User;
-    media: Media;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
   };
   collectionsJoins: {};
   collectionsSelect: {
+    'course-materials': CourseMaterialsSelect<false> | CourseMaterialsSelect<true>;
+    'course-material-attachments': CourseMaterialAttachmentsSelect<false> | CourseMaterialAttachmentsSelect<true>;
+    'material-types': MaterialTypesSelect<false> | MaterialTypesSelect<true>;
+    competences: CompetencesSelect<false> | CompetencesSelect<true>;
+    'school-types': SchoolTypesSelect<false> | SchoolTypesSelect<true>;
+    topics: TopicsSelect<false> | TopicsSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
-    media: MediaSelect<false> | MediaSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
     'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
@@ -115,10 +125,114 @@ export interface UserAuthOperations {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "course-materials".
+ */
+export interface CourseMaterial {
+  id: string;
+  title: string;
+  title_nl?: string | null;
+  title_de?: string | null;
+  description_nl?: string | null;
+  description_de?: string | null;
+  attachments?: (string | CourseMaterialAttachment)[] | null;
+  links?:
+    | {
+        label_nl?: string | null;
+        label_de?: string | null;
+        url?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  schoolType?: (string | null) | SchoolType;
+  competences?: (string | Competence)[] | null;
+  topics?: (string | Topic)[] | null;
+  materialTypes?: (string | MaterialType)[] | null;
+  cefr?: ('A1' | 'A2' | 'B1' | 'B2' | 'C1' | 'C2')[] | null;
+  language?: ('nl' | 'de' | 'en')[] | null;
+  status?: ('draft' | 'published') | null;
+  slug?: string | null;
+  notes?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "course-material-attachments".
+ */
+export interface CourseMaterialAttachment {
+  id: string;
+  alt?: string | null;
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "school-types".
+ */
+export interface SchoolType {
+  id: string;
+  title: string;
+  title_nl?: string | null;
+  title_de?: string | null;
+  slug?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "competences".
+ */
+export interface Competence {
+  id: string;
+  title: string;
+  title_nl?: string | null;
+  title_de?: string | null;
+  slug?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "topics".
+ */
+export interface Topic {
+  id: string;
+  title: string;
+  title_nl?: string | null;
+  title_de?: string | null;
+  slug?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "material-types".
+ */
+export interface MaterialType {
+  id: string;
+  title: string;
+  title_nl?: string | null;
+  title_de?: string | null;
+  slug?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "users".
  */
 export interface User {
   id: string;
+  name: string;
   updatedAt: string;
   createdAt: string;
   email: string;
@@ -139,37 +253,38 @@ export interface User {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "media".
- */
-export interface Media {
-  id: string;
-  alt: string;
-  updatedAt: string;
-  createdAt: string;
-  url?: string | null;
-  thumbnailURL?: string | null;
-  filename?: string | null;
-  mimeType?: string | null;
-  filesize?: number | null;
-  width?: number | null;
-  height?: number | null;
-  focalX?: number | null;
-  focalY?: number | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-locked-documents".
  */
 export interface PayloadLockedDocument {
   id: string;
   document?:
     | ({
-        relationTo: 'users';
-        value: string | User;
+        relationTo: 'course-materials';
+        value: string | CourseMaterial;
       } | null)
     | ({
-        relationTo: 'media';
-        value: string | Media;
+        relationTo: 'course-material-attachments';
+        value: string | CourseMaterialAttachment;
+      } | null)
+    | ({
+        relationTo: 'material-types';
+        value: string | MaterialType;
+      } | null)
+    | ({
+        relationTo: 'competences';
+        value: string | Competence;
+      } | null)
+    | ({
+        relationTo: 'school-types';
+        value: string | SchoolType;
+      } | null)
+    | ({
+        relationTo: 'topics';
+        value: string | Topic;
+      } | null)
+    | ({
+        relationTo: 'users';
+        value: string | User;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -215,9 +330,107 @@ export interface PayloadMigration {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "course-materials_select".
+ */
+export interface CourseMaterialsSelect<T extends boolean = true> {
+  title?: T;
+  title_nl?: T;
+  title_de?: T;
+  description_nl?: T;
+  description_de?: T;
+  attachments?: T;
+  links?:
+    | T
+    | {
+        label_nl?: T;
+        label_de?: T;
+        url?: T;
+        id?: T;
+      };
+  schoolType?: T;
+  competences?: T;
+  topics?: T;
+  materialTypes?: T;
+  cefr?: T;
+  language?: T;
+  status?: T;
+  slug?: T;
+  notes?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "course-material-attachments_select".
+ */
+export interface CourseMaterialAttachmentsSelect<T extends boolean = true> {
+  alt?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  url?: T;
+  thumbnailURL?: T;
+  filename?: T;
+  mimeType?: T;
+  filesize?: T;
+  width?: T;
+  height?: T;
+  focalX?: T;
+  focalY?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "material-types_select".
+ */
+export interface MaterialTypesSelect<T extends boolean = true> {
+  title?: T;
+  title_nl?: T;
+  title_de?: T;
+  slug?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "competences_select".
+ */
+export interface CompetencesSelect<T extends boolean = true> {
+  title?: T;
+  title_nl?: T;
+  title_de?: T;
+  slug?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "school-types_select".
+ */
+export interface SchoolTypesSelect<T extends boolean = true> {
+  title?: T;
+  title_nl?: T;
+  title_de?: T;
+  slug?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "topics_select".
+ */
+export interface TopicsSelect<T extends boolean = true> {
+  title?: T;
+  title_nl?: T;
+  title_de?: T;
+  slug?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "users_select".
  */
 export interface UsersSelect<T extends boolean = true> {
+  name?: T;
   updatedAt?: T;
   createdAt?: T;
   email?: T;
@@ -234,24 +447,6 @@ export interface UsersSelect<T extends boolean = true> {
         createdAt?: T;
         expiresAt?: T;
       };
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "media_select".
- */
-export interface MediaSelect<T extends boolean = true> {
-  alt?: T;
-  updatedAt?: T;
-  createdAt?: T;
-  url?: T;
-  thumbnailURL?: T;
-  filename?: T;
-  mimeType?: T;
-  filesize?: T;
-  width?: T;
-  height?: T;
-  focalX?: T;
-  focalY?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

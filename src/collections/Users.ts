@@ -4,10 +4,15 @@ export const Users: CollectionConfig = {
   slug: 'users',
   admin: {
     useAsTitle: 'email',
+    group: 'Beheer',
   },
   auth: true,
   fields: [
-    // Email added by default
-    // Add more fields as needed
+    {
+      label: 'Naam',
+      name: 'name',
+      type: 'text',
+      required: true,
+    },
   ],
 }
