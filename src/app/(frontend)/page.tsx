@@ -1,7 +1,6 @@
 import { headers as getHeaders } from 'next/headers.js'
 import Image from 'next/image'
 import { getPayload } from 'payload'
-import React from 'react'
 import { fileURLToPath } from 'url'
 
 import config from '@/payload.config'
@@ -38,10 +37,7 @@ export default async function HomePage() {
           >
             Go to admin panel
           </a>
-          <a
-            className="import"
-            href="/import-xslx"
-          >
+          <a className="import" href="/import">
             Import XLSX File
           </a>
           <a

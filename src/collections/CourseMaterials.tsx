@@ -178,12 +178,11 @@ export const CourseMaterials: CollectionConfig = {
       name: 'slug',
       label: 'Slug',
       type: 'text',
-      unique: true,
       admin: {
         position: 'sidebar',
       },
       hooks: {
-        beforeChange: [beforeChangeSlug('title_nl')],
+        beforeChange: [beforeChangeSlug('title_nl', 'title_de')],
       },
     },
     {
