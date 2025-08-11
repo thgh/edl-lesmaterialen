@@ -2,10 +2,10 @@
 
 import { getDictionary } from '@/i18n/dictionaries'
 import { CourseMaterial } from '@/payload-types'
-import Link from 'next/link'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { CourseMaterialCard } from './CourseMaterialCard'
 import { SearchAndFilters } from './SearchAndFilters'
+import { Sidebar } from './Sidebar'
 
 type MaterialType = {
   id: string
@@ -462,27 +462,7 @@ export function MaterialsExplorer({
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-[300px_1fr] lg:grid-cols-[320px_1fr] xl:grid-cols-[340px_1fr]">
-      <aside className="pb-6 bg-gray-50 px-4 py-4 sm:p-6 lg:p-8">
-        <div className="flex items-start justify-between mb-4 md:mb-10">
-          <Link href={`/${locale}`} className="flex items-center gap-3">
-            <img src="/assets/logo-edl.png" alt="Logo" width={128} height={104} />
-            <span className="text-lg font-semibold sr-only">EDL Münster</span>
-          </Link>
-          <nav className="flex items-center gap-2 text-sm">
-            <Link
-              href="/nl"
-              className={`rounded font-medium px-2 py-1 ${locale === 'nl' ? 'bg-brand' : 'bg-white shadow hover:bg-gray-100'}`}
-            >
-              NL
-            </Link>
-            <Link
-              href="/de"
-              className={`rounded font-medium px-2 py-1 ${locale === 'de' ? 'bg-brand' : 'bg-white shadow hover:bg-gray-100'}`}
-            >
-              DE
-            </Link>
-          </nav>
-        </div>
+      <Sidebar locale={locale}>
         <div className="md:hidden">
           <button
             type="button"
@@ -532,7 +512,7 @@ export function MaterialsExplorer({
             languageCounts={languageCounts}
           />
         </div>
-      </aside>
+      </Sidebar>
       <main className="px-4 py-4 sm:px-6 lg:px-8">
         <div className="mb-3 text-sm text-gray-600">{filtered.length}</div>
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
