@@ -8,6 +8,8 @@ import { MaterialNavigation } from '../../../components/MaterialNavigation'
 import { Sidebar } from '../../../components/Sidebar'
 import '../../../styles.css'
 
+export const dynamic = 'force-dynamic'
+
 // PDF Embed Component
 function PDFEmbed({ url }: { url: string }) {
   const proxyUrl = `/api/pdf-proxy?url=${encodeURIComponent(url)}`

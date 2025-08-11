@@ -2,6 +2,8 @@
 
 import { useState } from 'react'
 
+export const dynamic = 'force-dynamic'
+
 export default function ImportXLSXPage() {
   const [file, setFile] = useState<File | null>(null)
   const [uploading, setUploading] = useState(false)

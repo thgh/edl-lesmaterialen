@@ -1,0 +1,31 @@
+name: Deploy main
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+jobs:
+  deploy:
+    name: Deploy main
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install
+      - run: pnpm build
+        env:
+          NEXT_TELEMETRY_DISABLED: 1
+      - run: git config --global user.email "github@thomasg.be" && git config --global user.name "Github"
+      - name: Caprover Deploy
+        run: rm -r .next/cache && git add -f .next public && git commit -m "build" && npx caprover deploy
+        env:
+          CAPROVER_URL: https://captain.caprover.thomasg.be
+          CAPROVER_APP_TOKEN: ${{ secrets.CAPROVER_APP_TOKEN_MAIN }}
+          CAPROVER_BRANCH: main
+          CAPROVER_APP: edl-lesmaterialen-main

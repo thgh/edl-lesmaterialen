@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 
-let locales = ['nl', 'de']
+const locales = ['nl', 'de']
 
 export function middleware(request: NextRequest) {
   // Check if there is any supported locale in the pathname
@@ -23,7 +23,7 @@ export function middleware(request: NextRequest) {
 export const config = {
   matcher: [
     // Skip all internal paths (_next)
-    '/((?!_next|assets|admin|api).*)',
+    '/((?!_next|assets|admin|api|import).*)',
     // Optional: only run on root (/) URL
     // '/'
   ],
