@@ -17,6 +17,10 @@ const dictionaries = {
     languageGerman: 'Duits',
     showFilters: 'Filters tonen',
     hideFilters: 'Filters verbergen',
+    detailBackToOverview: 'Terug naar overzicht',
+    detailOpenWebsite: 'Open website',
+    detailDownload: 'Download',
+    detailExternalLinksTitle: 'Externe links',
   },
   de: {
     siteTitle: 'Unterrichtsmaterialien',
@@ -35,6 +39,10 @@ const dictionaries = {
     languageGerman: 'Deutsch',
     showFilters: 'Filter anzeigen',
     hideFilters: 'Filter ausblenden',
+    detailBackToOverview: 'Zurück zur Übersicht',
+    detailOpenWebsite: 'Webseite öffnen',
+    detailDownload: 'Herunterladen',
+    detailExternalLinksTitle: 'Externe Links',
   },
 } as const
 

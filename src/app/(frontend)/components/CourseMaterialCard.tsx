@@ -1,5 +1,6 @@
 import { CourseMaterial } from '@/payload-types'
 import Image from 'next/image'
+import Link from 'next/link'
 
 interface CourseMaterialCardProps {
   material: CourseMaterial
@@ -83,53 +84,56 @@ export function CourseMaterialCard({ material, locale, cefrLabel }: CourseMateri
   }
 
   const hasThumbnail = material.attachments && material.attachments.length > 0
+  const slug = material.slug || `id:${material.id}`
 
   return (
-    <article className="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm transition hover:shadow-md">
-      {hasThumbnail && (
-        <div className="relative aspect-[3/2] w-full overflow-hidden bg-gray-50">
-          <Image
-            src={`/api/media/${(material.attachments as any)[0].id}`}
-            alt={getTitle()}
-            fill
-            sizes="(min-width: 768px) 33vw, 100vw"
-            className="object-cover"
-          />
-        </div>
-      )}
+    <Link href={`/${locale}/lesmateriaal/${slug}`} className="block">
+      <article className="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm transition hover:shadow-md">
+        {hasThumbnail && (
+          <div className="relative aspect-[3/2] w-full overflow-hidden bg-gray-50">
+            <Image
+              src={`/api/media/${(material.attachments as any)[0].id}`}
+              alt={getTitle()}
+              fill
+              sizes="(min-width: 768px) 33vw, 100vw"
+              className="object-cover"
+            />
+          </div>
+        )}
 
-      <div className="space-y-3 p-4">
-        <div className="flex items-center justify-between text-xs text-gray-600">
-          <span className="rounded bg-gray-100 px-2 py-0.5">{getMaterialType()}</span>
-          <button className="text-gray-500 hover:text-gray-800" aria-label="Open material">
-            <svg
-              width="16"
-              height="16"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-            >
-              <path d="M7 17L17 7M17 7H7M17 7V17" />
-            </svg>
-          </button>
-        </div>
-
-        <h3 className="line-clamp-2 text-base font-semibold text-gray-900">{getTitle()}</h3>
-
-        <div className="space-y-1 text-sm text-gray-700">
-          {getCefrLevels() && (
-            <div className="flex items-center gap-2">
-              <span className="text-gray-500">{cefrLabel}</span>
-              <span>{getCefrLevels()}</span>
+        <div className="space-y-3 p-4">
+          <div className="flex items-center justify-between text-xs text-gray-600">
+            <span className="rounded bg-gray-100 px-2 py-0.5">{getMaterialType()}</span>
+            <div className="text-gray-500" aria-label="Open material">
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+              >
+                <path d="M7 17L17 7M17 7H7M17 7V17" />
+              </svg>
             </div>
-          )}
+          </div>
 
-          {getSchoolType() && <div>{getSchoolType()}</div>}
-          {getTopics() && <div>{getTopics()}</div>}
-          {getCompetences() && <div>{getCompetences()}</div>}
+          <h3 className="line-clamp-2 text-base font-semibold text-gray-900">{getTitle()}</h3>
+
+          <div className="space-y-1 text-sm text-gray-700">
+            {getCefrLevels() && (
+              <div className="flex items-center gap-2">
+                <span className="text-gray-500">{cefrLabel}</span>
+                <span>{getCefrLevels()}</span>
+              </div>
+            )}
+
+            {getSchoolType() && <div>{getSchoolType()}</div>}
+            {getTopics() && <div>{getTopics()}</div>}
+            {getCompetences() && <div>{getCompetences()}</div>}
+          </div>
         </div>
-      </div>
-    </article>
+      </article>
+    </Link>
   )
 }

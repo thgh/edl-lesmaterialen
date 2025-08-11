@@ -2,7 +2,6 @@
 
 import { getDictionary } from '@/i18n/dictionaries'
 import { CourseMaterial } from '@/payload-types'
-import Image from 'next/image'
 import Link from 'next/link'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { CourseMaterialCard } from './CourseMaterialCard'
@@ -466,19 +465,19 @@ export function MaterialsExplorer({
       <aside className="pb-6 bg-gray-50 px-4 py-4 sm:p-6 lg:p-8">
         <div className="flex items-start justify-between mb-4 md:mb-10">
           <Link href={`/${locale}`} className="flex items-center gap-3">
-            <Image src="/assets/logo.svg" alt="Logo" width={150} height={150} />
+            <img src="/assets/logo-edl.png" alt="Logo" width={128} height={104} />
             <span className="text-lg font-semibold sr-only">EDL Münster</span>
           </Link>
-          <nav className="mt-3 flex items-center gap-2 text-sm">
+          <nav className="flex items-center gap-2 text-sm">
             <Link
               href="/nl"
-              className={`rounded px-2 py-1 ${locale === 'nl' ? 'bg-gray-900 text-white' : 'bg-white shadow hover:bg-gray-100'}`}
+              className={`rounded font-medium px-2 py-1 ${locale === 'nl' ? 'bg-brand' : 'bg-white shadow hover:bg-gray-100'}`}
             >
               NL
             </Link>
             <Link
               href="/de"
-              className={`rounded px-2 py-1 ${locale === 'de' ? 'bg-gray-900 text-white' : 'bg-white shadow hover:bg-gray-100'}`}
+              className={`rounded font-medium px-2 py-1 ${locale === 'de' ? 'bg-brand' : 'bg-white shadow hover:bg-gray-100'}`}
             >
               DE
             </Link>
