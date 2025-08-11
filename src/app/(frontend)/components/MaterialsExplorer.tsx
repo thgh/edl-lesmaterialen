@@ -44,9 +44,10 @@ export function MaterialsExplorer({
   schoolTypes,
   competences,
   topics,
-  lang: locale,
+  lang,
   labels,
 }: MaterialsExplorerProps) {
+  const dict = getDictionary(lang)
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedTypes, setSelectedTypes] = useState<string[]>([])
   const [selectedSchoolTypes, setSelectedSchoolTypes] = useState<string[]>([])
@@ -159,7 +160,7 @@ export function MaterialsExplorer({
   const filtered = useMemo(() => {
     const query = searchQuery.trim().toLowerCase()
     return materials.filter((m) => {
-      const title = (locale === 'de' ? m.title_de : m.title_nl) || m.title_de || ''
+      const title = (lang === 'de' ? m.title_de : m.title_nl) || m.title_de || ''
       const matchesQuery = query === '' || title.toLowerCase().includes(query)
       const matchesLanguage =
         selectedLanguages.length === 0 ||
@@ -211,7 +212,7 @@ export function MaterialsExplorer({
     selectedSchoolTypes,
     selectedCompetences,
     selectedTopics,
-    locale,
+    lang,
   ])
 
   const visibleMaterials = filtered.slice(0, limit)
@@ -222,7 +223,7 @@ export function MaterialsExplorer({
       const query = searchQuery.trim().toLowerCase()
 
       const matchesQuery = (m: CourseMaterial) => {
-        const title = (locale === 'de' ? m.title_de : m.title_nl) || m.title_de || ''
+        const title = (lang === 'de' ? m.title_de : m.title_nl) || m.title_de || ''
         return query === '' || title.toLowerCase().includes(query)
       }
 
@@ -457,12 +458,12 @@ export function MaterialsExplorer({
       selectedSchoolTypes,
       selectedCompetences,
       selectedTopics,
-      locale,
+      lang,
     ])
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-[300px_1fr] lg:grid-cols-[320px_1fr] xl:grid-cols-[340px_1fr]">
-      <Sidebar locale={locale}>
+    <div className="block md:flex">
+      <Sidebar locale={lang}>
         <div className="md:hidden">
           <button
             type="button"
@@ -513,24 +514,38 @@ export function MaterialsExplorer({
           />
         </div>
       </Sidebar>
-      <main className="px-4 py-4 sm:px-6 lg:px-8">
+      <main className="px-4 py-6 sm:px-6 lg:px-8">
+        <h1 className="pt-4 text-2xl lg:text-3xl xl:text-4xl font-bold text-gray-900">
+          {dict.siteTitle}
+        </h1>
+        <p className="text-lg text-gray-600">{dict.siteTagline}</p>
         <div className="mb-3 text-sm text-gray-600">{filtered.length}</div>
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
           {visibleMaterials.map((material) => (
             <CourseMaterialCard
               key={material.id}
               material={material}
-              locale={locale}
+              locale={lang}
               cefrLabel={labels.cefrLabel}
+              filters={{
+                searchQuery,
+                selectedTypes,
+                selectedSchoolTypes,
+                selectedCompetences,
+                selectedTopics,
+                selectedLanguages,
+              }}
             />
           ))}
         </div>
-        <button
-          className="mt-6 rounded-md bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
-          onClick={() => setLimit(limit * 5)}
-        >
-          {getDictionary(locale).loadMore}
-        </button>
+        {limit < filtered.length && (
+          <button
+            className="mt-6 rounded-md bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
+            onClick={() => setLimit(limit * 5)}
+          >
+            {dict.loadMore}
+          </button>
+        )}
       </main>
     </div>
   )

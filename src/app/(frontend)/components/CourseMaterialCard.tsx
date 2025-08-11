@@ -6,9 +6,22 @@ interface CourseMaterialCardProps {
   material: CourseMaterial
   locale: 'nl' | 'de'
   cefrLabel: string
+  filters?: {
+    searchQuery: string
+    selectedTypes: string[]
+    selectedSchoolTypes: string[]
+    selectedCompetences: string[]
+    selectedTopics: string[]
+    selectedLanguages: string[]
+  }
 }
 
-export function CourseMaterialCard({ material, locale, cefrLabel }: CourseMaterialCardProps) {
+export function CourseMaterialCard({
+  material,
+  locale,
+  cefrLabel,
+  filters,
+}: CourseMaterialCardProps) {
   const getTitle = () => {
     return (
       (locale === 'de' ? material.title_de : material.title_nl) ||
@@ -86,8 +99,29 @@ export function CourseMaterialCard({ material, locale, cefrLabel }: CourseMateri
   const hasThumbnail = material.attachments && material.attachments.length > 0
   const slug = material.slug || `id:${material.id}`
 
+  // Build URL with filters
+  const buildDetailUrl = () => {
+    const baseUrl = `/${locale}/lesmateriaal/${slug}`
+    if (!filters) return baseUrl
+
+    const params = new URLSearchParams()
+
+    if (filters.searchQuery) params.set('q', filters.searchQuery)
+    if (filters.selectedTypes.length > 0) params.set('types', filters.selectedTypes.join(','))
+    if (filters.selectedSchoolTypes.length > 0)
+      params.set('schoolTypes', filters.selectedSchoolTypes.join(','))
+    if (filters.selectedCompetences.length > 0)
+      params.set('competences', filters.selectedCompetences.join(','))
+    if (filters.selectedTopics.length > 0) params.set('topics', filters.selectedTopics.join(','))
+    if (filters.selectedLanguages.length > 0)
+      params.set('langs', filters.selectedLanguages.join(','))
+
+    const queryString = params.toString()
+    return queryString ? `${baseUrl}?${queryString}` : baseUrl
+  }
+
   return (
-    <Link href={`/${locale}/lesmateriaal/${slug}`} className="block">
+    <Link href={buildDetailUrl()} className="block">
       <article className="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm transition hover:shadow-md">
         {hasThumbnail && (
           <div className="relative aspect-[3/2] w-full overflow-hidden bg-gray-50">

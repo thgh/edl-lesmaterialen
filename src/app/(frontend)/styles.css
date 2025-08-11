@@ -3,3 +3,24 @@
 @theme {
   --color-brand: #fdc601;
 }
+
+/* Responsive sidebar widths */
+@media (min-width: 768px) {
+  .sidebar {
+    width: 300px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .sidebar {
+    width: 340px;
+  }
+}
+
+/* For very large screens, grow sidebar proportionally while maintaining 1024px center */
+@media (min-width: 1704px) {
+  .sidebar {
+    width: calc((100vw - 1024px) / 2);
+    min-width: 340px;
+  }
+}

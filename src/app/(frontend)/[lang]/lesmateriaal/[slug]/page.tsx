@@ -4,6 +4,7 @@ import config from '@/payload.config'
 import Image from 'next/image'
 import Link from 'next/link'
 import { getPayload } from 'payload'
+import { MaterialNavigation } from '../../../components/MaterialNavigation'
 import { Sidebar } from '../../../components/Sidebar'
 import '../../../styles.css'
 
@@ -21,6 +22,14 @@ function PDFEmbed({ url }: { url: string }) {
 }
 
 type Params = { lang: 'nl' | 'de'; slug: string }
+type SearchParams = {
+  q?: string
+  types?: string
+  schoolTypes?: string
+  competences?: string
+  topics?: string
+  langs?: string
+}
 
 async function fetchMaterialBySlugOrId(slugOrId: string) {
   const payloadConfig = await config
@@ -47,6 +56,21 @@ async function fetchMaterialBySlugOrId(slugOrId: string) {
   return (res.docs?.[0] as unknown as CourseMaterial) || null
 }
 
+async function fetchAllMaterials() {
+  const payloadConfig = await config
+  const payload = await getPayload({ config: payloadConfig })
+
+  const res = await payload.find({
+    collection: 'course-materials',
+    where: {
+      status: { not_equals: 'draft' },
+    },
+    limit: 9999,
+  })
+
+  return res.docs as unknown as CourseMaterial[]
+}
+
 function getLocalized<T extends { title_nl?: string | null; title_de?: string | null }>(
   obj: T | string | null | undefined,
   locale: 'nl' | 'de',
@@ -55,21 +79,68 @@ function getLocalized<T extends { title_nl?: string | null; title_de?: string | 
   return (locale === 'de' ? obj.title_de : obj.title_nl) || obj.title_nl || obj.title_de || ''
 }
 
-export default async function CourseMaterialPage({ params }: { params: Promise<Params> }) {
+export default async function CourseMaterialPage({
+  params,
+  searchParams,
+}: {
+  params: Promise<Params>
+  searchParams: Promise<SearchParams>
+}) {
   const p = await params
+  const sp = await searchParams
   const locale = p.lang === 'de' ? 'de' : 'nl'
   const dict = getDictionary(locale)
-  const material = await fetchMaterialBySlugOrId(p.slug)
+
+  // Fetch current material and all materials for navigation
+  const [material, allMaterials] = await Promise.all([
+    fetchMaterialBySlugOrId(p.slug),
+    fetchAllMaterials(),
+  ])
 
   if (!material) {
     return (
-      <main className="px-4 py-8 sm:px-6 lg:px-8">
+      <main className="px-4 py-6 sm:px-6 lg:px-8">
         <p className="text-gray-600">Not found</p>
         <Link href={`/${locale}`} className="mt-4 inline-block text-blue-600 hover:underline">
           {dict.detailBackToOverview}
         </Link>
       </main>
     )
+  }
+
+  // Parse filter parameters from URL
+  const filters = {
+    searchQuery: sp.q || '',
+    selectedTypes: sp.types
+      ? sp.types
+          .split(',')
+          .map((t) => t.trim())
+          .filter(Boolean)
+      : [],
+    selectedSchoolTypes: sp.schoolTypes
+      ? sp.schoolTypes
+          .split(',')
+          .map((t) => t.trim())
+          .filter(Boolean)
+      : [],
+    selectedCompetences: sp.competences
+      ? sp.competences
+          .split(',')
+          .map((t) => t.trim())
+          .filter(Boolean)
+      : [],
+    selectedTopics: sp.topics
+      ? sp.topics
+          .split(',')
+          .map((t) => t.trim())
+          .filter(Boolean)
+      : [],
+    selectedLanguages: sp.langs
+      ? sp.langs
+          .split(',')
+          .map((t) => t.trim())
+          .filter(Boolean)
+      : [],
   }
 
   const title =
@@ -110,18 +181,21 @@ export default async function CourseMaterialPage({ params }: { params: Promise<P
   const pdfLinks = externalLinks.filter((lnk) => lnk.url?.toLowerCase().endsWith('.pdf'))
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-[300px_1fr] lg:grid-cols-[320px_1fr] xl:grid-cols-[340px_1fr]">
+    <div className="block md:flex">
       <Sidebar locale={locale} />
-      <main className="px-4 py-6 sm:px-6 lg:px-8">
-        <div className="mb-4">
-          <Link href={`/${locale}`} className="text-sm text-blue-600 hover:underline">
-            {dict.detailBackToOverview}
-          </Link>
-        </div>
+      <main className="px-4 py-6 sm:px-6 lg:px-8 flex-1">
+        <aside className="mb-4 max-w-5xl">
+          <MaterialNavigation
+            currentMaterial={material}
+            materials={allMaterials}
+            locale={locale}
+            filters={filters}
+          />
+        </aside>
 
-        <article className="mx-auto max-w-5xl">
+        <article className="max-w-5xl">
           <header className="mb-6">
-            <h1 className="text-2xl font-bold text-gray-900">{title}</h1>
+            <h1 className="text-2xl lg:text-3xl xl:text-4xl font-bold text-gray-900">{title}</h1>
             <div className="mt-2 flex flex-wrap items-center gap-3 text-sm text-gray-600">
               {cefr && (
                 <span className="rounded bg-gray-100 px-2 py-0.5">
@@ -149,6 +223,70 @@ export default async function CourseMaterialPage({ params }: { params: Promise<P
               </div>
             </div>
           )}
+
+          {/* Meta */}
+          <section className="mb-8 grid gap-4 md:grid-cols-2">
+            {Array.isArray(material.materialTypes) && material.materialTypes.length > 0 && (
+              <div>
+                <h3 className="text-sm font-semibold text-gray-700">{dict.materialTypesTitle}</h3>
+                <div className="mt-2 flex flex-wrap gap-2">
+                  {material.materialTypes.map((t) => (
+                    <span
+                      key={typeof t === 'string' ? t : (t as any).id}
+                      className="rounded bg-gray-100 px-2 py-0.5 text-sm"
+                    >
+                      {getLocalized(t as any, locale)}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {Array.isArray(material.topics) && material.topics.length > 0 && (
+              <div>
+                <h3 className="text-sm font-semibold text-gray-700">{dict.topicsTitle}</h3>
+                <div className="mt-2 flex flex-wrap gap-2">
+                  {material.topics.map((t) => (
+                    <span
+                      key={typeof t === 'string' ? t : (t as any).id}
+                      className="rounded bg-gray-100 px-2 py-0.5 text-sm"
+                    >
+                      {getLocalized(t as any, locale)}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {Array.isArray(material.competences) && material.competences.length > 0 && (
+              <div>
+                <h3 className="text-sm font-semibold text-gray-700">{dict.competencesTitle}</h3>
+                <div className="mt-2 flex flex-wrap gap-2">
+                  {material.competences.map((c) => (
+                    <span
+                      key={typeof c === 'string' ? c : (c as any).id}
+                      className="rounded bg-gray-100 px-2 py-0.5 text-sm"
+                    >
+                      {getLocalized(c as any, locale)}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {material.description_nl || material.description_de ? (
+              <div className="md:col-span-2">
+                <h3 className="text-sm font-semibold text-gray-700">
+                  {locale === 'de' ? 'Beschreibung' : 'Beschrijving'}
+                </h3>
+                <p className="mt-2 whitespace-pre-line text-gray-800">
+                  {(locale === 'de' ? material.description_de : material.description_nl) ||
+                    material.description_nl ||
+                    material.description_de}
+                </p>
+              </div>
+            ) : null}
+          </section>
 
           {/* Actions */}
           <section className="mb-10">
@@ -241,76 +379,12 @@ export default async function CourseMaterialPage({ params }: { params: Promise<P
             </section>
           )}
 
-          {/* Meta */}
-          <section className="mb-8 grid gap-4 md:grid-cols-2">
-            {Array.isArray(material.materialTypes) && material.materialTypes.length > 0 && (
-              <div>
-                <h3 className="text-sm font-semibold text-gray-700">{dict.materialTypesTitle}</h3>
-                <div className="mt-2 flex flex-wrap gap-2">
-                  {material.materialTypes.map((t) => (
-                    <span
-                      key={typeof t === 'string' ? t : (t as any).id}
-                      className="rounded bg-gray-100 px-2 py-0.5 text-sm"
-                    >
-                      {getLocalized(t as any, locale)}
-                    </span>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {Array.isArray(material.topics) && material.topics.length > 0 && (
-              <div>
-                <h3 className="text-sm font-semibold text-gray-700">{dict.topicsTitle}</h3>
-                <div className="mt-2 flex flex-wrap gap-2">
-                  {material.topics.map((t) => (
-                    <span
-                      key={typeof t === 'string' ? t : (t as any).id}
-                      className="rounded bg-gray-100 px-2 py-0.5 text-sm"
-                    >
-                      {getLocalized(t as any, locale)}
-                    </span>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {Array.isArray(material.competences) && material.competences.length > 0 && (
-              <div>
-                <h3 className="text-sm font-semibold text-gray-700">{dict.competencesTitle}</h3>
-                <div className="mt-2 flex flex-wrap gap-2">
-                  {material.competences.map((c) => (
-                    <span
-                      key={typeof c === 'string' ? c : (c as any).id}
-                      className="rounded bg-gray-100 px-2 py-0.5 text-sm"
-                    >
-                      {getLocalized(c as any, locale)}
-                    </span>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {material.description_nl || material.description_de ? (
-              <div className="md:col-span-2">
-                <h3 className="text-sm font-semibold text-gray-700">
-                  {locale === 'de' ? 'Beschreibung' : 'Beschrijving'}
-                </h3>
-                <p className="mt-2 whitespace-pre-line text-gray-800">
-                  {(locale === 'de' ? material.description_de : material.description_nl) ||
-                    material.description_nl ||
-                    material.description_de}
-                </p>
-              </div>
-            ) : null}
-          </section>
-
           {/* PDF embeds */}
           {pdfLinks.length > 0 && (
             <section className="mb-10">
               <h2 className="mb-3 text-lg font-semibold text-gray-900">PDF</h2>
               {pdfLinks.map((lnk) => (
-                <PDFEmbed url={lnk.url || ''} />
+                <PDFEmbed key={lnk.id || lnk.url} url={lnk.url || ''} />
               ))}
             </section>
           )}
