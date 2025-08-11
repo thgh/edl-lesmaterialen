@@ -7,6 +7,19 @@ import { getPayload } from 'payload'
 import { Sidebar } from '../../../components/Sidebar'
 import '../../../styles.css'
 
+// PDF Embed Component
+function PDFEmbed({ url }: { url: string }) {
+  const proxyUrl = `/api/pdf-proxy?url=${encodeURIComponent(url)}`
+
+  return (
+    <div className="mt-3 mb-4">
+      <div className="rounded-lg border border-gray-200 overflow-hidden">
+        <iframe src={proxyUrl} className="w-full h-screen" title="PDF Document" frameBorder="0" />
+      </div>
+    </div>
+  )
+}
+
 type Params = { lang: 'nl' | 'de'; slug: string }
 
 async function fetchMaterialBySlugOrId(slugOrId: string) {
@@ -93,6 +106,8 @@ export default async function CourseMaterialPage({ params }: { params: Promise<P
     externalLinks.length > 0 && (!material.attachments || material.attachments.length === 0)
 
   const cefr = material.cefr?.join(', ')
+
+  const pdfLinks = externalLinks.filter((lnk) => lnk.url?.toLowerCase().endsWith('.pdf'))
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-[300px_1fr] lg:grid-cols-[320px_1fr] xl:grid-cols-[340px_1fr]">
@@ -208,10 +223,11 @@ export default async function CourseMaterialPage({ params }: { params: Promise<P
                     lnk.label_nl ||
                     lnk.label_de ||
                     lnk.url
+                  const url = lnk.url || '#'
                   return (
                     <li key={lnk.id || lnk.url}>
                       <a
-                        href={lnk.url || '#'}
+                        href={url}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="text-blue-700 hover:underline"
@@ -288,6 +304,16 @@ export default async function CourseMaterialPage({ params }: { params: Promise<P
               </div>
             ) : null}
           </section>
+
+          {/* PDF embeds */}
+          {pdfLinks.length > 0 && (
+            <section className="mb-10">
+              <h2 className="mb-3 text-lg font-semibold text-gray-900">PDF</h2>
+              {pdfLinks.map((lnk) => (
+                <PDFEmbed url={lnk.url || ''} />
+              ))}
+            </section>
+          )}
         </article>
       </main>
     </div>
