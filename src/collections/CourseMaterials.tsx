@@ -1,10 +1,4 @@
-import { CourseMaterial } from '@/payload-types'
-import {
-  CollectionBeforeChangeHook,
-  CollectionConfig,
-  FieldAccess,
-  RelationshipField,
-} from 'payload'
+import { CollectionConfig, FieldAccess, RelationshipField } from 'payload'
 import { CEFRLevels } from './CEFRLevels'
 import { hiddenTitle, localize, localizedTitle } from './field'
 import { beforeChangeSlug } from './formatSlug'
@@ -197,16 +191,4 @@ export const CourseMaterials: CollectionConfig = {
       },
     },
   ],
-  hooks: {
-    beforeChange: [
-      (async ({ operation, data, req }) => {
-        if (operation === 'create' || !data.user) {
-          console.log('course material beforeChange', data.user, req.user?.id)
-          if (req.user) data.user = req.user.id
-        }
-
-        return data
-      }) as CollectionBeforeChangeHook<CourseMaterial>,
-    ],
-  },
 }
