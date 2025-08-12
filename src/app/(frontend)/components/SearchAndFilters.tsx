@@ -45,6 +45,46 @@ interface SearchAndFiltersProps {
   competenceCounts: Record<string, number>
   topicCounts: Record<string, number>
   languageCounts: Record<string, number>
+  locale: 'nl' | 'de'
+}
+
+interface FilterSectionProps {
+  title: string
+  options: Array<{
+    id: string
+    title: string
+    count: number
+  }>
+  selectedIds: string[]
+  onToggle: (id: string) => void
+}
+
+function FilterSection({ title, options, selectedIds, onToggle }: FilterSectionProps) {
+  if (!options.length) return null
+  return (
+    <div>
+      <h3 className="mb-2 text-sm font-medium text-gray-700">{title}</h3>
+      <div className="rounded-md border border-gray-200 shadow-sm">
+        {options.map((option) => (
+          <label
+            key={option.id}
+            className="flex select-none items-center justify-between gap-3 bg-white group focus-visible:outline first:pt-3 last:pb-3 first:rounded-t-md last:rounded-b-md px-3 py-2"
+          >
+            <span className="flex items-center gap-2">
+              <input
+                type="checkbox"
+                checked={selectedIds.includes(option.id)}
+                onChange={() => onToggle(option.id)}
+                className="size-4 rounded border-gray-300 text-black focus:ring-0"
+              />
+              <span className="text-sm text-gray-800 group-hover:underline">{option.title}</span>
+            </span>
+            <span className="text-xs text-gray-500">{option.count}</span>
+          </label>
+        ))}
+      </div>
+    </div>
+  )
 }
 
 export function SearchAndFilters({
@@ -65,6 +105,7 @@ export function SearchAndFilters({
   competenceCounts,
   topicCounts,
   languageCounts,
+  locale,
 }: SearchAndFiltersProps) {
   const handleTypeToggle = useCallback(
     (typeId: string) => {
@@ -162,8 +203,24 @@ export function SearchAndFilters({
     ],
   )
 
-  const getTypeTitle = (type: MaterialType) => {
-    return type.title_nl || type.title_de || 'Untitled'
+  // Helper function for localized title comparison
+  const getLocalizedTitleForSort = (type: MaterialType) => {
+    return (
+      (locale === 'de' ? type.title_de : type.title_nl) ||
+      type.title_de ||
+      type.title_nl ||
+      'Untitled'
+    )
+  }
+
+  // Helper function to get localized title for display
+  const getLocalizedTitle = (type: MaterialType) => {
+    return (
+      (locale === 'de' ? type.title_de : type.title_nl) ||
+      type.title_de ||
+      type.title_nl ||
+      'Untitled'
+    )
   }
 
   // Sorted copies of filter lists by highest count (desc), then by title (asc)
@@ -172,11 +229,11 @@ export function SearchAndFilters({
       const countA = typeCounts[a.id] ?? 0
       const countB = typeCounts[b.id] ?? 0
       if (countB !== countA) return countB - countA
-      return getTypeTitle(a).localeCompare(getTypeTitle(b), undefined, {
+      return getLocalizedTitleForSort(a).localeCompare(getLocalizedTitleForSort(b), undefined, {
         sensitivity: 'base',
       })
     })
-  }, [materialTypes, typeCounts])
+  }, [materialTypes, typeCounts, locale])
 
   const visibleMaterialTypes = useMemo(() => {
     return sortedMaterialTypes.filter(
@@ -189,11 +246,11 @@ export function SearchAndFilters({
       const countA = schoolTypeCounts[a.id] ?? 0
       const countB = schoolTypeCounts[b.id] ?? 0
       if (countB !== countA) return countB - countA
-      return getTypeTitle(a).localeCompare(getTypeTitle(b), undefined, {
+      return getLocalizedTitleForSort(a).localeCompare(getLocalizedTitleForSort(b), undefined, {
         sensitivity: 'base',
       })
     })
-  }, [schoolTypes, schoolTypeCounts])
+  }, [schoolTypes, schoolTypeCounts, locale])
 
   const visibleSchoolTypes = useMemo(() => {
     return sortedSchoolTypes.filter(
@@ -206,11 +263,11 @@ export function SearchAndFilters({
       const countA = competenceCounts[a.id] ?? 0
       const countB = competenceCounts[b.id] ?? 0
       if (countB !== countA) return countB - countA
-      return getTypeTitle(a).localeCompare(getTypeTitle(b), undefined, {
+      return getLocalizedTitleForSort(a).localeCompare(getLocalizedTitleForSort(b), undefined, {
         sensitivity: 'base',
       })
     })
-  }, [competences, competenceCounts])
+  }, [competences, competenceCounts, locale])
 
   const visibleCompetences = useMemo(() => {
     return sortedCompetences.filter(
@@ -223,11 +280,11 @@ export function SearchAndFilters({
       const countA = topicCounts[a.id] ?? 0
       const countB = topicCounts[b.id] ?? 0
       if (countB !== countA) return countB - countA
-      return getTypeTitle(a).localeCompare(getTypeTitle(b), undefined, {
+      return getLocalizedTitleForSort(a).localeCompare(getLocalizedTitleForSort(b), undefined, {
         sensitivity: 'base',
       })
     })
-  }, [topics, topicCounts])
+  }, [topics, topicCounts, locale])
 
   const visibleTopics = useMemo(() => {
     return sortedTopics.filter(
@@ -282,143 +339,67 @@ export function SearchAndFilters({
         />
       </div>
 
-      <div>
-        <h3 className="mb-2 text-sm font-medium text-gray-700">{labels.languagesTitle}</h3>
-        <div className="rounded-md border border-gray-200 shadow-sm">
-          {(languageCounts['nl'] ?? 0) > 0 || selectedLanguages.includes('nl') ? (
-            <label className="flex select-none items-center justify-between gap-3 bg-white group focus-visible:outline first:pt-3 last:pb-3 first:rounded-t-md last:rounded-b-md px-3 py-2">
-              <span className="flex items-center gap-2">
-                <input
-                  type="checkbox"
-                  checked={selectedLanguages.includes('nl')}
-                  onChange={() => handleLanguageToggle('nl')}
-                  className="size-4 rounded border-gray-300 text-black focus:ring-0"
-                />
-                <span className="text-sm text-gray-800 group-hover:underline">
-                  {labels.languageDutchLabel}
-                </span>
-              </span>
-              <span className="text-xs text-gray-500">{languageCounts['nl'] ?? 0}</span>
-            </label>
-          ) : null}
-          {(languageCounts['de'] ?? 0) > 0 || selectedLanguages.includes('de') ? (
-            <label className="flex select-none items-center justify-between gap-3 bg-white group focus-visible:outline first:pt-3 last:pb-3 first:rounded-t-md last:rounded-b-md px-3 py-2">
-              <span className="flex items-center gap-2">
-                <input
-                  type="checkbox"
-                  checked={selectedLanguages.includes('de')}
-                  onChange={() => handleLanguageToggle('de')}
-                  className="size-4 rounded border-gray-300 text-black focus:ring-0"
-                />
-                <span className="text-sm text-gray-800 group-hover:underline">
-                  {labels.languageGermanLabel}
-                </span>
-              </span>
-              <span className="text-xs text-gray-500">{languageCounts['de'] ?? 0}</span>
-            </label>
-          ) : null}
-        </div>
-      </div>
+      <FilterSection
+        title={labels.languagesTitle}
+        options={[
+          {
+            id: 'nl',
+            title: labels.languageDutchLabel,
+            count: languageCounts['nl'] ?? 0,
+          },
+          {
+            id: 'de',
+            title: labels.languageGermanLabel,
+            count: languageCounts['de'] ?? 0,
+          },
+        ].filter((option) => option.count > 0 || selectedLanguages.includes(option.id))}
+        selectedIds={selectedLanguages}
+        onToggle={(id) => handleLanguageToggle(id as 'nl' | 'de')}
+      />
 
-      <div>
-        <h3 className="mb-2 text-sm font-medium text-gray-700">{labels.materialTypesTitle}</h3>
-        <div className="rounded-md border border-gray-200 shadow-sm">
-          {visibleMaterialTypes.map((type) => (
-            <label
-              key={type.id}
-              className="flex select-none items-center justify-between gap-3 bg-white group focus-visible:outline first:pt-3 last:pb-3 first:rounded-t-md last:rounded-b-md px-3 py-2"
-            >
-              <span className="flex items-center gap-2">
-                <input
-                  type="checkbox"
-                  checked={selectedTypes.includes(type.id)}
-                  onChange={() => handleTypeToggle(type.id)}
-                  className="size-4 rounded border-gray-300 text-black focus:ring-0"
-                />
-                <span className="text-sm text-gray-800 group-hover:underline">
-                  {getTypeTitle(type)}
-                </span>
-              </span>
-              <span className="text-xs text-gray-500">{typeCounts[type.id] ?? 0}</span>
-            </label>
-          ))}
-        </div>
-      </div>
+      <FilterSection
+        title={labels.materialTypesTitle}
+        options={visibleMaterialTypes.map((type) => ({
+          id: type.id,
+          title: getLocalizedTitle(type),
+          count: typeCounts[type.id] ?? 0,
+        }))}
+        selectedIds={selectedTypes}
+        onToggle={handleTypeToggle}
+      />
 
-      <div>
-        <h3 className="mb-2 text-sm font-medium text-gray-700">{labels.schoolTypesTitle}</h3>
-        <div className="rounded-md border border-gray-200 shadow-sm">
-          {visibleSchoolTypes.map((item) => (
-            <label
-              key={item.id}
-              className="flex select-none items-center justify-between gap-3 bg-white group focus-visible:outline first:pt-3 last:pb-3 first:rounded-t-md last:rounded-b-md px-3 py-2"
-            >
-              <span className="flex items-center gap-2">
-                <input
-                  type="checkbox"
-                  checked={selectedSchoolTypes.includes(item.id)}
-                  onChange={() => handleSchoolTypeToggle(item.id)}
-                  className="size-4 rounded border-gray-300 text-black focus:ring-0"
-                />
-                <span className="text-sm text-gray-800 group-hover:underline">
-                  {getTypeTitle(item)}
-                </span>
-              </span>
-              <span className="text-xs text-gray-500">{schoolTypeCounts[item.id] ?? 0}</span>
-            </label>
-          ))}
-        </div>
-      </div>
+      <FilterSection
+        title={labels.schoolTypesTitle}
+        options={visibleSchoolTypes.map((item) => ({
+          id: item.id,
+          title: getLocalizedTitle(item),
+          count: schoolTypeCounts[item.id] ?? 0,
+        }))}
+        selectedIds={selectedSchoolTypes}
+        onToggle={handleSchoolTypeToggle}
+      />
 
-      <div>
-        <h3 className="mb-2 text-sm font-medium text-gray-700">{labels.competencesTitle}</h3>
-        <div className="rounded-md border border-gray-200 shadow-sm">
-          {visibleCompetences.map((item) => (
-            <label
-              key={item.id}
-              className="flex select-none items-center justify-between gap-3 bg-white group focus-visible:outline first:pt-3 last:pb-3 first:rounded-t-md last:rounded-b-md px-3 py-2"
-            >
-              <span className="flex items-center gap-2">
-                <input
-                  type="checkbox"
-                  checked={selectedCompetences.includes(item.id)}
-                  onChange={() => handleCompetenceToggle(item.id)}
-                  className="size-4 rounded border-gray-300 text-black focus:ring-0"
-                />
-                <span className="text-sm text-gray-800 group-hover:underline">
-                  {getTypeTitle(item)}
-                </span>
-              </span>
-              <span className="text-xs text-gray-500">{competenceCounts[item.id] ?? 0}</span>
-            </label>
-          ))}
-        </div>
-      </div>
+      <FilterSection
+        title={labels.competencesTitle}
+        options={visibleCompetences.map((item) => ({
+          id: item.id,
+          title: getLocalizedTitle(item),
+          count: competenceCounts[item.id] ?? 0,
+        }))}
+        selectedIds={selectedCompetences}
+        onToggle={handleCompetenceToggle}
+      />
 
-      <div>
-        <h3 className="mb-2 text-sm font-medium text-gray-700">{labels.topicsTitle}</h3>
-        <div className="rounded-md border border-gray-200 shadow-sm">
-          {visibleTopics.map((item) => (
-            <label
-              key={item.id}
-              className="flex select-none items-center justify-between gap-3 bg-white group focus-visible:outline first:pt-3 last:pb-3 first:rounded-t-md last:rounded-b-md px-3 py-2"
-            >
-              <span className="flex items-center gap-2">
-                <input
-                  type="checkbox"
-                  checked={selectedTopics.includes(item.id)}
-                  onChange={() => handleTopicToggle(item.id)}
-                  className="size-4 rounded border-gray-300 text-black focus:ring-0"
-                />
-                <span className="text-sm text-gray-800 group-hover:underline">
-                  {getTypeTitle(item)}
-                </span>
-              </span>
-              <span className="text-xs text-gray-500">{topicCounts[item.id] ?? 0}</span>
-            </label>
-          ))}
-        </div>
-      </div>
+      <FilterSection
+        title={labels.topicsTitle}
+        options={visibleTopics.map((item) => ({
+          id: item.id,
+          title: getLocalizedTitle(item),
+          count: topicCounts[item.id] ?? 0,
+        }))}
+        selectedIds={selectedTopics}
+        onToggle={handleTopicToggle}
+      />
     </div>
   )
 }

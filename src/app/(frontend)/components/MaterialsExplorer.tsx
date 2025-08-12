@@ -2,10 +2,13 @@
 
 import { getDictionary } from '@/i18n/dictionaries'
 import { CourseMaterial } from '@/payload-types'
+import Link from 'next/link'
 import { useEffect, useMemo, useRef, useState } from 'react'
+import useSWR from 'swr'
 import { CourseMaterialCard } from './CourseMaterialCard'
 import { SearchAndFilters } from './SearchAndFilters'
 import { Sidebar } from './Sidebar'
+import { fetcher } from './fetcher'
 
 type MaterialType = {
   id: string
@@ -54,8 +57,10 @@ export function MaterialsExplorer({
   const [selectedCompetences, setSelectedCompetences] = useState<string[]>([])
   const [selectedTopics, setSelectedTopics] = useState<string[]>([])
   const [selectedLanguages, setSelectedLanguages] = useState<string[]>([])
-  const [limit, setLimit] = useState(20)
+  const [limit, setLimit] = useState(30)
   const [filtersOpen, setFiltersOpen] = useState(false)
+
+  const isAuthenticated = useSWR('/api/users/me', fetcher).data?.user
 
   // Track last URL we intentionally pushed and an inactivity timer
   const lastPushedUrlRef = useRef<string | null>(null)
@@ -511,16 +516,30 @@ export function MaterialsExplorer({
             competenceCounts={competenceCounts}
             topicCounts={topicCounts}
             languageCounts={languageCounts}
+            locale={lang}
           />
         </div>
       </Sidebar>
-      <main className="px-4 py-6 sm:px-6 lg:px-8">
-        <h1 className="pt-4 text-2xl lg:text-3xl xl:text-4xl font-bold text-gray-900">
+      <main className="px-4 py-6 sm:p-6 lg:p-8">
+        {/* Admin button for authenticated users */}
+        {isAuthenticated && (
+          <Link
+            href={`/admin`}
+            className="float-right text-sm items-center gap-2 rounded-md bg-green-600 px-4 py-2 text-white hover:bg-green-700 hidden md:inline-flex"
+          >
+            {lang === 'de' ? 'Beheren' : 'Beheren'}
+          </Link>
+        )}
+        <h1 className="pt-2 text-2xl lg:text-3xl xl:text-4xl font-bold text-gray-900">
           {dict.siteTitle}
         </h1>
         <p className="text-lg text-gray-600">{dict.siteTagline}</p>
-        <div className="mb-3 text-sm text-gray-600">{filtered.length}</div>
-        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
+        <div className="mb-8 text-sm text-gray-600">
+          {filtered.length === 1
+            ? dict.materialFound
+            : dict.materialsFound.replace('{count}', filtered.length.toString())}
+        </div>
+        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 3xl:grid-cols-5">
           {visibleMaterials.map((material) => (
             <CourseMaterialCard
               key={material.id}
@@ -540,7 +559,7 @@ export function MaterialsExplorer({
         </div>
         {limit < filtered.length && (
           <button
-            className="mt-6 rounded-md bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
+            className="mt-6 font-medium rounded-md bg-brand px-4 py-2 text-black hover:bg-brand-dark"
             onClick={() => setLimit(limit * 5)}
           >
             {dict.loadMore}

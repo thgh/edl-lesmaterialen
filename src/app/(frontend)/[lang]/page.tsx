@@ -20,6 +20,7 @@ export default async function HomePage({ params }: { params: Promise<{ lang: 'nl
     where: {
       status: { not_equals: 'draft' },
     },
+    depth: 1,
     limit: 9999,
   })
 

@@ -21,6 +21,8 @@ const dictionaries = {
     detailOpenWebsite: 'Open website',
     detailDownload: 'Download',
     detailExternalLinksTitle: 'Externe links',
+    materialFound: '1 lesmateriaal gevonden',
+    materialsFound: '{count} lesmaterialen gevonden',
   },
   de: {
     siteTitle: 'Unterrichtsmaterialien',
@@ -43,6 +45,8 @@ const dictionaries = {
     detailOpenWebsite: 'Webseite öffnen',
     detailDownload: 'Herunterladen',
     detailExternalLinksTitle: 'Externe Links',
+    materialFound: '1 Material gefunden',
+    materialsFound: '{count} Materialen gefunden',
   },
 } as const
 

@@ -212,7 +212,6 @@ export const POST = async (request: Request) => {
         if (link) {
           courseMaterialData.links = [
             {
-              label_nl: 'Link',
               url: link,
             },
           ]

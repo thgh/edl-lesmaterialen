@@ -1,5 +1,5 @@
 import { getDictionary } from '@/i18n/dictionaries'
-import { CourseMaterial } from '@/payload-types'
+import { CourseMaterial, CourseMaterialAttachment } from '@/payload-types'
 import config from '@/payload.config'
 import Image from 'next/image'
 import Link from 'next/link'
@@ -12,7 +12,7 @@ export const dynamic = 'force-dynamic'
 
 // PDF Embed Component
 function PDFEmbed({ url }: { url: string }) {
-  const proxyUrl = `/api/pdf-proxy?url=${encodeURIComponent(url)}`
+  const proxyUrl = url.startsWith('http') ? `/api/pdf-proxy?url=${encodeURIComponent(url)}` : url
 
   return (
     <div className="mt-3 mb-4">
@@ -152,27 +152,12 @@ export default async function CourseMaterialPage({
     material.title ||
     'Untitled'
 
-  const firstAttachment =
-    Array.isArray(material.attachments) && material.attachments.length > 0
-      ? material.attachments[0]
-      : null
-
-  const firstAttachmentId = firstAttachment
-    ? typeof firstAttachment === 'string'
-      ? firstAttachment
-      : (firstAttachment as any).id
-    : null
-
-  const firstAttachmentMime =
-    firstAttachment && typeof firstAttachment !== 'string'
-      ? (firstAttachment as any).mimeType || null
-      : null
-
-  const hasImageHero = !!(
-    firstAttachmentId &&
-    firstAttachmentMime &&
-    firstAttachmentMime.startsWith('image/')
+  // Use the same thumbnail logic as the card component
+  const thumbnail = ((material.attachments as CourseMaterialAttachment[]) || []).find(
+    (a) => a && typeof a === 'object' && a.mimeType?.startsWith('image/'),
   )
+
+  const hasImageHero = !!thumbnail
 
   const externalLinks = material.links || []
   const hasExternalOnly =
@@ -181,6 +166,14 @@ export default async function CourseMaterialPage({
   const cefr = material.cefr?.join(', ')
 
   const pdfLinks = externalLinks.filter((lnk) => lnk.url?.toLowerCase().endsWith('.pdf'))
+
+  // Get PDF attachments for embedding
+  const pdfAttachments = Array.isArray(material.attachments)
+    ? material.attachments.filter((att) => {
+        const mime = typeof att === 'string' ? null : ((att as any).mimeType as string | null)
+        return !!mime && mime.startsWith('application/pdf')
+      })
+    : []
 
   return (
     <div className="block md:flex">
@@ -196,7 +189,7 @@ export default async function CourseMaterialPage({
         </aside>
 
         <article className="max-w-5xl">
-          <header className="mb-6">
+          <header className="mb-6 pt-4">
             <h1 className="text-2xl lg:text-3xl xl:text-4xl font-bold text-gray-900">{title}</h1>
             <div className="mt-2 flex flex-wrap items-center gap-3 text-sm text-gray-600">
               {cefr && (
@@ -216,7 +209,7 @@ export default async function CourseMaterialPage({
             <div className="mb-8 overflow-hidden rounded-lg border bg-gray-50">
               <div className="relative aspect-[3/2] w-full">
                 <Image
-                  src={`/api/media/${firstAttachmentId}`}
+                  src={thumbnail.url!}
                   alt={title}
                   fill
                   sizes="(min-width: 1024px) 900px, 100vw"
@@ -304,7 +297,7 @@ export default async function CourseMaterialPage({
                       href={url}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="inline-flex items-center gap-2 rounded-md bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
+                      className="inline-flex items-center gap-2 rounded-md bg-brand px-4 py-2"
                     >
                       {label || dict.detailOpenWebsite}
                       <svg
@@ -388,6 +381,23 @@ export default async function CourseMaterialPage({
               {pdfLinks.map((lnk) => (
                 <PDFEmbed key={lnk.id || lnk.url} url={lnk.url || ''} />
               ))}
+            </section>
+          )}
+
+          {/* PDF attachment embeds */}
+          {pdfAttachments.length > 0 && (
+            <section className="mb-10">
+              <h2 className="mb-3 text-lg font-semibold text-gray-900">
+                {pdfLinks.length > 0 ? 'Additional PDFs' : 'PDF'}
+              </h2>
+              {pdfAttachments.map((att) => {
+                if (!att || typeof att !== 'object' || !att.url) return null
+                return (
+                  <div key={att.id} className="mb-6">
+                    <PDFEmbed url={att.url} />
+                  </div>
+                )
+              })}
             </section>
           )}
         </article>

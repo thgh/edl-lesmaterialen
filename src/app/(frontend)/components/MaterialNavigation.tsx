@@ -5,6 +5,8 @@ import { CourseMaterial } from '@/payload-types'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useEffect, useMemo } from 'react'
+import useSWR from 'swr'
+import { fetcher } from './fetcher'
 
 interface MaterialNavigationProps {
   currentMaterial: CourseMaterial
@@ -28,6 +30,7 @@ export function MaterialNavigation({
 }: MaterialNavigationProps) {
   const router = useRouter()
   const dict = getDictionary(locale)
+  const isAuthenticated = useSWR('/api/users/me', fetcher).data?.user
   const filteredMaterials = useMemo(() => {
     const query = filters.searchQuery.trim().toLowerCase()
 
@@ -133,7 +136,7 @@ export function MaterialNavigation({
   }
 
   return (
-    <div className="flex items-center justify-between gap-4 mb-3">
+    <div className="flex flex-wrap items-center justify-between gap-4 mb-3">
       <div>
         <Link
           href={`/${locale}?${new URLSearchParams({
@@ -158,83 +161,102 @@ export function MaterialNavigation({
           {dict.detailBackToOverview}
         </Link>
       </div>
-      <div className="flex items-center gap-6">
-        <div className="text-sm text-gray-500">
-          {locale === 'de'
-            ? `${currentIndex + 1} von ${filteredMaterials.length}`
-            : `${currentIndex + 1} van ${filteredMaterials.length}`}
+      <div className="text-sm md:text-right grow text-gray-500">
+        {locale === 'de'
+          ? `${currentIndex + 1} von ${filteredMaterials.length}`
+          : `${currentIndex + 1} van ${filteredMaterials.length}`}
+      </div>
+      <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2">
+          {hasPrevious ? (
+            <Link
+              href={buildMaterialUrl(filteredMaterials[currentIndex - 1])}
+              className="inline-flex items-center gap-2 rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-700 shadow-sm hover:bg-gray-50"
+            >
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+              >
+                <path d="M15 18l-6-6 6-6" />
+              </svg>
+              {locale === 'de' ? 'Zurück' : 'Vorige'}
+            </Link>
+          ) : (
+            <div className="inline-flex items-center gap-2 rounded-md border border-gray-200 bg-white px-3 py-2 text-sm text-gray-300 shadow-sm hover:bg-gray-50 pointer-events-none">
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+              >
+                <path d="M15 18l-6-6 6-6" />
+              </svg>
+              {locale === 'de' ? 'Zurück' : 'Vorige'}
+            </div>
+          )}
         </div>
         <div className="flex items-center gap-2">
-          <div className="flex items-center gap-2">
-            {hasPrevious ? (
-              <Link
-                href={buildMaterialUrl(filteredMaterials[currentIndex - 1])}
-                className="inline-flex items-center gap-2 rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-700 shadow-sm hover:bg-gray-50"
+          {hasNext ? (
+            <Link
+              href={buildMaterialUrl(filteredMaterials[currentIndex + 1])}
+              className="inline-flex items-center gap-2 rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-700 shadow-sm hover:bg-gray-50"
+            >
+              {locale === 'de' ? 'Weiter' : 'Volgende'}
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
               >
-                <svg
-                  width="16"
-                  height="16"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                >
-                  <path d="M15 18l-6-6 6-6" />
-                </svg>
-                {locale === 'de' ? 'Zurück' : 'Vorige'}
-              </Link>
-            ) : (
-              <div className="inline-flex items-center gap-2 rounded-md border border-gray-200 bg-white px-3 py-2 text-sm text-gray-300 shadow-sm hover:bg-gray-50 pointer-events-none">
-                <svg
-                  width="16"
-                  height="16"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                >
-                  <path d="M15 18l-6-6 6-6" />
-                </svg>
-                {locale === 'de' ? 'Zurück' : 'Vorige'}
-              </div>
-            )}
-          </div>
-          <div className="flex items-center gap-2">
-            {hasNext ? (
-              <Link
-                href={buildMaterialUrl(filteredMaterials[currentIndex + 1])}
-                className="inline-flex items-center gap-2 rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-700 shadow-sm hover:bg-gray-50"
+                <path d="M9 18l6-6-6-6" />
+              </svg>
+            </Link>
+          ) : (
+            <div className="inline-flex items-center gap-2 rounded-md border border-gray-200 bg-white px-3 py-2 text-sm text-gray-300 shadow-sm hover:bg-gray-50 pointer-events-none">
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
               >
-                {locale === 'de' ? 'Weiter' : 'Volgende'}
-                <svg
-                  width="16"
-                  height="16"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                >
-                  <path d="M9 18l6-6-6-6" />
-                </svg>
-              </Link>
-            ) : (
-              <div className="inline-flex items-center gap-2 rounded-md border border-gray-200 bg-white px-3 py-2 text-sm text-gray-300 shadow-sm hover:bg-gray-50 pointer-events-none">
-                <svg
-                  width="16"
-                  height="16"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                >
-                  <path d="M9 18l6-6-6-6" />
-                </svg>
-                {locale === 'de' ? 'Weiter' : 'Volgende'}
-              </div>
-            )}
-          </div>
+                <path d="M9 18l6-6-6-6" />
+              </svg>
+              {locale === 'de' ? 'Weiter' : 'Volgende'}
+            </div>
+          )}
         </div>
       </div>
+
+      {/* Admin button for authenticated users */}
+      {isAuthenticated && (
+        <Link
+          href={`/admin/collections/course-materials/${currentMaterial.id}`}
+          className="text-sm items-center gap-2 rounded-md bg-green-600 px-4 py-2 text-white hover:bg-green-700 hidden md:inline-flex"
+        >
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+          >
+            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
+          </svg>
+          {locale === 'de' ? 'Bearbeiten' : 'Bewerken'}
+        </Link>
+      )}
     </div>
   )
 }

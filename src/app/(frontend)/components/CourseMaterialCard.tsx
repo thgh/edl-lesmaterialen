@@ -1,4 +1,4 @@
-import { CourseMaterial } from '@/payload-types'
+import { CourseMaterial, CourseMaterialAttachment } from '@/payload-types'
 import Image from 'next/image'
 import Link from 'next/link'
 
@@ -96,7 +96,9 @@ export function CourseMaterialCard({
     return ''
   }
 
-  const hasThumbnail = material.attachments && material.attachments.length > 0
+  const thumbnail = ((material.attachments as CourseMaterialAttachment[]) || []).find(
+    (a) => a && typeof a === 'object' && a.mimeType?.startsWith('image/'),
+  )
   const slug = material.slug || `id:${material.id}`
 
   // Build URL with filters
@@ -123,10 +125,10 @@ export function CourseMaterialCard({
   return (
     <Link href={buildDetailUrl()} className="block">
       <article className="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm transition hover:shadow-md">
-        {hasThumbnail && (
+        {thumbnail && (
           <div className="relative aspect-[3/2] w-full overflow-hidden bg-gray-50">
             <Image
-              src={`/api/media/${(material.attachments as any)[0].id}`}
+              src={thumbnail.url!}
               alt={getTitle()}
               fill
               sizes="(min-width: 768px) 33vw, 100vw"
@@ -138,18 +140,6 @@ export function CourseMaterialCard({
         <div className="space-y-3 p-4">
           <div className="flex items-center justify-between text-xs text-gray-600">
             <span className="rounded bg-gray-100 px-2 py-0.5">{getMaterialType()}</span>
-            <div className="text-gray-500" aria-label="Open material">
-              <svg
-                width="16"
-                height="16"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-              >
-                <path d="M7 17L17 7M17 7H7M17 7V17" />
-              </svg>
-            </div>
           </div>
 
           <h3 className="line-clamp-2 text-base font-semibold text-gray-900">{getTitle()}</h3>
