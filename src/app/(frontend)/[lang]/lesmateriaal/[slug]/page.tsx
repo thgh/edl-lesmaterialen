@@ -90,8 +90,8 @@ export default async function CourseMaterialPage({
 }) {
   const p = await params
   const sp = await searchParams
-  const locale = p.lang === 'de' ? 'de' : 'nl'
-  const dict = getDictionary(locale)
+  const lang = p.lang === 'de' ? 'de' : 'nl'
+  const dict = getDictionary(lang)
 
   // Fetch current material and all materials for navigation
   const [material, allMaterials] = await Promise.all([
@@ -103,7 +103,7 @@ export default async function CourseMaterialPage({
     return (
       <main className="px-4 py-6 sm:px-6 lg:px-8">
         <p className="text-gray-600">Not found</p>
-        <Link href={`/${locale}`} className="mt-4 inline-block text-blue-600 hover:underline">
+        <Link href={`/${lang}`} className="mt-4 inline-block text-blue-600 hover:underline">
           {dict.detailBackToOverview}
         </Link>
       </main>
@@ -146,7 +146,7 @@ export default async function CourseMaterialPage({
   }
 
   const title =
-    (locale === 'de' ? material.title_de : material.title_nl) ||
+    (lang === 'de' ? material.title_de : material.title_nl) ||
     material.title_de ||
     material.title_nl ||
     material.title ||
@@ -177,13 +177,13 @@ export default async function CourseMaterialPage({
 
   return (
     <div className="block md:flex">
-      <Sidebar locale={locale} />
+      <Sidebar locale={lang} />
       <main className="px-4 py-6 sm:px-6 lg:px-8 flex-1">
         <aside className="mb-4 max-w-5xl">
           <MaterialNavigation
             currentMaterial={material}
             materials={allMaterials}
-            locale={locale}
+            locale={lang}
             filters={filters}
           />
         </aside>
@@ -199,14 +199,14 @@ export default async function CourseMaterialPage({
               )}
               {material.schoolType && (
                 <span className="rounded bg-gray-100 px-2 py-0.5">
-                  {getLocalized(material.schoolType as any, locale)}
+                  {getLocalized(material.schoolType as any, lang)}
                 </span>
               )}
             </div>
           </header>
 
           {hasImageHero && (
-            <div className="mb-8 overflow-hidden rounded-lg border bg-gray-50">
+            <div className="mb-8 overflow-hidden rounded-lg border bg-gray-50 max-w-sm">
               <div className="relative aspect-[3/2] w-full">
                 <Image
                   src={thumbnail.url!}
@@ -230,7 +230,7 @@ export default async function CourseMaterialPage({
                       key={typeof t === 'string' ? t : (t as any).id}
                       className="rounded bg-gray-100 px-2 py-0.5 text-sm"
                     >
-                      {getLocalized(t as any, locale)}
+                      {getLocalized(t as any, lang)}
                     </span>
                   ))}
                 </div>
@@ -246,7 +246,7 @@ export default async function CourseMaterialPage({
                       key={typeof t === 'string' ? t : (t as any).id}
                       className="rounded bg-gray-100 px-2 py-0.5 text-sm"
                     >
-                      {getLocalized(t as any, locale)}
+                      {getLocalized(t as any, lang)}
                     </span>
                   ))}
                 </div>
@@ -262,7 +262,7 @@ export default async function CourseMaterialPage({
                       key={typeof c === 'string' ? c : (c as any).id}
                       className="rounded bg-gray-100 px-2 py-0.5 text-sm"
                     >
-                      {getLocalized(c as any, locale)}
+                      {getLocalized(c as any, lang)}
                     </span>
                   ))}
                 </div>
@@ -272,10 +272,10 @@ export default async function CourseMaterialPage({
             {material.description_nl || material.description_de ? (
               <div className="md:col-span-2">
                 <h3 className="text-sm font-semibold text-gray-700">
-                  {locale === 'de' ? 'Beschreibung' : 'Beschrijving'}
+                  {lang === 'de' ? 'Beschreibung' : 'Beschrijving'}
                 </h3>
                 <p className="mt-2 whitespace-pre-line text-gray-800">
-                  {(locale === 'de' ? material.description_de : material.description_nl) ||
+                  {(lang === 'de' ? material.description_de : material.description_nl) ||
                     material.description_nl ||
                     material.description_de}
                 </p>
@@ -289,7 +289,7 @@ export default async function CourseMaterialPage({
               <div className="flex flex-wrap items-center gap-3">
                 {externalLinks.map((lnk) => {
                   const label =
-                    (locale === 'de' ? lnk.label_de : lnk.label_nl) || lnk.label_nl || lnk.label_de
+                    (lang === 'de' ? lnk.label_de : lnk.label_nl) || lnk.label_nl || lnk.label_de
                   const url = lnk.url || '#'
                   return (
                     <a
@@ -335,7 +335,7 @@ export default async function CourseMaterialPage({
                         className="inline-flex items-center gap-2 rounded-md border border-gray-300 bg-white px-4 py-2 text-gray-800 shadow-sm hover:bg-gray-50"
                         download
                       >
-                        {isPdf ? 'PDF' : filename || dict.detailDownload}
+                        {isPdf ? 'Download PDF' : filename || dict.detailDownload}
                       </a>
                     )
                   })}
@@ -352,7 +352,7 @@ export default async function CourseMaterialPage({
               <ul className="list-inside list-disc space-y-2">
                 {externalLinks.map((lnk) => {
                   const label =
-                    (locale === 'de' ? lnk.label_de : lnk.label_nl) ||
+                    (lang === 'de' ? lnk.label_de : lnk.label_nl) ||
                     lnk.label_nl ||
                     lnk.label_de ||
                     lnk.url

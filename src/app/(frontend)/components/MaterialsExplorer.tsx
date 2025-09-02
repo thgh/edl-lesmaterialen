@@ -163,10 +163,25 @@ export function MaterialsExplorer({
   ])
 
   const filtered = useMemo(() => {
-    const query = searchQuery.trim().toLowerCase()
+    const query = searchQuery.trim()
     return materials.filter((m) => {
       const title = (lang === 'de' ? m.title_de : m.title_nl) || m.title_de || ''
-      const matchesQuery = query === '' || title.toLowerCase().includes(query)
+
+      // Normalize text by removing accents and converting to lowercase
+      const normalizeText = (text: string) => {
+        return text
+          .normalize('NFD')
+          .replace(/[\u0300-\u036f]/g, '') // Remove diacritics/accents
+          .toLowerCase()
+      }
+
+      const normalizedTitle = normalizeText(title)
+      const normalizedQuery = normalizeText(query)
+
+      // Split query into individual words and check if all words are present
+      const queryWords = normalizedQuery.split(/\s+/).filter((word) => word.length > 0)
+      const matchesQuery =
+        query === '' || queryWords.every((word) => normalizedTitle.includes(word))
       const matchesLanguage =
         selectedLanguages.length === 0 ||
         (Array.isArray(m.language) &&
@@ -228,7 +243,7 @@ export function MaterialsExplorer({
       const query = searchQuery.trim().toLowerCase()
 
       const matchesQuery = (m: CourseMaterial) => {
-        const title = (lang === 'de' ? m.title_de : m.title_nl) || m.title_de || ''
+        const title = (lang === 'de' ? m.title_de || m.title_nl : m.title_nl || m.title_de) || ''
         return query === '' || title.toLowerCase().includes(query)
       }
 
