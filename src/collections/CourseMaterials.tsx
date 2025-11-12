@@ -101,6 +101,7 @@ export const CourseMaterials: CollectionConfig = {
       label: 'Schooltype',
       name: 'schoolType',
       relationTo: 'school-types',
+      hasMany: true,
       admin: { position: 'sidebar' },
     },
     {
