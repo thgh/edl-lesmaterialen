@@ -85,9 +85,23 @@ export const POST = async (request: Request) => {
   try {
     const formData = await request.formData()
     const file = formData.get('file') as File
+    const deleteAll = formData.get('deleteAll') === 'true'
 
     if (!file) {
       return Response.json({ error: 'No file provided' }, { status: 400 })
+    }
+
+    const payload = await getPayload({
+      config: configPromise,
+    })
+
+    // Delete all existing course materials if requested
+    if (deleteAll) {
+      const ok = await payload.delete({
+        collection: 'course-materials',
+        where: {},
+      })
+      console.log('deleted materials', ok.docs.length)
     }
 
     // Read the file buffer
@@ -103,10 +117,6 @@ export const POST = async (request: Request) => {
 
     // Remove header row
     const dataRows = rows.slice(1)
-
-    const payload = await getPayload({
-      config: configPromise,
-    })
 
     const results = []
     let successCount = 0
@@ -219,7 +229,7 @@ export const POST = async (request: Request) => {
 
         // Add relationships if they exist
         if (schoolTypeId) {
-          courseMaterialData.schoolType = schoolTypeId
+          courseMaterialData.schoolType = [schoolTypeId]
         }
 
         if (competenceIds.length > 0) {
@@ -232,6 +242,46 @@ export const POST = async (request: Request) => {
 
         if (materialTypeIds.length > 0) {
           courseMaterialData.materialTypes = materialTypeIds
+        }
+
+        // Check for duplicate: same title + same link
+        const titleField =
+          languageValues.length === 1 && languageValues[0] === 'de' ? 'title_de' : 'title_nl'
+        const titleValue = naam
+
+        // Find existing course materials with same title
+        const existingMaterials = await payload.find({
+          collection: 'course-materials',
+          where: {
+            [titleField]: { equals: titleValue },
+          },
+          limit: 100, // Get multiple in case there are duplicates
+        })
+
+        // Check if any existing material has the same link
+        const duplicate = existingMaterials.docs.find((doc: any) => {
+          if (link) {
+            // If link is provided, check if any link in the array matches
+            return (
+              doc.links && Array.isArray(doc.links) && doc.links.some((l: any) => l.url === link)
+            )
+          } else {
+            // If no link, check if material also has no links
+            return !doc.links || !Array.isArray(doc.links) || doc.links.length === 0
+          }
+        })
+
+        if (duplicate) {
+          // Duplicate found - skip creation
+          results.push({
+            row: i + 2,
+            success: true,
+            id: duplicate.id,
+            title: naam,
+            duplicate: true,
+          })
+          successCount++
+          continue
         }
 
         const created = await payload.create({

@@ -11,6 +11,7 @@ export default function ImportXLSXPage() {
   const [error, setError] = useState<string | null>(null)
   const [addingTaxonomies, setAddingTaxonomies] = useState(false)
   const [taxonomyResult, setTaxonomyResult] = useState<any>(null)
+  const [deleteAll, setDeleteAll] = useState(false)
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = e.target.files?.[0]
@@ -37,6 +38,7 @@ export default function ImportXLSXPage() {
     try {
       const formData = new FormData()
       formData.append('file', file)
+      formData.append('deleteAll', deleteAll ? 'true' : 'false')
 
       const response = await fetch('/api/import', {
         method: 'POST',
@@ -98,6 +100,19 @@ export default function ImportXLSXPage() {
               onChange={handleFileChange}
               className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
             />
+          </div>
+
+          <div className="flex items-center">
+            <input
+              type="checkbox"
+              id="deleteAll"
+              checked={deleteAll}
+              onChange={(e) => setDeleteAll(e.target.checked)}
+              className="h-4 w-4 text-red-600 focus:ring-red-500 border-gray-300 rounded"
+            />
+            <label htmlFor="deleteAll" className="ml-2 block text-sm text-gray-700">
+              Verwijder alle bestaande lesmaterialen voordat import
+            </label>
           </div>
 
           <button
