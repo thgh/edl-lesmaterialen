@@ -77,6 +77,26 @@ export const CourseMaterials: CollectionConfig = {
     },
 
     {
+      label: 'ERK-niveaus',
+      name: 'cefr',
+      type: 'select',
+      hasMany: true,
+      options: CEFRLevels,
+      admin: { position: 'sidebar' },
+    },
+    {
+      label: 'Taal',
+      name: 'language',
+      type: 'select',
+      hasMany: true,
+      options: [
+        { label: 'Nederlands', value: 'nl' },
+        { label: 'Duits', value: 'de' },
+        { label: 'Engels', value: 'en' },
+      ],
+      admin: { position: 'sidebar' },
+    },
+    {
       type: 'relationship',
       label: 'Schooltype',
       name: 'schoolType',
@@ -106,24 +126,6 @@ export const CourseMaterials: CollectionConfig = {
       relationTo: 'material-types',
       hasMany: true,
       admin: { position: 'sidebar' },
-    },
-    {
-      label: 'ERK-niveaus',
-      name: 'cefr',
-      type: 'select',
-      hasMany: true,
-      options: CEFRLevels,
-    },
-    {
-      label: 'Taal',
-      name: 'language',
-      type: 'select',
-      hasMany: true,
-      options: [
-        { label: 'Nederlands', value: 'nl' },
-        { label: 'Duits', value: 'de' },
-        { label: 'Engels', value: 'en' },
-      ],
     },
     // {
     //   ...taxonomy,
