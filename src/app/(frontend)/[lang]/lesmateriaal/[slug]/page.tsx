@@ -4,11 +4,31 @@ import config from '@/payload.config'
 import Image from 'next/image'
 import Link from 'next/link'
 import { getPayload } from 'payload'
+import { Fragment } from 'react'
 import { MaterialNavigation } from '../../../components/MaterialNavigation'
 import { Sidebar } from '../../../components/Sidebar'
 import '../../../styles.css'
 
 export const dynamic = 'force-dynamic'
+
+// Helper function to convert words containing "@" into mailto links
+function renderTextWithEmailLinks(text: string) {
+  const words = text.split(/(\s+)/)
+  return words.map((word, index) => {
+    if (word.includes('@')) {
+      return (
+        <a
+          key={index}
+          href={`mailto:${word}`}
+          className="text-blue-600 hover:underline whitespace-nowrap"
+        >
+          {word}
+        </a>
+      )
+    }
+    return <Fragment key={index}>{word}</Fragment>
+  })
+}
 
 // PDF Embed Component
 function PDFEmbed({ url }: { url: string }) {
@@ -402,6 +422,15 @@ export default async function CourseMaterialPage({
             </section>
           )}
         </article>
+        {/* Footer with contact and disclaimer */}
+        <div className="mt-8 pt-6 border-t border-gray-200">
+          <div className="text-sm text-gray-600 mb-4">
+            {renderTextWithEmailLinks(dict.contactText)}
+          </div>
+          <div className="text-xs text-gray-500">
+            {dict.disclaimerText}
+          </div>
+        </div>
       </main>
     </div>
   )

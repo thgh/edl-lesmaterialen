@@ -3,7 +3,7 @@ export type Locale = 'nl' | 'de'
 const dictionaries = {
   nl: {
     siteTitle: 'Lesmaterialen',
-    siteTagline: 'Lesmaterialen verzameld door de EDL Münster.',
+    siteTagline: 'Lesmateriaal voor het Duits- en Nederlands onderwijs in de Euregio',
     searchTitle: 'Wat zoek je?',
     searchPlaceholder: 'Zoeken op titel',
     materialTypesTitle: 'Materiaalsoorten',
@@ -23,11 +23,14 @@ const dictionaries = {
     detailExternalLinksTitle: 'Externe links',
     materialFound: '1 lesmateriaal gevonden',
     materialsFound: '{count} lesmaterialen gevonden',
+    contactText:
+      'Voor vragen, het melden van problemen of het voorstellen van nieuw materiaal, neem contact op met zns.sekretariat@uni-muenster.de. Zentrum für Niederlande-Studien, Alter Steinweg 6/7, 48143 Münster',
+    disclaimerText:
+      'Deze website is ontwikkeld binnen de Euregionale Doorlopende Leerlijn (EDL) en wordt beheerd door het Zentrum für Niederlande-Studien (ZNS). Het materiaal is deels eigen werk, deels afkomstig uit externe bronnen – eigen materiaal is als zodanig vermeld. Alle rechten berusten bij de auteurs. Gebruik uitsluitend voor educatieve doeleinden. Bij vragen of als er iets niet lukt kunt u contact opnemen met het Zentrum für Niederlande-Studien.',
   },
   de: {
     siteTitle: 'Unterrichtsmaterialien',
-    siteTagline:
-      'Unterrichtsmaterialien Zentrum für Niederlande-Studien (ZNS) van de Universiteit Münster.',
+    siteTagline: 'Materialien für den Deutsch- und Niederländischunterricht in der Euregio',
     searchTitle: 'Wonach suchst du?',
     searchPlaceholder: 'Nach Titel suchen',
     materialTypesTitle: 'Materialarten',
@@ -47,6 +50,10 @@ const dictionaries = {
     detailExternalLinksTitle: 'Externe Links',
     materialFound: '1 Material gefunden',
     materialsFound: '{count} Materialen gefunden',
+    contactText:
+      'Bei Fragen, Problemen oder Vorschlägen für neues Material kontaktieren Sie bitte zns.sekretariat@uni-muenster.de. Zentrum für Niederlande-Studien, Alter Steinweg 6/7, 48143 Münster',
+    disclaimerText:
+      'Diese Website wurde im Rahmen der Euregionalen Bildungskette (EDL) erstellt und wird vom Zentrum für Niederlande-Studien (ZNS) betreut. Die Materialien stammen teils vom ZNS und EDL, teils aus externen Quellen – eigene Inhalte sind entsprechend gekennzeichnet. Alle Rechte liegen bei den jeweiligen Autor*innen. Nutzung nur zu Bildungszwecken. Bei Fragen oder technischen Problemen wenden Sie sich bitte an das Zentrum für Niederlande-Studien.',
   },
 } as const
 
