@@ -143,12 +143,13 @@ export interface CourseMaterial {
         id?: string | null;
       }[]
     | null;
-  schoolType?: (string | null) | SchoolType;
+  featured?: boolean | null;
+  cefr?: ('A1' | 'A2' | 'B1' | 'B2' | 'C1' | 'C2')[] | null;
+  language?: ('nl' | 'de' | 'en')[] | null;
+  schoolType?: (string | SchoolType)[] | null;
   competences?: (string | Competence)[] | null;
   topics?: (string | Topic)[] | null;
   materialTypes?: (string | MaterialType)[] | null;
-  cefr?: ('A1' | 'A2' | 'B1' | 'B2' | 'C1' | 'C2')[] | null;
-  language?: ('nl' | 'de' | 'en')[] | null;
   status?: ('draft' | 'published') | null;
   slug?: string | null;
   notes?: string | null;
@@ -347,12 +348,13 @@ export interface CourseMaterialsSelect<T extends boolean = true> {
         url?: T;
         id?: T;
       };
+  featured?: T;
+  cefr?: T;
+  language?: T;
   schoolType?: T;
   competences?: T;
   topics?: T;
   materialTypes?: T;
-  cefr?: T;
-  language?: T;
   status?: T;
   slug?: T;
   notes?: T;

@@ -131,7 +131,6 @@ export function MaterialsExplorer({
         window.clearTimeout(pushTimerRef.current)
       }
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   // Sync URL on filter changes (replaceState immediately, debounce pushState for history)
@@ -164,24 +163,31 @@ export function MaterialsExplorer({
 
   const filtered = useMemo(() => {
     const query = searchQuery.trim()
-    return materials.filter((m) => {
-      const title = (lang === 'de' ? m.title_de : m.title_nl) || m.title_de || ''
+    // Normalize text by removing accents and converting to lowercase
+    const normalizeText = (text: string) => {
+      return text
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '') // Remove diacritics/accents
+        .toLowerCase()
+    }
 
-      // Normalize text by removing accents and converting to lowercase
-      const normalizeText = (text: string) => {
-        return text
-          .normalize('NFD')
-          .replace(/[\u0300-\u036f]/g, '') // Remove diacritics/accents
-          .toLowerCase()
-      }
+    const normalizedQuery = normalizeText(query)
+    const queryWords = normalizedQuery.split(/\s+/).filter((word) => word.length > 0)
 
-      const normalizedTitle = normalizeText(title)
-      const normalizedQuery = normalizeText(query)
+    const filteredMaterials = materials.filter((m) => {
+      // Concatenate title and description, then normalize
+      const searchText = normalizeText(
+        (m.title_nl || '') +
+          ' ' +
+          (m.description_nl || '') +
+          ' ' +
+          (m.title_de || '') +
+          ' ' +
+          (m.description_de || ''),
+      )
 
-      // Split query into individual words and check if all words are present
-      const queryWords = normalizedQuery.split(/\s+/).filter((word) => word.length > 0)
-      const matchesQuery =
-        query === '' || queryWords.every((word) => normalizedTitle.includes(word))
+      // Check if all query words are present
+      const matchesQuery = query === '' || queryWords.every((word) => searchText.includes(word))
       const matchesLanguage =
         selectedLanguages.length === 0 ||
         (Array.isArray(m.language) &&
@@ -224,6 +230,20 @@ export function MaterialsExplorer({
         matchesTopics
       )
     })
+
+    // Sort: featured first, then by createdAt (newest first)
+    return filteredMaterials.sort((a, b) => {
+      // First sort by featured (featured items first)
+      const aFeatured = (a as any).featured === true ? 1 : 0
+      const bFeatured = (b as any).featured === true ? 1 : 0
+      if (aFeatured !== bFeatured) {
+        return bFeatured - aFeatured
+      }
+      // Then sort by createdAt (newest first)
+      const aDate = a.createdAt ? new Date(a.createdAt).getTime() : 0
+      const bDate = b.createdAt ? new Date(b.createdAt).getTime() : 0
+      return bDate - aDate
+    })
   }, [
     materials,
     searchQuery,
@@ -232,7 +252,6 @@ export function MaterialsExplorer({
     selectedSchoolTypes,
     selectedCompetences,
     selectedTopics,
-    lang,
   ])
 
   const visibleMaterials = filtered.slice(0, limit)
@@ -240,11 +259,35 @@ export function MaterialsExplorer({
   // Compute counts per taxonomy based on current search query but before applying that taxonomy itself
   const { typeCounts, schoolTypeCounts, competenceCounts, topicCounts, languageCounts } =
     useMemo(() => {
-      const query = searchQuery.trim().toLowerCase()
+      const query = searchQuery.trim()
+
+      // Normalize text by removing accents and converting to lowercase
+      const normalizeText = (text: string) => {
+        return text
+          .normalize('NFD')
+          .replace(/[\u0300-\u036f]/g, '') // Remove diacritics/accents
+          .toLowerCase()
+      }
+
+      const normalizedQuery = normalizeText(query)
+      const queryWords = normalizedQuery.split(/\s+/).filter((word) => word.length > 0)
 
       const matchesQuery = (m: CourseMaterial) => {
-        const title = (lang === 'de' ? m.title_de || m.title_nl : m.title_nl || m.title_de) || ''
-        return query === '' || title.toLowerCase().includes(query)
+        if (query === '') return true
+
+        // Concatenate title and description, then normalize
+        const searchText = normalizeText(
+          (m.title_nl || '') +
+            ' ' +
+            (m.description_nl || '') +
+            ' ' +
+            (m.title_de || '') +
+            ' ' +
+            (m.description_de || ''),
+        )
+
+        // Check if all query words are present
+        return queryWords.every((word) => searchText.includes(word))
       }
 
       const matchesExceptLanguages = (m: CourseMaterial) => {
@@ -473,12 +516,10 @@ export function MaterialsExplorer({
     }, [
       materials,
       searchQuery,
-      selectedLanguages,
       selectedTypes,
       selectedSchoolTypes,
       selectedCompetences,
       selectedTopics,
-      lang,
     ])
 
   return (
@@ -533,6 +574,11 @@ export function MaterialsExplorer({
             languageCounts={languageCounts}
             locale={lang}
           />
+        </div>
+        <div>
+          Melden als iets niet werkt of nieuw materiaal voorstel: Contacteer{' '}
+          <a href="mailto:zns.sekretariat@uni-muenster.de">zns.sekretariat@uni-muenster.de</a>{' '}
+          Zentrum für Niederlande-Studien Alter Steinweg 6/7 48143 Münster{' '}
         </div>
       </Sidebar>
       <main className="px-4 py-6 sm:p-6 lg:p-8">

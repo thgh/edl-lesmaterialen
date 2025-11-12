@@ -68,6 +68,7 @@ async function fetchAllMaterials() {
       status: { not_equals: 'draft' },
     },
     limit: 9999,
+    sort: '-createdAt',
   })
 
   return res.docs as unknown as CourseMaterial[]

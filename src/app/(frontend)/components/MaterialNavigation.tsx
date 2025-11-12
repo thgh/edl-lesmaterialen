@@ -32,11 +32,30 @@ export function MaterialNavigation({
   const dict = getDictionary(locale)
   const isAuthenticated = useSWR('/api/users/me', fetcher).data?.user
   const filteredMaterials = useMemo(() => {
-    const query = filters.searchQuery.trim().toLowerCase()
+    const query = filters.searchQuery.trim()
 
-    return materials.filter((m) => {
-      const title = (locale === 'de' ? m.title_de : m.title_nl) || m.title_de || ''
-      const matchesQuery = query === '' || title.toLowerCase().includes(query)
+    // Normalize text by removing accents and converting to lowercase
+    const normalizeText = (text: string) => {
+      return text
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '') // Remove diacritics/accents
+        .toLowerCase()
+    }
+
+    const normalizedQuery = normalizeText(query)
+    const queryWords = normalizedQuery.split(/\s+/).filter((word) => word.length > 0)
+
+    const filtered = materials.filter((m) => {
+      // Get title with fallback to other language
+      const title = (locale === 'de' ? m.title_de : m.title_nl) || (locale === 'de' ? m.title_nl : m.title_de) || ''
+      // Get description with fallback to other language
+      const description = (locale === 'de' ? m.description_de : m.description_nl) || (locale === 'de' ? m.description_nl : m.description_de) || ''
+
+      // Concatenate title and description, then normalize
+      const searchText = normalizeText(title + ' ' + description)
+
+      // Check if all query words are present
+      const matchesQuery = query === '' || queryWords.every((word) => searchText.includes(word))
 
       const matchesLanguage =
         filters.selectedLanguages.length === 0 ||
@@ -84,6 +103,20 @@ export function MaterialNavigation({
         matchesCompetences &&
         matchesTopics
       )
+    })
+
+    // Sort: featured first, then by createdAt (newest first)
+    return filtered.sort((a, b) => {
+      // First sort by featured (featured items first)
+      const aFeatured = (a as any).featured === true ? 1 : 0
+      const bFeatured = (b as any).featured === true ? 1 : 0
+      if (aFeatured !== bFeatured) {
+        return bFeatured - aFeatured
+      }
+      // Then sort by createdAt (newest first)
+      const aDate = a.createdAt ? new Date(a.createdAt).getTime() : 0
+      const bDate = b.createdAt ? new Date(b.createdAt).getTime() : 0
+      return bDate - aDate
     })
   }, [materials, filters, locale])
 

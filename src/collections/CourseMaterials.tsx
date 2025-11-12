@@ -13,23 +13,6 @@ export const materialStatusOptions = [
   { label: 'Gepubliceerd', value: 'published' } as const,
 ]
 
-const baseElements = [
-  'h1',
-  'h2',
-  'h3',
-  'h4',
-  'h5',
-  'h6',
-  'blockquote',
-  'ul',
-  'ol',
-  'link',
-  'relationship',
-  'upload',
-  'indent',
-  'textAlign',
-] as const
-
 export const CourseMaterials: CollectionConfig = {
   slug: 'course-materials',
   labels: {
@@ -74,6 +57,12 @@ export const CourseMaterials: CollectionConfig = {
           type: 'text',
         },
       ],
+    },
+    {
+      name: 'featured',
+      type: 'checkbox',
+      label: 'Uitgelicht',
+      defaultValue: false,
     },
 
     {

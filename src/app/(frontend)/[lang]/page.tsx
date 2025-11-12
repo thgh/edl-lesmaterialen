@@ -22,6 +22,7 @@ export default async function HomePage({ params }: { params: Promise<{ lang: 'nl
     },
     depth: 1,
     limit: 9999,
+    sort: '-createdAt',
   })
 
   // Fetch material types for filtering
