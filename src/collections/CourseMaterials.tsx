@@ -34,7 +34,6 @@ export const CourseMaterials: CollectionConfig = {
       label: 'Beschrijving',
       type: 'textarea',
     }),
-
     {
       name: 'attachments',
       label: 'Bijlages',
@@ -57,6 +56,19 @@ export const CourseMaterials: CollectionConfig = {
           type: 'text',
         },
       ],
+    },
+    {
+      name: 'license',
+      label: 'Licentie',
+      type: 'text',
+    },
+    {
+      name: 'contact',
+      label: 'Contactgegevens',
+      type: 'text',
+      admin: {
+        description: 'E-mailadres, link of naam van contactpersoon',
+      },
     },
     {
       name: 'featured',

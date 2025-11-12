@@ -3,31 +3,13 @@
 import { getDictionary } from '@/i18n/dictionaries'
 import { CourseMaterial } from '@/payload-types'
 import Link from 'next/link'
-import { Fragment, useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import useSWR from 'swr'
 import { CourseMaterialCard } from './CourseMaterialCard'
+import { Footer } from './Footer'
 import { SearchAndFilters } from './SearchAndFilters'
 import { Sidebar } from './Sidebar'
 import { fetcher } from './fetcher'
-
-// Helper function to convert words containing "@" into mailto links
-function renderTextWithEmailLinks(text: string) {
-  const words = text.split(/(\s+)/)
-  return words.map((word, index) => {
-    if (word.includes('@')) {
-      return (
-        <a
-          key={index}
-          href={`mailto:${word}`}
-          className="text-blue-600 hover:underline whitespace-nowrap"
-        >
-          {word}
-        </a>
-      )
-    }
-    return <Fragment key={index}>{word}</Fragment>
-  })
-}
 
 type MaterialType = {
   id: string
@@ -640,13 +622,7 @@ export function MaterialsExplorer({
             {dict.loadMore}
           </button>
         )}
-        {/* Footer with contact and disclaimer */}
-        <div className="mt-8 pt-6 border-t border-gray-200">
-          <div className="text-sm text-gray-600 mb-4">
-            {renderTextWithEmailLinks(dict.contactText)}
-          </div>
-          <div className="text-xs text-gray-500">{dict.disclaimerText}</div>
-        </div>
+        <Footer />
       </main>
     </div>
   )

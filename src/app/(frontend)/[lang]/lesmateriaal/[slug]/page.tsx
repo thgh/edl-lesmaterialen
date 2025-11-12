@@ -4,31 +4,13 @@ import config from '@/payload.config'
 import Image from 'next/image'
 import Link from 'next/link'
 import { getPayload } from 'payload'
-import { Fragment } from 'react'
+import { Footer } from '../../../components/Footer'
 import { MaterialNavigation } from '../../../components/MaterialNavigation'
 import { Sidebar } from '../../../components/Sidebar'
 import '../../../styles.css'
+import { renderTextWithEmailLinks } from '../../../utils/text'
 
 export const dynamic = 'force-dynamic'
-
-// Helper function to convert words containing "@" into mailto links
-function renderTextWithEmailLinks(text: string) {
-  const words = text.split(/(\s+)/)
-  return words.map((word, index) => {
-    if (word.includes('@')) {
-      return (
-        <a
-          key={index}
-          href={`mailto:${word}`}
-          className="text-blue-600 hover:underline whitespace-nowrap"
-        >
-          {word}
-        </a>
-      )
-    }
-    return <Fragment key={index}>{word}</Fragment>
-  })
-}
 
 // PDF Embed Component
 function PDFEmbed({ url }: { url: string }) {
@@ -226,6 +208,40 @@ export default async function CourseMaterialPage({
             </div>
           </header>
 
+          {/* Actions */}
+          {hasExternalOnly ? (
+            <section className="mb-6">
+              <div className="flex flex-wrap items-center gap-3">
+                {externalLinks.map((lnk) => {
+                  const label =
+                    (lang === 'de' ? lnk.label_de : lnk.label_nl) || lnk.label_nl || lnk.label_de
+                  const url = lnk.url || '#'
+                  return (
+                    <a
+                      key={lnk.id || url}
+                      href={url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-2 rounded-md bg-brand px-4 py-2"
+                    >
+                      {label || dict.detailOpenWebsite}
+                      <svg
+                        width="16"
+                        height="16"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                      >
+                        <path d="M7 17L17 7M17 7H7M17 7V17" />
+                      </svg>
+                    </a>
+                  )
+                })}
+              </div>
+            </section>
+          ) : null}
+
           {hasImageHero && (
             <div className="mb-8 overflow-hidden rounded-lg border bg-gray-50 max-w-sm">
               <div className="relative aspect-[3/2] w-full">
@@ -302,40 +318,27 @@ export default async function CourseMaterialPage({
                 </p>
               </div>
             ) : null}
+
+            {material.contact ? (
+              <div>
+                <h3 className="text-sm font-semibold text-gray-700">{dict.contactLabel}</h3>
+                <div className="mt-2 text-gray-800">
+                  {renderTextWithEmailLinks(material.contact)}
+                </div>
+              </div>
+            ) : null}
+
+            {material.license ? (
+              <div>
+                <h3 className="text-sm font-semibold text-gray-700">{dict.licenseLabel}</h3>
+                <p className="mt-2 text-gray-800">{material.license}</p>
+              </div>
+            ) : null}
           </section>
 
           {/* Actions */}
-          <section className="mb-10">
-            {hasExternalOnly ? (
-              <div className="flex flex-wrap items-center gap-3">
-                {externalLinks.map((lnk) => {
-                  const label =
-                    (lang === 'de' ? lnk.label_de : lnk.label_nl) || lnk.label_nl || lnk.label_de
-                  const url = lnk.url || '#'
-                  return (
-                    <a
-                      key={lnk.id || url}
-                      href={url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex items-center gap-2 rounded-md bg-brand px-4 py-2"
-                    >
-                      {label || dict.detailOpenWebsite}
-                      <svg
-                        width="16"
-                        height="16"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                      >
-                        <path d="M7 17L17 7M17 7H7M17 7V17" />
-                      </svg>
-                    </a>
-                  )
-                })}
-              </div>
-            ) : (
+          {!hasExternalOnly && (
+            <section className="mb-10">
               <div className="flex flex-wrap items-center gap-3">
                 {Array.isArray(material.attachments) &&
                   material.attachments.map((att) => {
@@ -361,8 +364,8 @@ export default async function CourseMaterialPage({
                     )
                   })}
               </div>
-            )}
-          </section>
+            </section>
+          )}
 
           {/* Additional links */}
           {externalLinks.length > 0 && !hasExternalOnly && (
@@ -422,15 +425,7 @@ export default async function CourseMaterialPage({
             </section>
           )}
         </article>
-        {/* Footer with contact and disclaimer */}
-        <div className="mt-8 pt-6 border-t border-gray-200">
-          <div className="text-sm text-gray-600 mb-4">
-            {renderTextWithEmailLinks(dict.contactText)}
-          </div>
-          <div className="text-xs text-gray-500">
-            {dict.disclaimerText}
-          </div>
-        </div>
+        <Footer />
       </main>
     </div>
   )

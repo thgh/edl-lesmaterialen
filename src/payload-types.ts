@@ -143,6 +143,11 @@ export interface CourseMaterial {
         id?: string | null;
       }[]
     | null;
+  license?: string | null;
+  /**
+   * E-mailadres, link of naam van contactpersoon
+   */
+  contact?: string | null;
   featured?: boolean | null;
   cefr?: ('A1' | 'A2' | 'B1' | 'B2' | 'C1' | 'C2')[] | null;
   language?: ('nl' | 'de' | 'en')[] | null;
@@ -348,6 +353,8 @@ export interface CourseMaterialsSelect<T extends boolean = true> {
         url?: T;
         id?: T;
       };
+  license?: T;
+  contact?: T;
   featured?: T;
   cefr?: T;
   language?: T;
