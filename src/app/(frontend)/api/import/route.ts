@@ -140,10 +140,18 @@ export const POST = async (request: Request) => {
         const taal = row[6]?.toString() || ''
         const erkNiveau = row[7]?.toString() || ''
 
-        // Process school type
-        const schoolTypeId = schooltype
-          ? await findOrCreateTaxonomy(payload, 'school-types', schooltype)
-          : null
+        // Process school types (split by comma if multiple)
+        const schoolTypes = schooltype
+          ? schooltype
+              .split(',')
+              .map((st: string) => st.trim())
+              .filter((st: string) => st)
+          : []
+        const schoolTypeIds = []
+        for (const st of schoolTypes) {
+          const id = await findOrCreateTaxonomy(payload, 'school-types', st)
+          if (id) schoolTypeIds.push(id)
+        }
 
         // Process competences (split by comma if multiple)
         const competences = competentie
@@ -230,8 +238,8 @@ export const POST = async (request: Request) => {
         }
 
         // Add relationships if they exist
-        if (schoolTypeId) {
-          courseMaterialData.schoolType = [schoolTypeId]
+        if (schoolTypeIds.length > 0) {
+          courseMaterialData.schoolType = schoolTypeIds
         }
 
         if (competenceIds.length > 0) {
