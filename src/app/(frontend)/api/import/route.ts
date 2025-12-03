@@ -86,6 +86,7 @@ export const POST = async (request: Request) => {
     const formData = await request.formData()
     const file = formData.get('file') as File
     const deleteAll = formData.get('deleteAll') === 'true'
+    const status = (formData.get('status') as 'draft' | 'published') || 'draft'
 
     if (!file) {
       return Response.json({ error: 'No file provided' }, { status: 400 })
@@ -204,7 +205,7 @@ export const POST = async (request: Request) => {
 
         // Create course material
         const courseMaterialData: any = {
-          status: 'draft',
+          status: status,
           language: languageValues,
           cefr: cefrLevels,
         }
@@ -220,6 +221,7 @@ export const POST = async (request: Request) => {
 
         // Add links if provided
         if (link) {
+          courseMaterialData.link = link
           courseMaterialData.links = [
             {
               url: link,
@@ -253,7 +255,7 @@ export const POST = async (request: Request) => {
         const existingMaterials = await payload.find({
           collection: 'course-materials',
           where: {
-            [titleField]: { equals: titleValue },
+            and: [{ [titleField]: { equals: titleValue } }, { link: { equals: link } }],
           },
           limit: 100, // Get multiple in case there are duplicates
         })

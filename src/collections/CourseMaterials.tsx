@@ -35,6 +35,11 @@ export const CourseMaterials: CollectionConfig = {
       type: 'textarea',
     }),
     {
+      name: 'link',
+      type: 'text',
+      label: 'Link',
+    },
+    {
       name: 'attachments',
       label: 'Bijlages',
       type: 'upload',
@@ -44,6 +49,7 @@ export const CourseMaterials: CollectionConfig = {
     {
       name: 'links',
       type: 'array',
+      hidden: true,
       fields: [
         localize({
           name: 'label',

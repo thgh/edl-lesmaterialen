@@ -134,6 +134,7 @@ export interface CourseMaterial {
   title_de?: string | null;
   description_nl?: string | null;
   description_de?: string | null;
+  link?: string | null;
   attachments?: (string | CourseMaterialAttachment)[] | null;
   links?:
     | {
@@ -344,6 +345,7 @@ export interface CourseMaterialsSelect<T extends boolean = true> {
   title_de?: T;
   description_nl?: T;
   description_de?: T;
+  link?: T;
   attachments?: T;
   links?:
     | T

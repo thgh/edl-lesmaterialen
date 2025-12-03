@@ -28,10 +28,10 @@ export default async function HomePage({ params }: { params: Promise<{ lang: 'nl
   // Fetch material types for filtering
   const [materialTypesResponse, schoolTypesResponse, competencesResponse, topicsResponse] =
     await Promise.all([
-      payload.find({ collection: 'material-types' }),
-      payload.find({ collection: 'school-types' }),
-      payload.find({ collection: 'competences' }),
-      payload.find({ collection: 'topics' }),
+      payload.find({ collection: 'material-types', limit: 999 }),
+      payload.find({ collection: 'school-types', limit: 999 }),
+      payload.find({ collection: 'competences', limit: 999 }),
+      payload.find({ collection: 'topics', limit: 999 }),
     ])
 
   const materials = materialsResponse.docs

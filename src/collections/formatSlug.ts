@@ -1,4 +1,5 @@
-import { FieldHook } from 'payload'
+import { randomBytes } from 'crypto'
+import { CollectionSlug, FieldHook } from 'payload'
 
 export function slugify(input: string) {
   return input
@@ -15,23 +16,46 @@ export function slugify(input: string) {
 
 export const beforeChangeSlug =
   (fallback: string, fallback2?: string): FieldHook =>
-  ({ value, originalDoc, data }) => {
-    if (value && typeof value === 'string') {
-      const afterSlugify = slugify(value)
-      if (afterSlugify !== value) console.log('reslugify', value, afterSlugify)
-      return afterSlugify
+  async ({ value, originalDoc, data, collection, req }) => {
+    const options = [
+      () => value,
+      () => data?.[fallback],
+      () => originalDoc?.[fallback],
+      () => fallback2 && data?.[fallback2],
+      () => fallback2 && originalDoc?.[fallback2],
+      () => randomBytes,
+    ]
+
+    let firstSlug = ''
+    for (const generate of options) {
+      const value = generate()
+      if (typeof value !== 'string') continue
+      const slug = slugify(value)
+      if (!slug) continue
+      if (!firstSlug) firstSlug = slug
+      const exists = await req.payload.find({
+        collection: collection?.slug as CollectionSlug,
+        where: { slug: { equals: slug } },
+        limit: 1,
+        depth: 0,
+        overrideAccess: true,
+      })
+      if (!exists.docs.length) {
+        console.log('new', slug, value)
+        return slug
+      }
+      if (exists.docs[0].id === originalDoc?.id) {
+        console.log('same', slug, value)
+        return slug
+      }
     }
 
-    const fallbackData = (data && data[fallback]) || (originalDoc && originalDoc[fallback])
-    if (fallbackData && typeof fallbackData === 'string') {
-      return slugify(fallbackData)
-    }
-
-    const fallback2Data =
-      fallback2 && ((data && data[fallback2]) || (originalDoc && originalDoc[fallback2]))
-    if (fallback2Data && typeof fallback2Data === 'string') {
-      return slugify(fallback2Data)
-    }
-
-    return value
+    const random = randomBytes(4)
+      .toString('base64url')
+      .replaceAll('-', '')
+      .replaceAll('_', '')
+      .toLowerCase()
+    console.log('random', firstSlug, random)
+    if (firstSlug) return firstSlug + '-' + random
+    return random
   }
