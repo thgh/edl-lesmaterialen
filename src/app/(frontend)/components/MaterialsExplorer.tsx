@@ -238,7 +238,7 @@ export function MaterialsExplorer({
 
     const filteredMaterials = materials.filter((m) => {
       // Concatenate title and description, then normalize
-      const searchText = normalizeText(
+      const primarySearchText = normalizeText(
         (m.title_nl || '') +
           ' ' +
           (m.description_nl || '') +
@@ -248,8 +248,27 @@ export function MaterialsExplorer({
           (m.description_de || ''),
       )
 
-      // Check if all query words are present
-      const matchesQuery = query === '' || queryWords.every((word) => searchText.includes(word))
+      // Extract topic titles for secondary search (lower priority)
+      const topicTitles = Array.isArray(m.topics)
+        ? m.topics
+            .map((t) => {
+              if (typeof t === 'string') return ''
+              const topic = t as any
+              return (topic.title_nl || '') + ' ' + (topic.title_de || '')
+            })
+            .join(' ')
+        : ''
+      const topicSearchText = normalizeText(topicTitles)
+
+      // Check if all query words are present in primary fields (title/description)
+      const matchesPrimary =
+        query === '' || queryWords.every((word) => primarySearchText.includes(word))
+
+      // If not matching primary, check topic titles (lower priority)
+      const matchesQueryInTopicTitles =
+        query === '' || queryWords.every((word) => topicSearchText.includes(word))
+
+      const matchesQuery = matchesPrimary || matchesQueryInTopicTitles
       const matchesLanguage =
         selectedLanguages.length === 0 ||
         (Array.isArray(m.language) &&
@@ -298,7 +317,7 @@ export function MaterialsExplorer({
       )
     })
 
-    // Sort: featured first, then by createdAt (newest first)
+    // Sort: featured first, then by relevance (primary matches before topic matches), then by createdAt (newest first)
     return filteredMaterials.sort((a, b) => {
       // First sort by featured (featured items first)
       const aFeatured = (a as any).featured === true ? 1 : 0
@@ -306,7 +325,35 @@ export function MaterialsExplorer({
       if (aFeatured !== bFeatured) {
         return bFeatured - aFeatured
       }
-      // Then sort by createdAt (newest first)
+
+      // Then sort by relevance (primary matches before topic-only matches)
+      if (query !== '') {
+        const aPrimaryText = normalizeText(
+          (a.title_nl || '') +
+            ' ' +
+            (a.description_nl || '') +
+            ' ' +
+            (a.title_de || '') +
+            ' ' +
+            (a.description_de || ''),
+        )
+        const bPrimaryText = normalizeText(
+          (b.title_nl || '') +
+            ' ' +
+            (b.description_nl || '') +
+            ' ' +
+            (b.title_de || '') +
+            ' ' +
+            (b.description_de || ''),
+        )
+        const aMatchesPrimary = queryWords.every((word) => aPrimaryText.includes(word))
+        const bMatchesPrimary = queryWords.every((word) => bPrimaryText.includes(word))
+        if (aMatchesPrimary !== bMatchesPrimary) {
+          return Number(bMatchesPrimary) - Number(aMatchesPrimary) // Primary matches come first
+        }
+      }
+
+      // Finally sort by createdAt (newest first)
       const aDate = a.createdAt ? new Date(a.createdAt).getTime() : 0
       const bDate = b.createdAt ? new Date(b.createdAt).getTime() : 0
       return bDate - aDate
@@ -350,7 +397,7 @@ export function MaterialsExplorer({
       if (query === '') return true
 
       // Concatenate title and description, then normalize
-      const searchText = normalizeText(
+      const primarySearchText = normalizeText(
         (m.title_nl || '') +
           ' ' +
           (m.description_nl || '') +
@@ -360,8 +407,25 @@ export function MaterialsExplorer({
           (m.description_de || ''),
       )
 
-      // Check if all query words are present
-      return queryWords.every((word) => searchText.includes(word))
+      // Extract topic titles for secondary search (lower priority)
+      const topicTitles = Array.isArray(m.topics)
+        ? m.topics
+            .map((t) => {
+              if (typeof t === 'string') return ''
+              const topic = t as any
+              return (topic.title_nl || '') + ' ' + (topic.title_de || '')
+            })
+            .join(' ')
+        : ''
+      const topicSearchText = normalizeText(topicTitles)
+
+      // Check if all query words are present in primary fields (title/description)
+      const matchesPrimary = queryWords.every((word) => primarySearchText.includes(word))
+
+      // If not matching primary, check topic titles (lower priority)
+      const matchesQueryInTopicTitles = queryWords.every((word) => topicSearchText.includes(word))
+
+      return matchesPrimary || matchesQueryInTopicTitles
     }
 
     const matchesExceptLanguages = (m: CourseMaterial) => {

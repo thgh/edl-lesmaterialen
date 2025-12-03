@@ -105,19 +105,7 @@ export function MaterialNavigation({
       )
     })
 
-    // Sort: featured first, then by createdAt (newest first)
-    return filtered.sort((a, b) => {
-      // First sort by featured (featured items first)
-      const aFeatured = (a as any).featured === true ? 1 : 0
-      const bFeatured = (b as any).featured === true ? 1 : 0
-      if (aFeatured !== bFeatured) {
-        return bFeatured - aFeatured
-      }
-      // Then sort by createdAt (newest first)
-      const aDate = a.createdAt ? new Date(a.createdAt).getTime() : 0
-      const bDate = b.createdAt ? new Date(b.createdAt).getTime() : 0
-      return bDate - aDate
-    })
+    return filtered
   }, [materials, filters, locale])
 
   const currentIndex = filteredMaterials.findIndex((m) => m.id === currentMaterial.id)
