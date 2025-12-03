@@ -237,24 +237,29 @@ export function MaterialsExplorer({
     const queryWords = normalizedQuery.split(/\s+/).filter((word) => word.length > 0)
 
     const filteredMaterials = materials.filter((m) => {
-      // Concatenate title and description, then normalize
-      const primarySearchText = normalizeText(
-        (m.title_nl || '') +
-          ' ' +
-          (m.description_nl || '') +
-          ' ' +
-          (m.title_de || '') +
-          ' ' +
-          (m.description_de || ''),
-      )
+      // Get title with fallback to other language
+      const title =
+        (lang === 'de' ? m.title_de : m.title_nl) || (lang === 'de' ? m.title_nl : m.title_de) || ''
+      // Get description with fallback to other language
+      const description =
+        (lang === 'de' ? m.description_de : m.description_nl) ||
+        (lang === 'de' ? m.description_nl : m.description_de) ||
+        ''
 
-      // Extract topic titles for secondary search (lower priority)
+      // Concatenate title and description, then normalize
+      const primarySearchText = normalizeText(title + ' ' + description)
+
+      // Extract topic titles for secondary search (lower priority) with fallback
       const topicTitles = Array.isArray(m.topics)
         ? m.topics
             .map((t) => {
               if (typeof t === 'string') return ''
               const topic = t as any
-              return (topic.title_nl || '') + ' ' + (topic.title_de || '')
+              const topicTitle =
+                (lang === 'de' ? topic.title_de : topic.title_nl) ||
+                (lang === 'de' ? topic.title_nl : topic.title_de) ||
+                ''
+              return topicTitle
             })
             .join(' ')
         : ''
@@ -328,24 +333,27 @@ export function MaterialsExplorer({
 
       // Then sort by relevance (primary matches before topic-only matches)
       if (query !== '') {
-        const aPrimaryText = normalizeText(
-          (a.title_nl || '') +
-            ' ' +
-            (a.description_nl || '') +
-            ' ' +
-            (a.title_de || '') +
-            ' ' +
-            (a.description_de || ''),
-        )
-        const bPrimaryText = normalizeText(
-          (b.title_nl || '') +
-            ' ' +
-            (b.description_nl || '') +
-            ' ' +
-            (b.title_de || '') +
-            ' ' +
-            (b.description_de || ''),
-        )
+        // Get titles with fallback for relevance sorting
+        const aTitle =
+          (lang === 'de' ? a.title_de : a.title_nl) ||
+          (lang === 'de' ? a.title_nl : a.title_de) ||
+          ''
+        const aDescription =
+          (lang === 'de' ? a.description_de : a.description_nl) ||
+          (lang === 'de' ? a.description_nl : a.description_de) ||
+          ''
+        const aPrimaryText = normalizeText(aTitle + ' ' + aDescription)
+
+        const bTitle =
+          (lang === 'de' ? b.title_de : b.title_nl) ||
+          (lang === 'de' ? b.title_nl : b.title_de) ||
+          ''
+        const bDescription =
+          (lang === 'de' ? b.description_de : b.description_nl) ||
+          (lang === 'de' ? b.description_nl : b.description_de) ||
+          ''
+        const bPrimaryText = normalizeText(bTitle + ' ' + bDescription)
+
         const aMatchesPrimary = queryWords.every((word) => aPrimaryText.includes(word))
         const bMatchesPrimary = queryWords.every((word) => bPrimaryText.includes(word))
         if (aMatchesPrimary !== bMatchesPrimary) {
@@ -361,6 +369,7 @@ export function MaterialsExplorer({
   }, [
     materials,
     searchQuery,
+    lang,
     selectedLanguages,
     selectedTypes,
     selectedSchoolTypes,
@@ -396,24 +405,29 @@ export function MaterialsExplorer({
     const matchesQuery = (m: CourseMaterial) => {
       if (query === '') return true
 
-      // Concatenate title and description, then normalize
-      const primarySearchText = normalizeText(
-        (m.title_nl || '') +
-          ' ' +
-          (m.description_nl || '') +
-          ' ' +
-          (m.title_de || '') +
-          ' ' +
-          (m.description_de || ''),
-      )
+      // Get title with fallback to other language
+      const title =
+        (lang === 'de' ? m.title_de : m.title_nl) || (lang === 'de' ? m.title_nl : m.title_de) || ''
+      // Get description with fallback to other language
+      const description =
+        (lang === 'de' ? m.description_de : m.description_nl) ||
+        (lang === 'de' ? m.description_nl : m.description_de) ||
+        ''
 
-      // Extract topic titles for secondary search (lower priority)
+      // Concatenate title and description, then normalize
+      const primarySearchText = normalizeText(title + ' ' + description)
+
+      // Extract topic titles for secondary search (lower priority) with fallback
       const topicTitles = Array.isArray(m.topics)
         ? m.topics
             .map((t) => {
               if (typeof t === 'string') return ''
               const topic = t as any
-              return (topic.title_nl || '') + ' ' + (topic.title_de || '')
+              const topicTitle =
+                (lang === 'de' ? topic.title_de : topic.title_nl) ||
+                (lang === 'de' ? topic.title_nl : topic.title_de) ||
+                ''
+              return topicTitle
             })
             .join(' ')
         : ''
@@ -715,6 +729,7 @@ export function MaterialsExplorer({
   }, [
     materials,
     searchQuery,
+    lang,
     selectedTypes,
     selectedSchoolTypes,
     selectedCompetences,
