@@ -1,5 +1,6 @@
 'use client'
 
+import { CEFRLevels } from '@/collections/CEFRLevels'
 import { getDictionary } from '@/i18n/dictionaries'
 import { CourseMaterial } from '@/payload-types'
 import Link from 'next/link'
@@ -64,6 +65,61 @@ export function MaterialsExplorer({
   const [filtersOpen, setFiltersOpen] = useState(false)
 
   const isAuthenticated = useSWR('/api/users/me', fetcher).data?.user
+
+  // Validate and remove invalid selections from taxonomy lists
+  useEffect(() => {
+    const validLanguageValues = ['nl', 'de', 'en']
+    const validCefrValues = CEFRLevels.map((level) => level.value)
+
+    // Get valid IDs from taxonomy arrays
+    const validTypeIds = new Set(materialTypes.map((t) => t.id))
+    const validSchoolTypeIds = new Set(schoolTypes.map((t) => t.id))
+    const validCompetenceIds = new Set(competences.map((c) => c.id))
+    const validTopicIds = new Set(topics.map((t) => t.id))
+
+    // Filter out invalid selections
+    const filteredTypes = selectedTypes.filter((id) => validTypeIds.has(id))
+    const filteredSchoolTypes = selectedSchoolTypes.filter((id) => validSchoolTypeIds.has(id))
+    const filteredCompetences = selectedCompetences.filter((id) => validCompetenceIds.has(id))
+    const filteredTopics = selectedTopics.filter((id) => validTopicIds.has(id))
+    const filteredLanguages = selectedLanguages.filter((lang) => validLanguageValues.includes(lang))
+    const filteredCefrLevels = selectedCefrLevels.filter((level) => validCefrValues.includes(level))
+
+    // Update state only if there are changes to avoid infinite loops
+    // Compare arrays by checking if lengths differ or if any item differs
+    const arraysEqual = (a: string[], b: string[]) =>
+      a.length === b.length && a.every((val, idx) => val === b[idx])
+
+    if (!arraysEqual(filteredTypes, selectedTypes)) {
+      setSelectedTypes(filteredTypes)
+    }
+    if (!arraysEqual(filteredSchoolTypes, selectedSchoolTypes)) {
+      setSelectedSchoolTypes(filteredSchoolTypes)
+    }
+    if (!arraysEqual(filteredCompetences, selectedCompetences)) {
+      setSelectedCompetences(filteredCompetences)
+    }
+    if (!arraysEqual(filteredTopics, selectedTopics)) {
+      setSelectedTopics(filteredTopics)
+    }
+    if (!arraysEqual(filteredLanguages, selectedLanguages)) {
+      setSelectedLanguages(filteredLanguages)
+    }
+    if (!arraysEqual(filteredCefrLevels, selectedCefrLevels)) {
+      setSelectedCefrLevels(filteredCefrLevels)
+    }
+  }, [
+    materialTypes,
+    schoolTypes,
+    competences,
+    topics,
+    selectedTypes,
+    selectedSchoolTypes,
+    selectedCompetences,
+    selectedTopics,
+    selectedLanguages,
+    selectedCefrLevels,
+  ])
 
   // Track last URL we intentionally pushed and an inactivity timer
   const lastPushedUrlRef = useRef<string | null>(null)
@@ -269,322 +325,337 @@ export function MaterialsExplorer({
   const visibleMaterials = filtered.slice(0, limit)
 
   // Compute counts per taxonomy based on current search query but before applying that taxonomy itself
-  const { typeCounts, schoolTypeCounts, competenceCounts, topicCounts, languageCounts, cefrCounts } =
-    useMemo(() => {
-      const query = searchQuery.trim()
+  const {
+    typeCounts,
+    schoolTypeCounts,
+    competenceCounts,
+    topicCounts,
+    languageCounts,
+    cefrCounts,
+  } = useMemo(() => {
+    const query = searchQuery.trim()
 
-      // Normalize text by removing accents and converting to lowercase
-      const normalizeText = (text: string) => {
-        return text
-          .normalize('NFD')
-          .replace(/[\u0300-\u036f]/g, '') // Remove diacritics/accents
-          .toLowerCase()
-      }
+    // Normalize text by removing accents and converting to lowercase
+    const normalizeText = (text: string) => {
+      return text
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '') // Remove diacritics/accents
+        .toLowerCase()
+    }
 
-      const normalizedQuery = normalizeText(query)
-      const queryWords = normalizedQuery.split(/\s+/).filter((word) => word.length > 0)
+    const normalizedQuery = normalizeText(query)
+    const queryWords = normalizedQuery.split(/\s+/).filter((word) => word.length > 0)
 
-      const matchesQuery = (m: CourseMaterial) => {
-        if (query === '') return true
+    const matchesQuery = (m: CourseMaterial) => {
+      if (query === '') return true
 
-        // Concatenate title and description, then normalize
-        const searchText = normalizeText(
-          (m.title_nl || '') +
-            ' ' +
-            (m.description_nl || '') +
-            ' ' +
-            (m.title_de || '') +
-            ' ' +
-            (m.description_de || ''),
-        )
+      // Concatenate title and description, then normalize
+      const searchText = normalizeText(
+        (m.title_nl || '') +
+          ' ' +
+          (m.description_nl || '') +
+          ' ' +
+          (m.title_de || '') +
+          ' ' +
+          (m.description_de || ''),
+      )
 
-        // Check if all query words are present
-        return queryWords.every((word) => searchText.includes(word))
-      }
+      // Check if all query words are present
+      return queryWords.every((word) => searchText.includes(word))
+    }
 
-      const matchesExceptLanguages = (m: CourseMaterial) => {
-        const matchesType =
-          selectedTypes.length === 0 ||
-          (Array.isArray(m.materialTypes) &&
-            m.materialTypes.some((t) =>
-              typeof t === 'string'
-                ? selectedTypes.includes(t)
-                : t && 'id' in t && selectedTypes.includes(String((t as any).id)),
-            ))
+    const matchesExceptLanguages = (m: CourseMaterial) => {
+      const matchesType =
+        selectedTypes.length === 0 ||
+        (Array.isArray(m.materialTypes) &&
+          m.materialTypes.some((t) =>
+            typeof t === 'string'
+              ? selectedTypes.includes(t)
+              : t && 'id' in t && selectedTypes.includes(String((t as any).id)),
+          ))
 
-        const matchesSchoolType =
-          selectedSchoolTypes.length === 0 ||
-          (() => {
-            const st = m.schoolType
-            if (!st) return false
-            if (typeof st === 'string') return selectedSchoolTypes.includes(st)
-            return selectedSchoolTypes.includes(String((st as any).id))
-          })()
-
-        const matchesCompetences =
-          selectedCompetences.length === 0 ||
-          (Array.isArray(m.competences) &&
-            m.competences.some((c) =>
-              typeof c === 'string'
-                ? selectedCompetences.includes(c)
-                : c && 'id' in c && selectedCompetences.includes(String((c as any).id)),
-            ))
-
-        const matchesTopics =
-          selectedTopics.length === 0 ||
-          (Array.isArray(m.topics) &&
-            m.topics.some((t) =>
-              typeof t === 'string'
-                ? selectedTopics.includes(t)
-                : t && 'id' in t && selectedTopics.includes(String((t as any).id)),
-            ))
-
-        return (
-          matchesQuery(m) && matchesType && matchesSchoolType && matchesCompetences && matchesTopics
-        )
-      }
-
-      const matchesExceptTypes = (m: CourseMaterial) => {
-        // school type filter
-        const matchesSchoolType =
-          selectedSchoolTypes.length === 0 ||
-          (() => {
-            const st = m.schoolType
-            if (!st) return false
-            if (typeof st === 'string') return selectedSchoolTypes.includes(st)
-            return selectedSchoolTypes.includes(String((st as any).id))
-          })()
-
-        const matchesCompetences =
-          selectedCompetences.length === 0 ||
-          (Array.isArray(m.competences) &&
-            m.competences.some((c) =>
-              typeof c === 'string'
-                ? selectedCompetences.includes(c)
-                : c && 'id' in c && selectedCompetences.includes(String((c as any).id)),
-            ))
-
-        const matchesTopics =
-          selectedTopics.length === 0 ||
-          (Array.isArray(m.topics) &&
-            m.topics.some((t) =>
-              typeof t === 'string'
-                ? selectedTopics.includes(t)
-                : t && 'id' in t && selectedTopics.includes(String((t as any).id)),
-            ))
-
-        return matchesQuery(m) && matchesSchoolType && matchesCompetences && matchesTopics
-      }
-
-      const matchesExceptSchoolType = (m: CourseMaterial) => {
-        const matchesType =
-          selectedTypes.length === 0 ||
-          (Array.isArray(m.materialTypes) &&
-            m.materialTypes.some((t) =>
-              typeof t === 'string'
-                ? selectedTypes.includes(t)
-                : t && 'id' in t && selectedTypes.includes(String((t as any).id)),
-            ))
-
-        const matchesCompetences =
-          selectedCompetences.length === 0 ||
-          (Array.isArray(m.competences) &&
-            m.competences.some((c) =>
-              typeof c === 'string'
-                ? selectedCompetences.includes(c)
-                : c && 'id' in c && selectedCompetences.includes(String((c as any).id)),
-            ))
-
-        const matchesTopics =
-          selectedTopics.length === 0 ||
-          (Array.isArray(m.topics) &&
-            m.topics.some((t) =>
-              typeof t === 'string'
-                ? selectedTopics.includes(t)
-                : t && 'id' in t && selectedTopics.includes(String((t as any).id)),
-            ))
-
-        return matchesQuery(m) && matchesType && matchesCompetences && matchesTopics
-      }
-
-      const matchesExceptCompetences = (m: CourseMaterial) => {
-        const matchesType =
-          selectedTypes.length === 0 ||
-          (Array.isArray(m.materialTypes) &&
-            m.materialTypes.some((t) =>
-              typeof t === 'string'
-                ? selectedTypes.includes(t)
-                : t && 'id' in t && selectedTypes.includes(String((t as any).id)),
-            ))
-
-        const matchesSchoolType =
-          selectedSchoolTypes.length === 0 ||
-          (() => {
-            const st = m.schoolType
-            if (!st) return false
-            if (typeof st === 'string') return selectedSchoolTypes.includes(st)
-            return selectedSchoolTypes.includes(String((st as any).id))
-          })()
-
-        const matchesTopics =
-          selectedTopics.length === 0 ||
-          (Array.isArray(m.topics) &&
-            m.topics.some((t) =>
-              typeof t === 'string'
-                ? selectedTopics.includes(t)
-                : t && 'id' in t && selectedTopics.includes(String((t as any).id)),
-            ))
-
-        return matchesQuery(m) && matchesType && matchesSchoolType && matchesTopics
-      }
-
-      const matchesExceptTopics = (m: CourseMaterial) => {
-        const matchesType =
-          selectedTypes.length === 0 ||
-          (Array.isArray(m.materialTypes) &&
-            m.materialTypes.some((t) =>
-              typeof t === 'string'
-                ? selectedTypes.includes(t)
-                : t && 'id' in t && selectedTypes.includes(String((t as any).id)),
-            ))
-
-        const matchesSchoolType =
-          selectedSchoolTypes.length === 0 ||
-          (() => {
-            const st = m.schoolType
-            if (!st) return false
-            if (typeof st === 'string') return selectedSchoolTypes.includes(st)
-            return selectedSchoolTypes.includes(String((st as any).id))
-          })()
-
-        const matchesCompetences =
-          selectedCompetences.length === 0 ||
-          (Array.isArray(m.competences) &&
-            m.competences.some((c) =>
-              typeof c === 'string'
-                ? selectedCompetences.includes(c)
-                : c && 'id' in c && selectedCompetences.includes(String((c as any).id)),
-            ))
-
-        return matchesQuery(m) && matchesType && matchesSchoolType && matchesCompetences
-      }
-
-      const matchesExceptCefr = (m: CourseMaterial) => {
-        const matchesType =
-          selectedTypes.length === 0 ||
-          (Array.isArray(m.materialTypes) &&
-            m.materialTypes.some((t) =>
-              typeof t === 'string'
-                ? selectedTypes.includes(t)
-                : t && 'id' in t && selectedTypes.includes(String((t as any).id)),
-            ))
-
-        const matchesSchoolType =
-          selectedSchoolTypes.length === 0 ||
-          (() => {
-            const st = m.schoolType
-            if (!st) return false
-            if (typeof st === 'string') return selectedSchoolTypes.includes(st)
-            return selectedSchoolTypes.includes(String((st as any).id))
-          })()
-
-        const matchesCompetences =
-          selectedCompetences.length === 0 ||
-          (Array.isArray(m.competences) &&
-            m.competences.some((c) =>
-              typeof c === 'string'
-                ? selectedCompetences.includes(c)
-                : c && 'id' in c && selectedCompetences.includes(String((c as any).id)),
-            ))
-
-        const matchesTopics =
-          selectedTopics.length === 0 ||
-          (Array.isArray(m.topics) &&
-            m.topics.some((t) =>
-              typeof t === 'string'
-                ? selectedTopics.includes(t)
-                : t && 'id' in t && selectedTopics.includes(String((t as any).id)),
-            ))
-
-        return matchesQuery(m) && matchesType && matchesSchoolType && matchesCompetences && matchesTopics
-      }
-
-      const typeCounts: Record<string, number> = {}
-      const schoolTypeCounts: Record<string, number> = {}
-      const competenceCounts: Record<string, number> = {}
-      const topicCounts: Record<string, number> = {}
-      const languageCounts: Record<string, number> = {}
-      const cefrCounts: Record<string, number> = {}
-
-      // iterate once and increment relevant buckets when material matches the other filters
-      for (const m of materials) {
-        if (matchesExceptTypes(m)) {
-          if (Array.isArray(m.materialTypes)) {
-            for (const t of m.materialTypes) {
-              const id = typeof t === 'string' ? t : String((t as any).id)
-              if (id) typeCounts[id] = (typeCounts[id] ?? 0) + 1
-            }
-          }
-        }
-
-        if (matchesExceptSchoolType(m)) {
+      const matchesSchoolType =
+        selectedSchoolTypes.length === 0 ||
+        (() => {
           const st = m.schoolType
-          if (st) {
-            const id = typeof st === 'string' ? st : String((st as any).id)
-            if (id) schoolTypeCounts[id] = (schoolTypeCounts[id] ?? 0) + 1
+          if (!st) return false
+          if (typeof st === 'string') return selectedSchoolTypes.includes(st)
+          return selectedSchoolTypes.includes(String((st as any).id))
+        })()
+
+      const matchesCompetences =
+        selectedCompetences.length === 0 ||
+        (Array.isArray(m.competences) &&
+          m.competences.some((c) =>
+            typeof c === 'string'
+              ? selectedCompetences.includes(c)
+              : c && 'id' in c && selectedCompetences.includes(String((c as any).id)),
+          ))
+
+      const matchesTopics =
+        selectedTopics.length === 0 ||
+        (Array.isArray(m.topics) &&
+          m.topics.some((t) =>
+            typeof t === 'string'
+              ? selectedTopics.includes(t)
+              : t && 'id' in t && selectedTopics.includes(String((t as any).id)),
+          ))
+
+      return (
+        matchesQuery(m) && matchesType && matchesSchoolType && matchesCompetences && matchesTopics
+      )
+    }
+
+    const matchesExceptTypes = (m: CourseMaterial) => {
+      // school type filter
+      const matchesSchoolType =
+        selectedSchoolTypes.length === 0 ||
+        (() => {
+          const st = m.schoolType
+          if (!st) return false
+          if (typeof st === 'string') return selectedSchoolTypes.includes(st)
+          return selectedSchoolTypes.includes(String((st as any).id))
+        })()
+
+      const matchesCompetences =
+        selectedCompetences.length === 0 ||
+        (Array.isArray(m.competences) &&
+          m.competences.some((c) =>
+            typeof c === 'string'
+              ? selectedCompetences.includes(c)
+              : c && 'id' in c && selectedCompetences.includes(String((c as any).id)),
+          ))
+
+      const matchesTopics =
+        selectedTopics.length === 0 ||
+        (Array.isArray(m.topics) &&
+          m.topics.some((t) =>
+            typeof t === 'string'
+              ? selectedTopics.includes(t)
+              : t && 'id' in t && selectedTopics.includes(String((t as any).id)),
+          ))
+
+      return matchesQuery(m) && matchesSchoolType && matchesCompetences && matchesTopics
+    }
+
+    const matchesExceptSchoolType = (m: CourseMaterial) => {
+      const matchesType =
+        selectedTypes.length === 0 ||
+        (Array.isArray(m.materialTypes) &&
+          m.materialTypes.some((t) =>
+            typeof t === 'string'
+              ? selectedTypes.includes(t)
+              : t && 'id' in t && selectedTypes.includes(String((t as any).id)),
+          ))
+
+      const matchesCompetences =
+        selectedCompetences.length === 0 ||
+        (Array.isArray(m.competences) &&
+          m.competences.some((c) =>
+            typeof c === 'string'
+              ? selectedCompetences.includes(c)
+              : c && 'id' in c && selectedCompetences.includes(String((c as any).id)),
+          ))
+
+      const matchesTopics =
+        selectedTopics.length === 0 ||
+        (Array.isArray(m.topics) &&
+          m.topics.some((t) =>
+            typeof t === 'string'
+              ? selectedTopics.includes(t)
+              : t && 'id' in t && selectedTopics.includes(String((t as any).id)),
+          ))
+
+      return matchesQuery(m) && matchesType && matchesCompetences && matchesTopics
+    }
+
+    const matchesExceptCompetences = (m: CourseMaterial) => {
+      const matchesType =
+        selectedTypes.length === 0 ||
+        (Array.isArray(m.materialTypes) &&
+          m.materialTypes.some((t) =>
+            typeof t === 'string'
+              ? selectedTypes.includes(t)
+              : t && 'id' in t && selectedTypes.includes(String((t as any).id)),
+          ))
+
+      const matchesSchoolType =
+        selectedSchoolTypes.length === 0 ||
+        (() => {
+          const st = m.schoolType
+          if (!st) return false
+          if (typeof st === 'string') return selectedSchoolTypes.includes(st)
+          return selectedSchoolTypes.includes(String((st as any).id))
+        })()
+
+      const matchesTopics =
+        selectedTopics.length === 0 ||
+        (Array.isArray(m.topics) &&
+          m.topics.some((t) =>
+            typeof t === 'string'
+              ? selectedTopics.includes(t)
+              : t && 'id' in t && selectedTopics.includes(String((t as any).id)),
+          ))
+
+      return matchesQuery(m) && matchesType && matchesSchoolType && matchesTopics
+    }
+
+    const matchesExceptTopics = (m: CourseMaterial) => {
+      const matchesType =
+        selectedTypes.length === 0 ||
+        (Array.isArray(m.materialTypes) &&
+          m.materialTypes.some((t) =>
+            typeof t === 'string'
+              ? selectedTypes.includes(t)
+              : t && 'id' in t && selectedTypes.includes(String((t as any).id)),
+          ))
+
+      const matchesSchoolType =
+        selectedSchoolTypes.length === 0 ||
+        (() => {
+          const st = m.schoolType
+          if (!st) return false
+          if (typeof st === 'string') return selectedSchoolTypes.includes(st)
+          return selectedSchoolTypes.includes(String((st as any).id))
+        })()
+
+      const matchesCompetences =
+        selectedCompetences.length === 0 ||
+        (Array.isArray(m.competences) &&
+          m.competences.some((c) =>
+            typeof c === 'string'
+              ? selectedCompetences.includes(c)
+              : c && 'id' in c && selectedCompetences.includes(String((c as any).id)),
+          ))
+
+      return matchesQuery(m) && matchesType && matchesSchoolType && matchesCompetences
+    }
+
+    const matchesExceptCefr = (m: CourseMaterial) => {
+      const matchesType =
+        selectedTypes.length === 0 ||
+        (Array.isArray(m.materialTypes) &&
+          m.materialTypes.some((t) =>
+            typeof t === 'string'
+              ? selectedTypes.includes(t)
+              : t && 'id' in t && selectedTypes.includes(String((t as any).id)),
+          ))
+
+      const matchesSchoolType =
+        selectedSchoolTypes.length === 0 ||
+        (() => {
+          const st = m.schoolType
+          if (!st) return false
+          if (typeof st === 'string') return selectedSchoolTypes.includes(st)
+          return selectedSchoolTypes.includes(String((st as any).id))
+        })()
+
+      const matchesCompetences =
+        selectedCompetences.length === 0 ||
+        (Array.isArray(m.competences) &&
+          m.competences.some((c) =>
+            typeof c === 'string'
+              ? selectedCompetences.includes(c)
+              : c && 'id' in c && selectedCompetences.includes(String((c as any).id)),
+          ))
+
+      const matchesTopics =
+        selectedTopics.length === 0 ||
+        (Array.isArray(m.topics) &&
+          m.topics.some((t) =>
+            typeof t === 'string'
+              ? selectedTopics.includes(t)
+              : t && 'id' in t && selectedTopics.includes(String((t as any).id)),
+          ))
+
+      return (
+        matchesQuery(m) && matchesType && matchesSchoolType && matchesCompetences && matchesTopics
+      )
+    }
+
+    const typeCounts: Record<string, number> = {}
+    const schoolTypeCounts: Record<string, number> = {}
+    const competenceCounts: Record<string, number> = {}
+    const topicCounts: Record<string, number> = {}
+    const languageCounts: Record<string, number> = {}
+    const cefrCounts: Record<string, number> = {}
+
+    // iterate once and increment relevant buckets when material matches the other filters
+    for (const m of materials) {
+      if (matchesExceptTypes(m)) {
+        if (Array.isArray(m.materialTypes)) {
+          for (const t of m.materialTypes) {
+            const id = typeof t === 'string' ? t : String((t as any).id)
+            if (id) typeCounts[id] = (typeCounts[id] ?? 0) + 1
           }
         }
+      }
 
-        if (matchesExceptCompetences(m)) {
-          if (Array.isArray(m.competences)) {
-            for (const c of m.competences) {
-              const id = typeof c === 'string' ? c : String((c as any).id)
-              if (id) competenceCounts[id] = (competenceCounts[id] ?? 0) + 1
-            }
+      if (matchesExceptSchoolType(m)) {
+        const st = m.schoolType
+        if (st) {
+          const id = typeof st === 'string' ? st : String((st as any).id)
+          if (id) schoolTypeCounts[id] = (schoolTypeCounts[id] ?? 0) + 1
+        }
+      }
+
+      if (matchesExceptCompetences(m)) {
+        if (Array.isArray(m.competences)) {
+          for (const c of m.competences) {
+            const id = typeof c === 'string' ? c : String((c as any).id)
+            if (id) competenceCounts[id] = (competenceCounts[id] ?? 0) + 1
           }
         }
+      }
 
-        if (matchesExceptTopics(m)) {
-          if (Array.isArray(m.topics)) {
-            for (const t of m.topics) {
-              const id = typeof t === 'string' ? t : String((t as any).id)
-              if (id) topicCounts[id] = (topicCounts[id] ?? 0) + 1
-            }
+      if (matchesExceptTopics(m)) {
+        if (Array.isArray(m.topics)) {
+          for (const t of m.topics) {
+            const id = typeof t === 'string' ? t : String((t as any).id)
+            if (id) topicCounts[id] = (topicCounts[id] ?? 0) + 1
           }
         }
+      }
 
-        if (matchesExceptLanguages(m)) {
-          if (Array.isArray(m.language)) {
-            for (const l of m.language) {
-              if (l === 'nl' || l === 'de') {
-                const key = l as string
-                languageCounts[key] = (languageCounts[key] ?? 0) + 1
-              }
-            }
-          }
-        }
-
-        if (matchesExceptCefr(m)) {
-          if (Array.isArray(m.cefr)) {
-            for (const level of m.cefr) {
-              if (level) {
-                const key = level as string
-                cefrCounts[key] = (cefrCounts[key] ?? 0) + 1
-              }
+      if (matchesExceptLanguages(m)) {
+        if (Array.isArray(m.language)) {
+          for (const l of m.language) {
+            if (l === 'nl' || l === 'de') {
+              const key = l as string
+              languageCounts[key] = (languageCounts[key] ?? 0) + 1
             }
           }
         }
       }
 
-      return { typeCounts, schoolTypeCounts, competenceCounts, topicCounts, languageCounts, cefrCounts }
-    }, [
-      materials,
-      searchQuery,
-      selectedTypes,
-      selectedSchoolTypes,
-      selectedCompetences,
-      selectedTopics,
-    ])
+      if (matchesExceptCefr(m)) {
+        if (Array.isArray(m.cefr)) {
+          for (const level of m.cefr) {
+            if (level) {
+              const key = level as string
+              cefrCounts[key] = (cefrCounts[key] ?? 0) + 1
+            }
+          }
+        }
+      }
+    }
+
+    return {
+      typeCounts,
+      schoolTypeCounts,
+      competenceCounts,
+      topicCounts,
+      languageCounts,
+      cefrCounts,
+    }
+  }, [
+    materials,
+    searchQuery,
+    selectedTypes,
+    selectedSchoolTypes,
+    selectedCompetences,
+    selectedTopics,
+  ])
 
   return (
     <div className="block md:flex">
@@ -613,7 +684,15 @@ export function MaterialsExplorer({
             selectedTopics={selectedTopics}
             selectedLanguages={selectedLanguages}
             selectedCefrLevels={selectedCefrLevels}
-            onChange={({ query, types, schoolTypes, competences, topics, languages, cefrLevels }) => {
+            onChange={({
+              query,
+              types,
+              schoolTypes,
+              competences,
+              topics,
+              languages,
+              cefrLevels,
+            }) => {
               setSearchQuery(query)
               setSelectedTypes(types)
               setSelectedSchoolTypes(schoolTypes)

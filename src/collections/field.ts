@@ -42,8 +42,12 @@ export const hiddenTitle: TextField = {
     beforeChange: [
       ({ data, originalDoc }) => {
         const d = { ...originalDoc, ...data }
-        return [d?.title_nl, d?.title_de].filter(Boolean).join(' - ')
+        return [d?.title_nl, d?.title_de].filter(Boolean).filter(uniq).join(' - ')
       },
     ],
   },
+}
+
+function uniq(value: string, index: number, self: string[]): boolean {
+  return self.indexOf(value) === index
 }

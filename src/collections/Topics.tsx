@@ -4,6 +4,6 @@ export const Topics = createTaxonomy({
   slug: 'topics',
   labels: {
     singular: 'Onderwerp',
-    plural: 'Onderwerpen',
+    plural: "Onderwerpen / thema's",
   },
 })
