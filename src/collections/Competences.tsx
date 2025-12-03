@@ -1,4 +1,4 @@
-import { createTaxonomy } from "./taxonomy";
+import { createTaxonomy } from './taxonomy'
 
 export const Competences = createTaxonomy({
   slug: 'competences',

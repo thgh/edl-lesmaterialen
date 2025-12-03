@@ -38,9 +38,9 @@ export function Sidebar({ locale, children }: SidebarProps) {
                 ZNS Zentrum für Niederländen-Studien
               </span>
             </Link>
-            <img 
-              src="/assets/Euregionale Doorlopende Leerlijn.png" 
-              alt="Euregionale Doorlopende Leerlijn" 
+            <img
+              src="/assets/Euregionale Doorlopende Leerlijn.png"
+              alt="Euregionale Doorlopende Leerlijn"
               className="h-12 md:hidden mix-blend-multiply"
             />
           </div>
@@ -61,9 +61,9 @@ export function Sidebar({ locale, children }: SidebarProps) {
         </div>
         {children}
         <div className="hidden md:block sticky bottom-0 bg-gray-50 -mx-4 md:-mx-6 lg:-mx-8">
-          <img 
-            src="/assets/Euregionale Doorlopende Leerlijn.png" 
-            alt="Euregionale Doorlopende Leerlijn" 
+          <img
+            src="/assets/Euregionale Doorlopende Leerlijn.png"
+            alt="Euregionale Doorlopende Leerlijn"
             className="w-full h-auto max-w-full mix-blend-multiply"
           />
         </div>

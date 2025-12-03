@@ -47,9 +47,15 @@ export function MaterialNavigation({
 
     const filtered = materials.filter((m) => {
       // Get title with fallback to other language
-      const title = (locale === 'de' ? m.title_de : m.title_nl) || (locale === 'de' ? m.title_nl : m.title_de) || ''
+      const title =
+        (locale === 'de' ? m.title_de : m.title_nl) ||
+        (locale === 'de' ? m.title_nl : m.title_de) ||
+        ''
       // Get description with fallback to other language
-      const description = (locale === 'de' ? m.description_de : m.description_nl) || (locale === 'de' ? m.description_nl : m.description_de) || ''
+      const description =
+        (locale === 'de' ? m.description_de : m.description_nl) ||
+        (locale === 'de' ? m.description_nl : m.description_de) ||
+        ''
 
       // Concatenate title and description, then normalize
       const searchText = normalizeText(title + ' ' + description)

@@ -34,4 +34,3 @@ export function renderTextWithEmailLinks(text: string) {
     return <Fragment key={index}>{word}</Fragment>
   })
 }
-
