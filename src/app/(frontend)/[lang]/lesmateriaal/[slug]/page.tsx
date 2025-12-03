@@ -84,6 +84,16 @@ function getLocalized<T extends { title_nl?: string | null; title_de?: string | 
   return (locale === 'de' ? obj.title_de : obj.title_nl) || obj.title_nl || obj.title_de || ''
 }
 
+function getHostname(url: string | null | undefined): string {
+  if (!url) return ''
+  try {
+    const urlObj = new URL(url)
+    return urlObj.hostname.replace(/^www\./, '')
+  } catch {
+    return ''
+  }
+}
+
 export default async function CourseMaterialPage({
   params,
   searchParams,
@@ -208,40 +218,6 @@ export default async function CourseMaterialPage({
             </div>
           </header>
 
-          {/* Actions */}
-          {hasExternalOnly ? (
-            <section className="mb-6">
-              <div className="flex flex-wrap items-center gap-3">
-                {externalLinks.map((lnk) => {
-                  const label =
-                    (lang === 'de' ? lnk.label_de : lnk.label_nl) || lnk.label_nl || lnk.label_de
-                  const url = lnk.url || '#'
-                  return (
-                    <a
-                      key={lnk.id || url}
-                      href={url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex items-center gap-2 rounded-md bg-brand px-4 py-2"
-                    >
-                      {label || dict.detailOpenWebsite}
-                      <svg
-                        width="16"
-                        height="16"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                      >
-                        <path d="M7 17L17 7M17 7H7M17 7V17" />
-                      </svg>
-                    </a>
-                  )
-                })}
-              </div>
-            </section>
-          ) : null}
-
           {hasImageHero && (
             <div className="mb-8 overflow-hidden rounded-lg border bg-gray-50 max-w-sm">
               <div className="relative aspect-[3/2] w-full">
@@ -336,10 +312,42 @@ export default async function CourseMaterialPage({
             ) : null}
           </section>
 
+          {/* Main Link */}
+          {material.link && (
+            <section className="mb-6">
+              <a
+                href={material.link}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex flex-col items-center gap-1 rounded-md bg-brand px-6 py-3 text-lg font-semibold text-black shadow-md hover:bg-opacity-90 transition-colors"
+              >
+                <span className="flex items-center gap-2">
+                  {dict.detailOpenWebsite}
+                  <svg
+                    width="20"
+                    height="20"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                  >
+                    <path d="M7 17L17 7M17 7H7M17 7V17" />
+                  </svg>
+                </span>
+                {getHostname(material.link) && (
+                  <span className="text-xs font-normal opacity-80">
+                    {getHostname(material.link)}
+                  </span>
+                )}
+              </a>
+            </section>
+          )}
+
           {/* Actions */}
-          {!hasExternalOnly && (
+          {material.attachments && material.attachments.length > 0 && (
             <section className="mb-10">
-              <div className="flex flex-wrap items-center gap-3">
+              <h2 className="mb-3 text-lg font-semibold text-gray-900">Downloads</h2>
+              <div className="flex flex-col gap-2">
                 {Array.isArray(material.attachments) &&
                   material.attachments.map((att) => {
                     const id = typeof att === 'string' ? att : (att as any).id
@@ -349,18 +357,86 @@ export default async function CourseMaterialPage({
                       typeof att === 'string'
                         ? undefined
                         : ((att as any).filename as string | undefined)
-                    const isPdf = !!mime && mime.startsWith('application/pdf')
-                    return (
-                      <a
-                        key={id}
-                        href={`/api/media/${id}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center gap-2 rounded-md border border-gray-300 bg-white px-4 py-2 text-gray-800 shadow-sm hover:bg-gray-50"
-                        download
+                    const url = typeof att === 'string' ? null : ((att as any).url as string | null)
+                    if (!url) return null
+
+                    const isImage = mime?.startsWith('image/') ?? false
+
+                    // File type icon
+                    const FileIcon = () => {
+                      if (isImage) {
+                        return (
+                          <svg
+                            width="20"
+                            height="20"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="2"
+                            className="text-gray-600"
+                          >
+                            <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+                            <circle cx="8.5" cy="8.5" r="1.5" />
+                            <polyline points="21 15 16 10 5 21" />
+                          </svg>
+                        )
+                      }
+                      return (
+                        <svg
+                          width="20"
+                          height="20"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          className="text-gray-600"
+                        >
+                          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                          <polyline points="14 2 14 8 20 8" />
+                          <line x1="16" y1="13" x2="8" y2="13" />
+                          <line x1="16" y1="17" x2="8" y2="17" />
+                          <polyline points="10 9 9 9 8 9" />
+                        </svg>
+                      )
+                    }
+
+                    // Download icon
+                    const DownloadIcon = () => (
+                      <svg
+                        width="20"
+                        height="20"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        className="text-gray-600"
                       >
-                        {isPdf ? 'Download PDF' : filename || dict.detailDownload}
-                      </a>
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                        <polyline points="7 10 12 15 17 10" />
+                        <line x1="12" y1="15" x2="12" y2="3" />
+                      </svg>
+                    )
+
+                    return (
+                      <div key={id} className="flex items-center gap-2">
+                        <a
+                          href={url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex items-center gap-3 flex-1 rounded-md border border-gray-300 bg-white p-3 text-gray-800 shadow-sm hover:bg-gray-50 hover:text-gray-900 leading-none"
+                        >
+                          <FileIcon />
+                          <span>{filename || dict.detailDownload}</span>
+                        </a>
+                        <a
+                          href={url}
+                          download={filename || undefined}
+                          className="flex items-center justify-center rounded-md border border-gray-300 bg-white p-3 shadow-sm hover:bg-gray-50 transition-colors min-w-[48px]"
+                          aria-label="Download"
+                        >
+                          <DownloadIcon />
+                        </a>
+                      </div>
                     )
                   })}
               </div>
