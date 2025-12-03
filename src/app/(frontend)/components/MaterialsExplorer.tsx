@@ -24,6 +24,7 @@ type Labels = {
   schoolTypesTitle: string
   competencesTitle: string
   topicsTitle: string
+  cefrTitle: string
   cefrLabel: string
   languagesTitle: string
   languageDutchLabel: string
@@ -58,6 +59,7 @@ export function MaterialsExplorer({
   const [selectedCompetences, setSelectedCompetences] = useState<string[]>([])
   const [selectedTopics, setSelectedTopics] = useState<string[]>([])
   const [selectedLanguages, setSelectedLanguages] = useState<string[]>([])
+  const [selectedCefrLevels, setSelectedCefrLevels] = useState<string[]>([])
   const [limit, setLimit] = useState(30)
   const [filtersOpen, setFiltersOpen] = useState(false)
 
@@ -87,6 +89,7 @@ export function MaterialsExplorer({
     setSelectedCompetences(readList('competences'))
     setSelectedTopics(readList('topics'))
     setSelectedLanguages(readList('langs'))
+    setSelectedCefrLevels(readList('cefr'))
   }
 
   const buildUrlWithFilters = (): string => {
@@ -111,6 +114,7 @@ export function MaterialsExplorer({
     setOrDelete('competences', selectedCompetences)
     setOrDelete('topics', selectedTopics)
     setOrDelete('langs', selectedLanguages)
+    setOrDelete('cefr', selectedCefrLevels)
 
     current.search = sp.toString()
     return current.toString()
@@ -160,6 +164,7 @@ export function MaterialsExplorer({
     selectedCompetences,
     selectedTopics,
     selectedLanguages,
+    selectedCefrLevels,
   ])
 
   const filtered = useMemo(() => {
@@ -222,13 +227,18 @@ export function MaterialsExplorer({
             if (typeof t === 'string') return selectedTopics.includes(t)
             return t && 'id' in t && selectedTopics.includes(String((t as any).id))
           }))
+      const matchesCefr =
+        selectedCefrLevels.length === 0 ||
+        (Array.isArray(m.cefr) &&
+          m.cefr.some((level) => selectedCefrLevels.includes(level as string)))
       return (
         matchesQuery &&
         matchesLanguage &&
         matchesType &&
         matchesSchoolType &&
         matchesCompetences &&
-        matchesTopics
+        matchesTopics &&
+        matchesCefr
       )
     })
 
@@ -253,12 +263,13 @@ export function MaterialsExplorer({
     selectedSchoolTypes,
     selectedCompetences,
     selectedTopics,
+    selectedCefrLevels,
   ])
 
   const visibleMaterials = filtered.slice(0, limit)
 
   // Compute counts per taxonomy based on current search query but before applying that taxonomy itself
-  const { typeCounts, schoolTypeCounts, competenceCounts, topicCounts, languageCounts } =
+  const { typeCounts, schoolTypeCounts, competenceCounts, topicCounts, languageCounts, cefrCounts } =
     useMemo(() => {
       const query = searchQuery.trim()
 
@@ -458,11 +469,52 @@ export function MaterialsExplorer({
         return matchesQuery(m) && matchesType && matchesSchoolType && matchesCompetences
       }
 
+      const matchesExceptCefr = (m: CourseMaterial) => {
+        const matchesType =
+          selectedTypes.length === 0 ||
+          (Array.isArray(m.materialTypes) &&
+            m.materialTypes.some((t) =>
+              typeof t === 'string'
+                ? selectedTypes.includes(t)
+                : t && 'id' in t && selectedTypes.includes(String((t as any).id)),
+            ))
+
+        const matchesSchoolType =
+          selectedSchoolTypes.length === 0 ||
+          (() => {
+            const st = m.schoolType
+            if (!st) return false
+            if (typeof st === 'string') return selectedSchoolTypes.includes(st)
+            return selectedSchoolTypes.includes(String((st as any).id))
+          })()
+
+        const matchesCompetences =
+          selectedCompetences.length === 0 ||
+          (Array.isArray(m.competences) &&
+            m.competences.some((c) =>
+              typeof c === 'string'
+                ? selectedCompetences.includes(c)
+                : c && 'id' in c && selectedCompetences.includes(String((c as any).id)),
+            ))
+
+        const matchesTopics =
+          selectedTopics.length === 0 ||
+          (Array.isArray(m.topics) &&
+            m.topics.some((t) =>
+              typeof t === 'string'
+                ? selectedTopics.includes(t)
+                : t && 'id' in t && selectedTopics.includes(String((t as any).id)),
+            ))
+
+        return matchesQuery(m) && matchesType && matchesSchoolType && matchesCompetences && matchesTopics
+      }
+
       const typeCounts: Record<string, number> = {}
       const schoolTypeCounts: Record<string, number> = {}
       const competenceCounts: Record<string, number> = {}
       const topicCounts: Record<string, number> = {}
       const languageCounts: Record<string, number> = {}
+      const cefrCounts: Record<string, number> = {}
 
       // iterate once and increment relevant buckets when material matches the other filters
       for (const m of materials) {
@@ -511,9 +563,20 @@ export function MaterialsExplorer({
             }
           }
         }
+
+        if (matchesExceptCefr(m)) {
+          if (Array.isArray(m.cefr)) {
+            for (const level of m.cefr) {
+              if (level) {
+                const key = level as string
+                cefrCounts[key] = (cefrCounts[key] ?? 0) + 1
+              }
+            }
+          }
+        }
       }
 
-      return { typeCounts, schoolTypeCounts, competenceCounts, topicCounts, languageCounts }
+      return { typeCounts, schoolTypeCounts, competenceCounts, topicCounts, languageCounts, cefrCounts }
     }, [
       materials,
       searchQuery,
@@ -549,13 +612,15 @@ export function MaterialsExplorer({
             selectedCompetences={selectedCompetences}
             selectedTopics={selectedTopics}
             selectedLanguages={selectedLanguages}
-            onChange={({ query, types, schoolTypes, competences, topics, languages }) => {
+            selectedCefrLevels={selectedCefrLevels}
+            onChange={({ query, types, schoolTypes, competences, topics, languages, cefrLevels }) => {
               setSearchQuery(query)
               setSelectedTypes(types)
               setSelectedSchoolTypes(schoolTypes)
               setSelectedCompetences(competences)
               setSelectedTopics(topics)
               setSelectedLanguages(languages)
+              setSelectedCefrLevels(cefrLevels)
             }}
             labels={{
               searchTitle: labels.searchTitle,
@@ -564,6 +629,7 @@ export function MaterialsExplorer({
               schoolTypesTitle: labels.schoolTypesTitle,
               competencesTitle: labels.competencesTitle,
               topicsTitle: labels.topicsTitle,
+              cefrTitle: labels.cefrTitle,
               languagesTitle: labels.languagesTitle,
               languageDutchLabel: labels.languageDutchLabel,
               languageGermanLabel: labels.languageGermanLabel,
@@ -573,6 +639,7 @@ export function MaterialsExplorer({
             competenceCounts={competenceCounts}
             topicCounts={topicCounts}
             languageCounts={languageCounts}
+            cefrCounts={cefrCounts}
             locale={lang}
           />
         </div>
@@ -610,6 +677,7 @@ export function MaterialsExplorer({
                 selectedCompetences,
                 selectedTopics,
                 selectedLanguages,
+                selectedCefrLevels,
               }}
             />
           ))}

@@ -13,6 +13,7 @@ interface CourseMaterialCardProps {
     selectedCompetences: string[]
     selectedTopics: string[]
     selectedLanguages: string[]
+    selectedCefrLevels: string[]
   }
 }
 
@@ -117,6 +118,8 @@ export function CourseMaterialCard({
     if (filters.selectedTopics.length > 0) params.set('topics', filters.selectedTopics.join(','))
     if (filters.selectedLanguages.length > 0)
       params.set('langs', filters.selectedLanguages.join(','))
+    if (filters.selectedCefrLevels.length > 0)
+      params.set('cefr', filters.selectedCefrLevels.join(','))
 
     const queryString = params.toString()
     return queryString ? `${baseUrl}?${queryString}` : baseUrl

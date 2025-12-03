@@ -1,5 +1,6 @@
 'use client'
 
+import { CEFRLevels } from '@/collections/CEFRLevels'
 import { useCallback, useMemo } from 'react'
 
 interface MaterialType {
@@ -15,6 +16,7 @@ interface Labels {
   schoolTypesTitle: string
   competencesTitle: string
   topicsTitle: string
+  cefrTitle: string
   languagesTitle: string
   languageDutchLabel: string
   languageGermanLabel: string
@@ -31,6 +33,7 @@ interface SearchAndFiltersProps {
   selectedCompetences: string[]
   selectedTopics: string[]
   selectedLanguages: string[]
+  selectedCefrLevels: string[]
   onChange: (state: {
     query: string
     types: string[]
@@ -38,6 +41,7 @@ interface SearchAndFiltersProps {
     competences: string[]
     topics: string[]
     languages: string[]
+    cefrLevels: string[]
   }) => void
   labels: Labels
   typeCounts: Record<string, number>
@@ -45,6 +49,7 @@ interface SearchAndFiltersProps {
   competenceCounts: Record<string, number>
   topicCounts: Record<string, number>
   languageCounts: Record<string, number>
+  cefrCounts: Record<string, number>
   locale: 'nl' | 'de'
 }
 
@@ -98,6 +103,7 @@ export function SearchAndFilters({
   selectedCompetences,
   selectedTopics,
   selectedLanguages,
+  selectedCefrLevels,
   onChange,
   labels,
   typeCounts,
@@ -105,6 +111,7 @@ export function SearchAndFilters({
   competenceCounts,
   topicCounts,
   languageCounts,
+  cefrCounts,
   locale,
 }: SearchAndFiltersProps) {
   const handleTypeToggle = useCallback(
@@ -119,6 +126,7 @@ export function SearchAndFilters({
         competences: selectedCompetences,
         topics: selectedTopics,
         languages: selectedLanguages,
+        cefrLevels: selectedCefrLevels,
       })
     },
     [
@@ -128,6 +136,8 @@ export function SearchAndFilters({
       selectedSchoolTypes,
       selectedCompetences,
       selectedTopics,
+      selectedLanguages,
+      selectedCefrLevels,
     ],
   )
 
@@ -143,6 +153,7 @@ export function SearchAndFilters({
         competences: selectedCompetences,
         topics: selectedTopics,
         languages: selectedLanguages,
+        cefrLevels: selectedCefrLevels,
       })
     },
     [
@@ -152,6 +163,8 @@ export function SearchAndFilters({
       selectedSchoolTypes,
       selectedCompetences,
       selectedTopics,
+      selectedLanguages,
+      selectedCefrLevels,
     ],
   )
 
@@ -167,6 +180,7 @@ export function SearchAndFilters({
         competences: next,
         topics: selectedTopics,
         languages: selectedLanguages,
+        cefrLevels: selectedCefrLevels,
       })
     },
     [
@@ -191,6 +205,7 @@ export function SearchAndFilters({
         competences: selectedCompetences,
         topics: next,
         languages: selectedLanguages,
+        cefrLevels: selectedCefrLevels,
       })
     },
     [
@@ -200,6 +215,8 @@ export function SearchAndFilters({
       selectedSchoolTypes,
       selectedCompetences,
       selectedTopics,
+      selectedLanguages,
+      selectedCefrLevels,
     ],
   )
 
@@ -233,7 +250,7 @@ export function SearchAndFilters({
         sensitivity: 'base',
       })
     })
-  }, [materialTypes, typeCounts, locale])
+  }, [materialTypes, typeCounts, locale, getLocalizedTitleForSort])
 
   const visibleMaterialTypes = useMemo(() => {
     return sortedMaterialTypes.filter(
@@ -250,7 +267,7 @@ export function SearchAndFilters({
         sensitivity: 'base',
       })
     })
-  }, [schoolTypes, schoolTypeCounts, locale])
+  }, [schoolTypes, schoolTypeCounts, locale, getLocalizedTitleForSort])
 
   const visibleSchoolTypes = useMemo(() => {
     return sortedSchoolTypes.filter(
@@ -267,7 +284,7 @@ export function SearchAndFilters({
         sensitivity: 'base',
       })
     })
-  }, [competences, competenceCounts, locale])
+  }, [competences, competenceCounts, locale, getLocalizedTitleForSort])
 
   const visibleCompetences = useMemo(() => {
     return sortedCompetences.filter(
@@ -284,7 +301,7 @@ export function SearchAndFilters({
         sensitivity: 'base',
       })
     })
-  }, [topics, topicCounts, locale])
+  }, [topics, topicCounts, locale, getLocalizedTitleForSort])
 
   const visibleTopics = useMemo(() => {
     return sortedTopics.filter(
@@ -304,6 +321,7 @@ export function SearchAndFilters({
         competences: selectedCompetences,
         topics: selectedTopics,
         languages: next,
+        cefrLevels: selectedCefrLevels,
       })
     },
     [
@@ -314,8 +332,51 @@ export function SearchAndFilters({
       selectedCompetences,
       selectedTopics,
       selectedLanguages,
+      selectedCefrLevels,
     ],
   )
+
+  const handleCefrToggle = useCallback(
+    (level: string) => {
+      const next = selectedCefrLevels.includes(level)
+        ? selectedCefrLevels.filter((x) => x !== level)
+        : [...selectedCefrLevels, level]
+      onChange({
+        query: searchQuery,
+        types: selectedTypes,
+        schoolTypes: selectedSchoolTypes,
+        competences: selectedCompetences,
+        topics: selectedTopics,
+        languages: selectedLanguages,
+        cefrLevels: next,
+      })
+    },
+    [
+      onChange,
+      searchQuery,
+      selectedTypes,
+      selectedSchoolTypes,
+      selectedCompetences,
+      selectedTopics,
+      selectedLanguages,
+      selectedCefrLevels,
+    ],
+  )
+
+  const sortedCefrLevels = useMemo(() => {
+    return [...CEFRLevels].sort((a, b) => {
+      const countA = cefrCounts[a.value] ?? 0
+      const countB = cefrCounts[b.value] ?? 0
+      if (countB !== countA) return countB - countA
+      return a.value.localeCompare(b.value)
+    })
+  }, [cefrCounts])
+
+  const visibleCefrLevels = useMemo(() => {
+    return sortedCefrLevels.filter(
+      (level) => (cefrCounts[level.value] ?? 0) > 0 || selectedCefrLevels.includes(level.value),
+    )
+  }, [sortedCefrLevels, cefrCounts, selectedCefrLevels])
 
   return (
     <div className="space-y-6">
@@ -333,6 +394,7 @@ export function SearchAndFilters({
               competences: selectedCompetences,
               topics: selectedTopics,
               languages: selectedLanguages,
+              cefrLevels: selectedCefrLevels,
             })
           }
           className="w-full rounded-md bg-white border border-gray-200 px-3 py-2 text-sm shadow-sm focus:border-gray-500 focus:outline-none"
@@ -377,6 +439,17 @@ export function SearchAndFilters({
         }))}
         selectedIds={selectedSchoolTypes}
         onToggle={handleSchoolTypeToggle}
+      />
+
+      <FilterSection
+        title={labels.cefrTitle}
+        options={visibleCefrLevels.map((level) => ({
+          id: level.value,
+          title: level.label,
+          count: cefrCounts[level.value] ?? 0,
+        }))}
+        selectedIds={selectedCefrLevels}
+        onToggle={handleCefrToggle}
       />
 
       <FilterSection

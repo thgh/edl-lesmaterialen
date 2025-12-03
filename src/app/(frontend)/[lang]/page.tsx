@@ -55,6 +55,7 @@ export default async function HomePage({ params }: { params: Promise<{ lang: 'nl
         schoolTypesTitle: dict.schoolTypesTitle,
         competencesTitle: dict.competencesTitle,
         topicsTitle: dict.topicsTitle,
+        cefrTitle: dict.cefrTitle,
         cefrLabel: dict.cefrLabel,
         languagesTitle: dict.languagesTitle,
         languageDutchLabel: dict.languageDutch,
