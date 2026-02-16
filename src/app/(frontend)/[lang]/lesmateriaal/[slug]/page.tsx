@@ -9,6 +9,7 @@ import { MaterialNavigation } from '../../../components/MaterialNavigation'
 import { Sidebar } from '../../../components/Sidebar'
 import '../../../styles.css'
 import { renderTextWithEmailLinks } from '../../../utils/text'
+import { considerPDF } from '../../../utils/pdf'
 
 export const dynamic = 'force-dynamic'
 
@@ -182,15 +183,15 @@ export default async function CourseMaterialPage({
   const pdfLinks: Array<{ id?: string; url: string }> = []
 
   // Add material.link if it's a PDF
-  if (material.link && material.link.toLowerCase().endsWith('.pdf')) {
-    pdfLinks.push({ url: material.link })
+  if (considerPDF(material.link)) {
+    pdfLinks.push({ url: material.link! })
   }
 
   // Add PDFs from material.links
   for (const lnk of externalLinks) {
     const url = lnk.url
-    if (url && url.toLowerCase().endsWith('.pdf')) {
-      pdfLinks.push({ id: lnk.id || undefined, url })
+    if (considerPDF(url)) {
+      pdfLinks.push({ id: lnk.id || undefined, url: url! })
     }
   }
 
@@ -465,7 +466,7 @@ export default async function CourseMaterialPage({
               </h2>
               <ul className="list-inside list-disc space-y-2">
                 {externalLinks
-                  .filter((lnk) => !lnk.url?.toLowerCase().endsWith('.pdf'))
+                  .filter((lnk) => !considerPDF(lnk.url))
                   .map((lnk) => {
                     const label =
                       (lang === 'de' ? lnk.label_de : lnk.label_nl) ||

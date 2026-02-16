@@ -209,7 +209,7 @@ export function CourseMaterialCard({
     <Link href={buildDetailUrl()} className="block">
       <article className="rounded-xl border border-gray-200 bg-white shadow-sm transition hover:shadow-md overflow-visible">
         {thumbnail && (
-          <div className="relative aspect-[3/2] w-full overflow-hidden bg-gray-50">
+          <div className="relative aspect-[3/2] w-full overflow-hidden bg-gray-50 rounded-t-xl">
             <Image
               src={thumbnail.url!}
               alt={getTitle()}

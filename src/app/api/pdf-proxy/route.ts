@@ -1,3 +1,4 @@
+import { considerPDF } from '@/app/(frontend)/utils/pdf'
 import { NextRequest, NextResponse } from 'next/server'
 
 export const revalidate = 3600 // 1 hour
@@ -12,7 +13,7 @@ export async function GET(request: NextRequest) {
 
   try {
     // Validate that the URL is a PDF
-    if (!url.toLowerCase().endsWith('.pdf')) {
+    if (!considerPDF(url)) {
       return NextResponse.json({ error: 'Only PDF URLs are allowed' }, { status: 400 })
     }
 
