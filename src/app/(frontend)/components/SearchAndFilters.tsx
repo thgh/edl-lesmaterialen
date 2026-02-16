@@ -420,17 +420,6 @@ export function SearchAndFilters({
       />
 
       <FilterSection
-        title={labels.materialTypesTitle}
-        options={visibleMaterialTypes.map((type) => ({
-          id: type.id,
-          title: getLocalizedTitle(type),
-          count: typeCounts[type.id] ?? 0,
-        }))}
-        selectedIds={selectedTypes}
-        onToggle={handleTypeToggle}
-      />
-
-      <FilterSection
         title={labels.schoolTypesTitle}
         options={visibleSchoolTypes.map((item) => ({
           id: item.id,
@@ -442,14 +431,14 @@ export function SearchAndFilters({
       />
 
       <FilterSection
-        title={labels.cefrTitle}
-        options={visibleCefrLevels.map((level) => ({
-          id: level.value,
-          title: level.label,
-          count: cefrCounts[level.value] ?? 0,
+        title={labels.topicsTitle}
+        options={visibleTopics.map((item) => ({
+          id: item.id,
+          title: getLocalizedTitle(item),
+          count: topicCounts[item.id] ?? 0,
         }))}
-        selectedIds={selectedCefrLevels}
-        onToggle={handleCefrToggle}
+        selectedIds={selectedTopics}
+        onToggle={handleTopicToggle}
       />
 
       <FilterSection
@@ -464,14 +453,25 @@ export function SearchAndFilters({
       />
 
       <FilterSection
-        title={labels.topicsTitle}
-        options={visibleTopics.map((item) => ({
-          id: item.id,
-          title: getLocalizedTitle(item),
-          count: topicCounts[item.id] ?? 0,
+        title={labels.cefrTitle}
+        options={visibleCefrLevels.map((level) => ({
+          id: level.value,
+          title: level.label,
+          count: cefrCounts[level.value] ?? 0,
         }))}
-        selectedIds={selectedTopics}
-        onToggle={handleTopicToggle}
+        selectedIds={selectedCefrLevels}
+        onToggle={handleCefrToggle}
+      />
+
+      <FilterSection
+        title={labels.materialTypesTitle}
+        options={visibleMaterialTypes.map((type) => ({
+          id: type.id,
+          title: getLocalizedTitle(type),
+          count: typeCounts[type.id] ?? 0,
+        }))}
+        selectedIds={selectedTypes}
+        onToggle={handleTypeToggle}
       />
     </div>
   )
