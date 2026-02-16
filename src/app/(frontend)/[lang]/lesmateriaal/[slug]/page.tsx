@@ -8,8 +8,8 @@ import { Footer } from '../../../components/Footer'
 import { MaterialNavigation } from '../../../components/MaterialNavigation'
 import { Sidebar } from '../../../components/Sidebar'
 import '../../../styles.css'
-import { renderTextWithEmailLinks } from '../../../utils/text'
 import { considerPDF } from '../../../utils/pdf'
+import { renderTextWithEmailLinks } from '../../../utils/text'
 
 export const dynamic = 'force-dynamic'
 
@@ -203,6 +203,14 @@ export default async function CourseMaterialPage({
       })
     : []
 
+  // Get image attachments for display
+  const imageAttachments = Array.isArray(material.attachments)
+    ? material.attachments.filter((att) => {
+        const mime = typeof att === 'string' ? null : ((att as any).mimeType as string | null)
+        return !!mime && mime.startsWith('image/')
+      })
+    : []
+
   return (
     <div className="block md:flex">
       <Sidebar locale={lang} />
@@ -232,20 +240,6 @@ export default async function CourseMaterialPage({
               )}
             </div>
           </header>
-
-          {hasImageHero && (
-            <div className="mb-8 overflow-hidden rounded-lg border bg-gray-50 max-w-sm">
-              <div className="relative aspect-[3/2] w-full">
-                <Image
-                  src={thumbnail.url!}
-                  alt={title}
-                  fill
-                  sizes="(min-width: 1024px) 900px, 100vw"
-                  className="object-cover"
-                />
-              </div>
-            </div>
-          )}
 
           {/* Meta */}
           <section className="mb-8 grid gap-4 md:grid-cols-2">
@@ -376,6 +370,8 @@ export default async function CourseMaterialPage({
                     if (!url) return null
 
                     const isImage = mime?.startsWith('image/') ?? false
+                    // Skip images in downloads section - they're shown separately
+                    if (isImage) return null
 
                     // File type icon
                     const FileIcon = () => {
@@ -515,6 +511,40 @@ export default async function CourseMaterialPage({
                   </div>
                 )
               })}
+            </section>
+          )}
+
+          {/* Image attachments */}
+          {imageAttachments.length > 0 && (
+            <section className="mb-10">
+              <h2 className="mb-3 text-lg font-semibold text-gray-900">Afbeeldingen</h2>
+              <div className="flex flex-col gap-6">
+                {imageAttachments.map((att) => {
+                  if (!att || typeof att !== 'object' || !att.url) return null
+                  const filename = att.filename as string | undefined
+                  return (
+                    <div key={att.id} className="flex justify-center">
+                      <a
+                        href={att.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="relative w-full cursor-pointer"
+                        style={{ maxWidth: '100vw', maxHeight: '100vh' }}
+                      >
+                        <Image
+                          src={att.url}
+                          alt={filename || 'Afbeelding'}
+                          width={0}
+                          height={0}
+                          sizes="100vw"
+                          className="w-full h-auto max-h-[100vh] object-contain"
+                          style={{ maxWidth: '100vw', height: 'auto' }}
+                        />
+                      </a>
+                    </div>
+                  )
+                })}
+              </div>
             </section>
           )}
         </article>
