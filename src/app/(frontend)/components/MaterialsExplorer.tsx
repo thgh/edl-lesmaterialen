@@ -930,23 +930,45 @@ export function MaterialsExplorer({
             : dict.materialsFound.replace('{count}', filtered.length.toString())}
         </div>
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 3xl:grid-cols-5">
-          {visibleMaterials.map((material) => (
-            <CourseMaterialCard
-              key={material.id}
-              material={material}
-              locale={lang}
-              cefrLabel={labels.cefrLabel}
-              filters={{
-                searchQuery,
-                selectedTypes,
-                selectedSchoolTypes,
-                selectedCompetences,
-                selectedTopics,
-                selectedLanguages,
-                selectedCefrLevels,
-              }}
-            />
-          ))}
+          {visibleMaterials.flatMap((material, index) => {
+            const cards = [
+              <CourseMaterialCard
+                key={material.id}
+                material={material}
+                locale={lang}
+                cefrLabel={labels.cefrLabel}
+                filters={{
+                  searchQuery,
+                  selectedTypes,
+                  selectedSchoolTypes,
+                  selectedCompetences,
+                  selectedTopics,
+                  selectedLanguages,
+                  selectedCefrLevels,
+                }}
+              />,
+            ]
+
+            // Insert the Euregionale Doorlopende Leerlijn image as the 10th card (after 9 materials)
+            if (index === 3) {
+              cards.push(
+                <div
+                  key="edl-image-card"
+                  className="rounded-xl border border-gray-200 bg-white shadow-sm overflow-hidden"
+                >
+                  <div className="relative w-full h-full overflow-hidden">
+                    <img
+                      src="/assets/Euregionale Doorlopende Leerlijn.png"
+                      alt="Euregionale Doorlopende Leerlijn"
+                      className="w-full h-full object-contain mix-blend-multiply"
+                    />
+                  </div>
+                </div>,
+              )
+            }
+
+            return cards
+          })}
         </div>
         {limit < filtered.length && (
           <button
