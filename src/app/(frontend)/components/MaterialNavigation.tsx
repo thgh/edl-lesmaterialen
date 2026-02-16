@@ -81,12 +81,11 @@ export function MaterialNavigation({
 
       const matchesSchoolType =
         filters.selectedSchoolTypes.length === 0 ||
-        (() => {
-          const st = m.schoolType
-          if (!st) return false
-          if (typeof st === 'string') return filters.selectedSchoolTypes.includes(st)
-          return filters.selectedSchoolTypes.includes(String((st as any).id))
-        })()
+        (Array.isArray(m.schoolTypes) &&
+          m.schoolTypes.some((st) => {
+            if (typeof st === 'string') return filters.selectedSchoolTypes.includes(st)
+            return st && 'id' in st && filters.selectedSchoolTypes.includes(String((st as any).id))
+          }))
 
       const matchesCompetences =
         filters.selectedCompetences.length === 0 ||

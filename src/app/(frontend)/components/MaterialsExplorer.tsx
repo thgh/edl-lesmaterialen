@@ -292,7 +292,7 @@ export function MaterialsExplorer({
       const matchesSchoolType =
         selectedSchoolTypes.length === 0 ||
         (() => {
-          const st = m.schoolType
+          const st = m.schoolTypes
           if (!st) return false
           if (typeof st === 'string') return selectedSchoolTypes.includes(st)
           return selectedSchoolTypes.includes(String((st as any).id))
@@ -459,7 +459,7 @@ export function MaterialsExplorer({
       const matchesSchoolType =
         selectedSchoolTypes.length === 0 ||
         (() => {
-          const st = m.schoolType
+          const st = m.schoolTypes
           if (!st) return false
           if (typeof st === 'string') return selectedSchoolTypes.includes(st)
           return selectedSchoolTypes.includes(String((st as any).id))
@@ -493,7 +493,7 @@ export function MaterialsExplorer({
       const matchesSchoolType =
         selectedSchoolTypes.length === 0 ||
         (() => {
-          const st = m.schoolType
+          const st = m.schoolTypes
           if (!st) return false
           if (typeof st === 'string') return selectedSchoolTypes.includes(st)
           return selectedSchoolTypes.includes(String((st as any).id))
@@ -564,7 +564,7 @@ export function MaterialsExplorer({
       const matchesSchoolType =
         selectedSchoolTypes.length === 0 ||
         (() => {
-          const st = m.schoolType
+          const st = m.schoolTypes
           if (!st) return false
           if (typeof st === 'string') return selectedSchoolTypes.includes(st)
           return selectedSchoolTypes.includes(String((st as any).id))
@@ -595,7 +595,7 @@ export function MaterialsExplorer({
       const matchesSchoolType =
         selectedSchoolTypes.length === 0 ||
         (() => {
-          const st = m.schoolType
+          const st = m.schoolTypes
           if (!st) return false
           if (typeof st === 'string') return selectedSchoolTypes.includes(st)
           return selectedSchoolTypes.includes(String((st as any).id))
@@ -626,7 +626,7 @@ export function MaterialsExplorer({
       const matchesSchoolType =
         selectedSchoolTypes.length === 0 ||
         (() => {
-          const st = m.schoolType
+          const st = m.schoolTypes
           if (!st) return false
           if (typeof st === 'string') return selectedSchoolTypes.includes(st)
           return selectedSchoolTypes.includes(String((st as any).id))
@@ -674,10 +674,12 @@ export function MaterialsExplorer({
       }
 
       if (matchesExceptSchoolType(m)) {
-        const st = m.schoolType
-        if (st) {
-          const id = typeof st === 'string' ? st : String((st as any).id)
-          if (id) schoolTypeCounts[id] = (schoolTypeCounts[id] ?? 0) + 1
+        const st = m.schoolTypes
+        if (Array.isArray(st)) {
+          for (const s of st) {
+            const id = typeof s === 'string' ? s : String((s as any).id)
+            if (id) schoolTypeCounts[id] = (schoolTypeCounts[id] ?? 0) + 1
+          }
         }
       }
 

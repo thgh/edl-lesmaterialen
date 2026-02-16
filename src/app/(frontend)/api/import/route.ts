@@ -239,7 +239,7 @@ export const POST = async (request: Request) => {
 
         // Add relationships if they exist
         if (schoolTypeIds.length > 0) {
-          courseMaterialData.schoolType = schoolTypeIds
+          courseMaterialData.schoolTypes = schoolTypeIds
         }
 
         if (competenceIds.length > 0) {

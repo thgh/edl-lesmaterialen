@@ -105,8 +105,8 @@ export const CourseMaterials: CollectionConfig = {
     },
     {
       type: 'relationship',
-      label: 'Schooltype',
-      name: 'schoolType',
+      label: 'Schooltypes',
+      name: 'schoolTypes',
       relationTo: 'school-types',
       hasMany: true,
       admin: { position: 'sidebar' },

@@ -180,12 +180,12 @@ export default async function CourseMaterialPage({
 
   // Check both material.link and material.links for PDFs
   const pdfLinks: Array<{ id?: string; url: string }> = []
-  
+
   // Add material.link if it's a PDF
   if (material.link && material.link.toLowerCase().endsWith('.pdf')) {
     pdfLinks.push({ url: material.link })
   }
-  
+
   // Add PDFs from material.links
   for (const lnk of externalLinks) {
     const url = lnk.url
@@ -224,9 +224,9 @@ export default async function CourseMaterialPage({
                   {dict.cefrLabel} {cefr}
                 </span>
               )}
-              {material.schoolType && (
+              {Array.isArray(material.schoolTypes) && material.schoolTypes.length > 0 && (
                 <span className="rounded bg-gray-100 px-2 py-0.5">
-                  {getLocalized(material.schoolType as any, lang)}
+                  {getLocalized(material.schoolTypes[0] as any, lang)}
                 </span>
               )}
             </div>

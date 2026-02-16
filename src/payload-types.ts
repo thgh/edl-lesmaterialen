@@ -153,7 +153,7 @@ export interface CourseMaterial {
   featured?: boolean | null;
   cefr?: ('A1' | 'A2' | 'B1' | 'B2' | 'C1' | 'C2')[] | null;
   language?: ('nl' | 'de' | 'en')[] | null;
-  schoolType?: (string | SchoolType)[] | null;
+  schoolTypes?: (string | SchoolType)[] | null;
   competences?: (string | Competence)[] | null;
   topics?: (string | Topic)[] | null;
   materialTypes?: (string | MaterialType)[] | null;
@@ -379,7 +379,7 @@ export interface CourseMaterialsSelect<T extends boolean = true> {
   featured?: T;
   cefr?: T;
   language?: T;
-  schoolType?: T;
+  schoolTypes?: T;
   competences?: T;
   topics?: T;
   materialTypes?: T;

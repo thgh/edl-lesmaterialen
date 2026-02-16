@@ -107,8 +107,12 @@ export function CourseMaterialCard({
     }
 
     // Convert to localized titles
-    const displayed = selectedTypes.map(getTypeTitle).filter((title): title is string => title !== null)
-    const remaining = remainingTypes.map(getTypeTitle).filter((title): title is string => title !== null)
+    const displayed = selectedTypes
+      .map(getTypeTitle)
+      .filter((title): title is string => title !== null)
+    const remaining = remainingTypes
+      .map(getTypeTitle)
+      .filter((title): title is string => title !== null)
 
     return { displayed, remaining }
   }
@@ -121,12 +125,21 @@ export function CourseMaterialCard({
   }
 
   const getSchoolType = () => {
-    if (material.schoolType && typeof material.schoolType === 'object') {
-      return (
-        (locale === 'de'
-          ? (material.schoolType as any).title_de
-          : (material.schoolType as any).title_nl) || ''
-      )
+    if (
+      material.schoolTypes &&
+      Array.isArray(material.schoolTypes) &&
+      material.schoolTypes.length > 0
+    ) {
+      return material.schoolTypes
+        .map((st) =>
+          typeof st === 'object'
+            ? locale === 'de'
+              ? (st as any).title_de
+              : (st as any).title_nl
+            : '',
+        )
+        .filter(Boolean)
+        .join(', ')
     }
     return ''
   }
@@ -211,7 +224,10 @@ export function CourseMaterialCard({
           <div className="flex items-center justify-between text-xs text-gray-600">
             <div className="flex flex-wrap items-center gap-1.5">
               {displayedTypes.map((type, index) => (
-                <span key={index} className="inline-flex items-center rounded bg-gray-100 px-2 py-0.5 h-5">
+                <span
+                  key={index}
+                  className="inline-flex items-center rounded bg-gray-100 px-2 py-0.5 h-5"
+                >
                   {type}
                 </span>
               ))}
