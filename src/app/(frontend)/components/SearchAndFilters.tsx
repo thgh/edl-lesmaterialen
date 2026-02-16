@@ -119,7 +119,7 @@ function FilterSection({ title, options, selectedIds, onToggle }: FilterSectionP
         {options.map((option) => (
           <label
             key={option.id}
-            className="flex select-none items-center justify-between gap-3 bg-white group focus-visible:outline first:pt-3 last:pb-3 first:rounded-t-md last:rounded-b-md px-3 py-2"
+            className="flex select-none items-center justify-between gap-3 bg-white group focus-visible:outline first:pt-2 last:pb-2 first:rounded-t-md last:rounded-b-md px-3 py-1"
           >
             <span className="flex items-center gap-2">
               <input
@@ -425,7 +425,7 @@ export function SearchAndFilters({
   }, [sortedCefrLevels, cefrCounts, selectedCefrLevels])
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       <div>
         <h3 className="mb-2 text-sm font-medium text-gray-700">{labels.searchTitle}</h3>
         <input
