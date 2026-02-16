@@ -4,6 +4,7 @@ import { CEFRLevels } from '@/collections/CEFRLevels'
 import { getDictionary } from '@/i18n/dictionaries'
 import { CourseMaterial } from '@/payload-types'
 import Link from 'next/link'
+import { usePathname, useSearchParams } from 'next/navigation'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import useSWR from 'swr'
 import { CourseMaterialCard } from './CourseMaterialCard'
@@ -65,6 +66,9 @@ export function MaterialsExplorer({
   const [filtersOpen, setFiltersOpen] = useState(false)
 
   const isAuthenticated = useSWR('/api/users/me', fetcher).data?.user
+  const pathname = usePathname()
+  const searchParams = useSearchParams()
+  const withoutLocale = pathname.replace(`/${lang}`, '')
 
   // Validate and remove invalid selections from taxonomy lists
   useEffect(() => {
@@ -803,15 +807,33 @@ export function MaterialsExplorer({
         </div>
       </Sidebar>
       <main className="px-4 py-6 sm:p-6 lg:p-8">
-        {/* Admin button for authenticated users */}
-        {isAuthenticated && (
-          <Link
-            href={`/admin`}
-            className="float-right text-sm items-center gap-2 rounded-md bg-green-600 px-4 py-2 text-white hover:bg-green-700 hidden md:inline-flex"
-          >
-            {lang === 'de' ? 'Beheren' : 'Beheren'}
-          </Link>
-        )}
+        {/* Language picker and admin button for authenticated users */}
+        <div className="float-right flex items-center gap-2 mb-4">
+          <nav className="flex items-center gap-2 text-sm">
+            <a
+              href={lang === 'nl' ? '#' : `/nl${withoutLocale}?${searchParams.toString()}`}
+              className={`inline-flex items-center gap-1.5 rounded font-medium px-2 py-1 bg-gray-100 hover:bg-gray-200 ${lang === 'nl' ? 'border-2 border-gray-400' : 'border-2 border-transparent'}`}
+            >
+              <span>🇳🇱</span>
+              NL
+            </a>
+            <a
+              href={lang === 'de' ? '#' : `/de${withoutLocale}?${searchParams.toString()}`}
+              className={`inline-flex items-center gap-1.5 rounded font-medium px-2 py-1 bg-gray-100 hover:bg-gray-200 ${lang === 'de' ? 'border-2 border-gray-400' : 'border-2 border-transparent'}`}
+            >
+              <span>🇩🇪</span>
+              DE
+            </a>
+          </nav>
+          {isAuthenticated && (
+            <Link
+              href={`/admin`}
+              className="text-sm items-center gap-2 rounded-md bg-green-600 px-4 py-2 text-white hover:bg-green-700 hidden md:inline-flex"
+            >
+              {lang === 'de' ? 'Beheren' : 'Beheren'}
+            </Link>
+          )}
+        </div>
         <h1 className="pt-2 text-2xl lg:text-3xl xl:text-4xl font-bold text-gray-900">
           {dict.siteTitle}
         </h1>

@@ -44,20 +44,6 @@ export function Sidebar({ locale, children }: SidebarProps) {
               className="h-12 md:hidden mix-blend-multiply"
             />
           </div>
-          <nav className="mt-3 flex items-center gap-2 text-sm">
-            <a
-              href={locale === 'nl' ? '#' : `/nl${withoutLocale}?${searchParams.toString()}`}
-              className={`rounded font-medium px-2 py-1 ${locale === 'nl' ? 'bg-brand' : 'bg-white shadow hover:bg-gray-100'}`}
-            >
-              NL
-            </a>
-            <a
-              href={locale === 'de' ? '#' : `/de${withoutLocale}?${searchParams.toString()}`}
-              className={`rounded font-medium px-2 py-1 ${locale === 'de' ? 'bg-brand' : 'bg-white shadow hover:bg-gray-100'}`}
-            >
-              DE
-            </a>
-          </nav>
         </div>
         {children}
         <div className="hidden md:block sticky bottom-0 bg-gray-50 -mx-4 md:-mx-6 lg:-mx-8">
