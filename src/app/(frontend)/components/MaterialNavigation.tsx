@@ -1,3 +1,72 @@
+/**
+ * MaterialNavigation Component
+ *
+ * A comprehensive navigation component for browsing course materials in a filtered list context.
+ * This component provides multiple navigation methods and maintains filter state across navigation.
+ *
+ * Key Features:
+ *
+ * 1. **Filtered Material Navigation**
+ *    - Filters the provided materials array based on search query and multiple filter criteria
+ *    - Supports filtering by: search query (text search), material types, school types, competences,
+ *      topics, and languages
+ *    - Text search normalizes text (removes accents/diacritics) and performs multi-word matching
+ *    - All query words must be present in the material's title or description (with language fallback)
+ *
+ * 2. **Previous/Next Navigation**
+ *    - Displays Previous ("Vorige"/"Zurück") and Next ("Volgende"/"Weiter") buttons
+ *    - Buttons are disabled when at the first/last item in the filtered list
+ *    - Navigation preserves all active filters in URL query parameters
+ *    - Uses material slug or ID-based fallback for URL construction
+ *
+ * 3. **Keyboard Navigation**
+ *    - Arrow Left: Navigate to previous material in filtered list
+ *    - Arrow Right: Navigate to next material in filtered list
+ *    - Keyboard events are properly cleaned up on unmount
+ *
+ * 4. **Position Indicator**
+ *    - Shows current position in filtered list (e.g., "1 van 5" / "1 von 5")
+ *    - Updates dynamically as filters change
+ *
+ * 5. **Back to Overview Link**
+ *    - Provides a link back to the main materials overview page
+ *    - Preserves all active filters in the URL query parameters
+ *
+ * 6. **Language Switcher**
+ *    - Toggle between Dutch (NL) and German (DE) locales
+ *    - Preserves current path and query parameters when switching languages
+ *    - Highlights the currently active language
+ *
+ * 7. **Admin Edit Button**
+ *    - Shows an "Edit" button for authenticated users (fetched via SWR)
+ *    - Links directly to the Payload CMS admin panel for the current material
+ *    - Hidden on mobile devices (md:inline-flex)
+ *
+ * 8. **Filter State Preservation**
+ *    - All navigation actions preserve filter state in URL query parameters:
+ *      - q: search query
+ *      - types: comma-separated material type IDs
+ *      - schoolTypes: comma-separated school type IDs
+ *      - competences: comma-separated competence IDs
+ *      - topics: comma-separated topic IDs
+ *      - langs: comma-separated language codes
+ *
+ * 9. **Language Fallback**
+ *    - When displaying materials, falls back to the alternate language if the primary
+ *      language content is missing (e.g., shows German title if Dutch title is unavailable)
+ *
+ * 10. **Conditional Rendering**
+ *     - Component returns null if there is only one or zero materials in the filtered list
+ *     - This prevents showing navigation controls when navigation isn't meaningful
+ *
+ * Technical Implementation:
+ * - Uses React hooks: useMemo for filtered materials computation, useEffect for keyboard listeners
+ * - Uses Next.js navigation hooks: useRouter, usePathname, useSearchParams
+ * - Uses SWR for authentication check: '/api/users/me'
+ * - Memoized filtering prevents unnecessary recalculations on re-renders
+ * - Handles both string IDs and object references for filter matching
+ */
+
 'use client'
 
 import { getDictionary } from '@/i18n/dictionaries'

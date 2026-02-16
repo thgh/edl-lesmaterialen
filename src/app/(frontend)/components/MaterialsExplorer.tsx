@@ -291,12 +291,11 @@ export function MaterialsExplorer({
           }))
       const matchesSchoolType =
         selectedSchoolTypes.length === 0 ||
-        (() => {
-          const st = m.schoolTypes
-          if (!st) return false
-          if (typeof st === 'string') return selectedSchoolTypes.includes(st)
-          return selectedSchoolTypes.includes(String((st as any).id))
-        })()
+        (Array.isArray(m.schoolTypes) &&
+          m.schoolTypes.some((st) => {
+            if (typeof st === 'string') return selectedSchoolTypes.includes(st)
+            return st && 'id' in st && selectedSchoolTypes.includes(String((st as any).id))
+          }))
       const matchesCompetences =
         selectedCompetences.length === 0 ||
         (Array.isArray(m.competences) &&
@@ -458,12 +457,11 @@ export function MaterialsExplorer({
 
       const matchesSchoolType =
         selectedSchoolTypes.length === 0 ||
-        (() => {
-          const st = m.schoolTypes
-          if (!st) return false
-          if (typeof st === 'string') return selectedSchoolTypes.includes(st)
-          return selectedSchoolTypes.includes(String((st as any).id))
-        })()
+        (Array.isArray(m.schoolTypes) &&
+          m.schoolTypes.some((st) => {
+            if (typeof st === 'string') return selectedSchoolTypes.includes(st)
+            return st && 'id' in st && selectedSchoolTypes.includes(String((st as any).id))
+          }))
 
       const matchesCompetences =
         selectedCompetences.length === 0 ||
@@ -483,8 +481,18 @@ export function MaterialsExplorer({
               : t && 'id' in t && selectedTopics.includes(String((t as any).id)),
           ))
 
+      const matchesCefr =
+        selectedCefrLevels.length === 0 ||
+        (Array.isArray(m.cefr) &&
+          m.cefr.some((level) => selectedCefrLevels.includes(level as string)))
+
       return (
-        matchesQuery(m) && matchesType && matchesSchoolType && matchesCompetences && matchesTopics
+        matchesQuery(m) &&
+        matchesType &&
+        matchesSchoolType &&
+        matchesCompetences &&
+        matchesTopics &&
+        matchesCefr
       )
     }
 
@@ -492,12 +500,11 @@ export function MaterialsExplorer({
       // school type filter
       const matchesSchoolType =
         selectedSchoolTypes.length === 0 ||
-        (() => {
-          const st = m.schoolTypes
-          if (!st) return false
-          if (typeof st === 'string') return selectedSchoolTypes.includes(st)
-          return selectedSchoolTypes.includes(String((st as any).id))
-        })()
+        (Array.isArray(m.schoolTypes) &&
+          m.schoolTypes.some((st) => {
+            if (typeof st === 'string') return selectedSchoolTypes.includes(st)
+            return st && 'id' in st && selectedSchoolTypes.includes(String((st as any).id))
+          }))
 
       const matchesCompetences =
         selectedCompetences.length === 0 ||
@@ -517,7 +524,24 @@ export function MaterialsExplorer({
               : t && 'id' in t && selectedTopics.includes(String((t as any).id)),
           ))
 
-      return matchesQuery(m) && matchesSchoolType && matchesCompetences && matchesTopics
+      const matchesLanguage =
+        selectedLanguages.length === 0 ||
+        (Array.isArray(m.language) &&
+          m.language.some((l) => selectedLanguages.includes(l as string)))
+
+      const matchesCefr =
+        selectedCefrLevels.length === 0 ||
+        (Array.isArray(m.cefr) &&
+          m.cefr.some((level) => selectedCefrLevels.includes(level as string)))
+
+      return (
+        matchesQuery(m) &&
+        matchesSchoolType &&
+        matchesCompetences &&
+        matchesTopics &&
+        matchesLanguage &&
+        matchesCefr
+      )
     }
 
     const matchesExceptSchoolType = (m: CourseMaterial) => {
@@ -548,7 +572,24 @@ export function MaterialsExplorer({
               : t && 'id' in t && selectedTopics.includes(String((t as any).id)),
           ))
 
-      return matchesQuery(m) && matchesType && matchesCompetences && matchesTopics
+      const matchesLanguage =
+        selectedLanguages.length === 0 ||
+        (Array.isArray(m.language) &&
+          m.language.some((l) => selectedLanguages.includes(l as string)))
+
+      const matchesCefr =
+        selectedCefrLevels.length === 0 ||
+        (Array.isArray(m.cefr) &&
+          m.cefr.some((level) => selectedCefrLevels.includes(level as string)))
+
+      return (
+        matchesQuery(m) &&
+        matchesType &&
+        matchesCompetences &&
+        matchesTopics &&
+        matchesLanguage &&
+        matchesCefr
+      )
     }
 
     const matchesExceptCompetences = (m: CourseMaterial) => {
@@ -563,12 +604,11 @@ export function MaterialsExplorer({
 
       const matchesSchoolType =
         selectedSchoolTypes.length === 0 ||
-        (() => {
-          const st = m.schoolTypes
-          if (!st) return false
-          if (typeof st === 'string') return selectedSchoolTypes.includes(st)
-          return selectedSchoolTypes.includes(String((st as any).id))
-        })()
+        (Array.isArray(m.schoolTypes) &&
+          m.schoolTypes.some((st) => {
+            if (typeof st === 'string') return selectedSchoolTypes.includes(st)
+            return st && 'id' in st && selectedSchoolTypes.includes(String((st as any).id))
+          }))
 
       const matchesTopics =
         selectedTopics.length === 0 ||
@@ -579,7 +619,24 @@ export function MaterialsExplorer({
               : t && 'id' in t && selectedTopics.includes(String((t as any).id)),
           ))
 
-      return matchesQuery(m) && matchesType && matchesSchoolType && matchesTopics
+      const matchesLanguage =
+        selectedLanguages.length === 0 ||
+        (Array.isArray(m.language) &&
+          m.language.some((l) => selectedLanguages.includes(l as string)))
+
+      const matchesCefr =
+        selectedCefrLevels.length === 0 ||
+        (Array.isArray(m.cefr) &&
+          m.cefr.some((level) => selectedCefrLevels.includes(level as string)))
+
+      return (
+        matchesQuery(m) &&
+        matchesType &&
+        matchesSchoolType &&
+        matchesTopics &&
+        matchesLanguage &&
+        matchesCefr
+      )
     }
 
     const matchesExceptTopics = (m: CourseMaterial) => {
@@ -594,12 +651,11 @@ export function MaterialsExplorer({
 
       const matchesSchoolType =
         selectedSchoolTypes.length === 0 ||
-        (() => {
-          const st = m.schoolTypes
-          if (!st) return false
-          if (typeof st === 'string') return selectedSchoolTypes.includes(st)
-          return selectedSchoolTypes.includes(String((st as any).id))
-        })()
+        (Array.isArray(m.schoolTypes) &&
+          m.schoolTypes.some((st) => {
+            if (typeof st === 'string') return selectedSchoolTypes.includes(st)
+            return st && 'id' in st && selectedSchoolTypes.includes(String((st as any).id))
+          }))
 
       const matchesCompetences =
         selectedCompetences.length === 0 ||
@@ -610,7 +666,24 @@ export function MaterialsExplorer({
               : c && 'id' in c && selectedCompetences.includes(String((c as any).id)),
           ))
 
-      return matchesQuery(m) && matchesType && matchesSchoolType && matchesCompetences
+      const matchesLanguage =
+        selectedLanguages.length === 0 ||
+        (Array.isArray(m.language) &&
+          m.language.some((l) => selectedLanguages.includes(l as string)))
+
+      const matchesCefr =
+        selectedCefrLevels.length === 0 ||
+        (Array.isArray(m.cefr) &&
+          m.cefr.some((level) => selectedCefrLevels.includes(level as string)))
+
+      return (
+        matchesQuery(m) &&
+        matchesType &&
+        matchesSchoolType &&
+        matchesCompetences &&
+        matchesLanguage &&
+        matchesCefr
+      )
     }
 
     const matchesExceptCefr = (m: CourseMaterial) => {
@@ -625,12 +698,11 @@ export function MaterialsExplorer({
 
       const matchesSchoolType =
         selectedSchoolTypes.length === 0 ||
-        (() => {
-          const st = m.schoolTypes
-          if (!st) return false
-          if (typeof st === 'string') return selectedSchoolTypes.includes(st)
-          return selectedSchoolTypes.includes(String((st as any).id))
-        })()
+        (Array.isArray(m.schoolTypes) &&
+          m.schoolTypes.some((st) => {
+            if (typeof st === 'string') return selectedSchoolTypes.includes(st)
+            return st && 'id' in st && selectedSchoolTypes.includes(String((st as any).id))
+          }))
 
       const matchesCompetences =
         selectedCompetences.length === 0 ||
@@ -650,8 +722,18 @@ export function MaterialsExplorer({
               : t && 'id' in t && selectedTopics.includes(String((t as any).id)),
           ))
 
+      const matchesLanguage =
+        selectedLanguages.length === 0 ||
+        (Array.isArray(m.language) &&
+          m.language.some((l) => selectedLanguages.includes(l as string)))
+
       return (
-        matchesQuery(m) && matchesType && matchesSchoolType && matchesCompetences && matchesTopics
+        matchesQuery(m) &&
+        matchesType &&
+        matchesSchoolType &&
+        matchesCompetences &&
+        matchesTopics &&
+        matchesLanguage
       )
     }
 
@@ -740,6 +822,8 @@ export function MaterialsExplorer({
     selectedSchoolTypes,
     selectedCompetences,
     selectedTopics,
+    selectedLanguages,
+    selectedCefrLevels,
   ])
 
   return (

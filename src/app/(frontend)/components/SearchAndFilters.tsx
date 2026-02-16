@@ -1,3 +1,49 @@
+/**
+ * SearchAndFilters Component
+ *
+ * A comprehensive search and filtering interface for course materials that provides:
+ *
+ * 1. **Search Functionality**
+ *    - Text input field for querying materials by keywords
+ *    - Real-time search updates via onChange callback
+ *
+ * 2. **Multi-Category Filtering**
+ *    - Material Types: Filter by different types of course materials
+ *    - School Types: Filter by educational institution types
+ *    - Competences: Filter by skill/competence areas
+ *    - Topics: Filter by subject topics
+ *    - Languages: Filter by Dutch (nl) or German (de) language
+ *    - CEFR Levels: Filter by Common European Framework of Reference language levels
+ *
+ * 3. **Smart Filter Display Logic**
+ *    - Options are sorted by result count (descending), then alphabetically by title
+ *    - Options with zero results are hidden unless already selected (maintains user selections)
+ *    - Each filter option displays its result count alongside the label
+ *
+ * 4. **Localization Support**
+ *    - Supports Dutch (nl) and German (de) locales
+ *    - Displays localized titles based on the current locale
+ *    - Falls back to alternative language titles if primary is unavailable
+ *
+ * 5. **Performance Optimizations**
+ *    - Uses useMemo to cache sorted and filtered lists, recalculating only when dependencies change
+ *    - Uses useCallback for toggle handlers to prevent unnecessary re-renders
+ *    - Memoized sorting logic combines count-based and alphabetical ordering
+ *
+ * 6. **State Management**
+ *    - Controlled component: receives all state as props (searchQuery, selected filters)
+ *    - Communicates all changes via single onChange callback with complete state object
+ *    - Each filter toggle handler updates only its specific category while preserving others
+ *
+ * 7. **UI Components**
+ *    - Reusable FilterSection component renders checkbox lists with counts
+ *    - Consistent styling with Tailwind CSS classes
+ *    - Accessible checkbox inputs with proper labels
+ *
+ * The component is designed to work with a parent component that manages the actual filtering
+ * logic and material data, while this component handles the UI and user interactions.
+ */
+
 'use client'
 
 import { CEFRLevels } from '@/collections/CEFRLevels'

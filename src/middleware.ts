@@ -3,8 +3,20 @@ import { NextRequest, NextResponse } from 'next/server'
 const locales = ['nl', 'de']
 
 export function middleware(request: NextRequest) {
-  // Check if there is any supported locale in the pathname
   const { pathname } = request.nextUrl
+
+  // Skip redirect for special paths like .well-known, favicon, robots.txt, etc.
+  if (
+    pathname.startsWith('/.well-known/') ||
+    pathname === '/favicon.ico' ||
+    pathname === '/robots.txt' ||
+    pathname === '/sitemap.xml' ||
+    pathname === '/manifest.json'
+  ) {
+    return
+  }
+
+  // Check if there is any supported locale in the pathname
   const pathnameHasLocale = locales.some(
     (locale) => pathname.startsWith(`/${locale}/`) || pathname === `/${locale}`,
   )
