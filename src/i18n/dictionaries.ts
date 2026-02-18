@@ -25,7 +25,7 @@ const dictionaries = {
     materialFound: '1 lesmateriaal gevonden',
     materialsFound: '{count} lesmaterialen gevonden',
     contactText:
-      'Voor vragen, het melden van problemen of het voorstellen van nieuw materiaal, neem contact op met zns.sekretariat@uni-muenster.de. Zentrum für Niederlande-Studien, Alter Steinweg 6/7, 48143 Münster',
+      'Voor vragen, het melden van problemen of het voorstellen van nieuw materiaal, neem contact op met zns.sekretariat@uni-muenster.de Zentrum für Niederlande-Studien, Alter Steinweg 6/7, 48143 Münster',
     disclaimerText:
       'Deze website is ontwikkeld binnen de Euregionale Doorlopende Leerlijn (EDL) en wordt beheerd door het Zentrum für Niederlande-Studien (ZNS). Het materiaal is deels eigen werk, deels afkomstig uit externe bronnen – eigen materiaal is als zodanig vermeld. Alle rechten berusten bij de auteurs. Gebruik uitsluitend voor educatieve doeleinden.',
     contactLabel: 'Contactgegevens',
@@ -55,7 +55,7 @@ const dictionaries = {
     materialFound: '1 Material gefunden',
     materialsFound: '{count} Materialen gefunden',
     contactText:
-      'Bei Fragen, Problemen oder Vorschlägen für neues Material kontaktieren Sie bitte zns.sekretariat@uni-muenster.de. Zentrum für Niederlande-Studien, Alter Steinweg 6/7, 48143 Münster',
+      'Bei Fragen, Problemen oder Vorschlägen für neues Material kontaktieren Sie bitte zns.sekretariat@uni-muenster.de Zentrum für Niederlande-Studien, Alter Steinweg 6/7, 48143 Münster',
     disclaimerText:
       'Diese Website wurde im Rahmen der Euregionalen Bildungskette (EDL) erstellt und wird vom Zentrum für Niederlande-Studien (ZNS) betreut. Die Materialien stammen teils vom ZNS und EDL, teils aus externen Quellen – eigene Inhalte sind entsprechend gekennzeichnet. Alle Rechte liegen bei den jeweiligen Autor*innen. Nutzung nur zu Bildungszwecken.',
     contactLabel: 'Kontaktdaten',

@@ -21,14 +21,21 @@ export function renderTextWithEmailLinks(text: string) {
     }
     // Check if it's an email address (contains @)
     if (trimmedWord.includes('@')) {
+      // Strip trailing punctuation (e.g., period at end of sentence) from mailto link
+      const match = trimmedWord.match(/^(.+?)([.,;:)\]>]+)$/)
+      const emailPart = match ? match[1] : trimmedWord
+      const trailingPunctuation = match ? match[2] : ''
+
       return (
-        <a
-          key={index}
-          href={`mailto:${trimmedWord}`}
-          className="text-blue-600 hover:underline whitespace-nowrap"
-        >
-          {word}
-        </a>
+        <Fragment key={index}>
+          <a
+            href={`mailto:${emailPart}`}
+            className="text-blue-600 hover:underline whitespace-nowrap"
+          >
+            {emailPart}
+          </a>
+          {trailingPunctuation}
+        </Fragment>
       )
     }
     return <Fragment key={index}>{word}</Fragment>
