@@ -91,7 +91,7 @@ async function fetchMaterialBySlugOrId(slugOrId: string) {
       },
     },
   })
-  console.log(`find: ${performance.now() - startTime}ms`, res.docs?.[0])
+  console.log(`find: ${performance.now() - startTime}ms`)
   return (res.docs?.[0] as unknown as CourseMaterial) || null
 }
 
@@ -200,12 +200,12 @@ export default async function CourseMaterialPage({
     material.title ||
     'Untitled'
 
-  // Use the same thumbnail logic as the card component
-  const thumbnail = ((material.attachments as CourseMaterialAttachment[]) || []).find(
-    (a) => a && typeof a === 'object' && a.mimeType?.startsWith('image/'),
-  )
-
-  const hasImageHero = !!thumbnail
+  const preview =
+    material.preview &&
+    typeof material.preview === 'object' &&
+    material.preview.mimeType?.startsWith('image/')
+      ? (material.preview as CourseMaterialAttachment)
+      : null
 
   const externalLinks = material.links || []
   const hasExternalOnly =
@@ -259,25 +259,36 @@ export default async function CourseMaterialPage({
             />
           </aside>
 
-          <article className="max-w-6xl mx-auto">
-            <header className="mb-6 pt-4">
-              <h1 className="text-2xl lg:text-3xl xl:text-4xl font-bold text-gray-900">{title}</h1>
-              <div className="mt-2 flex flex-wrap items-center gap-3 text-sm text-gray-600">
-                {cefr && (
-                  <span className="rounded bg-gray-100 px-2 py-0.5">
-                    {dict.cefrLabel} {cefr}
-                  </span>
-                )}
-                {Array.isArray(material.schoolTypes) && material.schoolTypes.length > 0 && (
-                  <span className="rounded bg-gray-100 px-2 py-0.5">
-                    {getLocalized(material.schoolTypes[0] as any, lang)}
-                  </span>
-                )}
+          <article className="max-w-6xl mx-auto mt-10">
+            {preview && (
+              <div className="mb-8 relative aspect-[3/2] w-full max-w-1/2 float-right overflow-hidden rounded-xl border border-gray-200 bg-gray-50">
+                <Image
+                  src={preview.url!}
+                  alt={title}
+                  fill
+                  sizes="(min-width: 1024px) 896px, 100vw"
+                  className="object-cover"
+                  priority
+                />
               </div>
-            </header>
+            )}
+
+            <h1 className="text-2xl lg:text-3xl xl:text-4xl font-bold text-gray-900">{title}</h1>
+            <div className="mb-6 mt-2 flex flex-wrap items-center gap-3 text-sm">
+              {cefr && (
+                <span className="rounded bg-gray-100 px-2 py-0.5">
+                  {dict.cefrLabel} {cefr}
+                </span>
+              )}
+              {Array.isArray(material.schoolTypes) && material.schoolTypes.length > 0 && (
+                <span className="rounded bg-gray-100 px-2 py-0.5">
+                  {getLocalized(material.schoolTypes[0] as any, lang)}
+                </span>
+              )}
+            </div>
 
             {/* Meta */}
-            <section className="mb-8 grid gap-4 md:grid-cols-2">
+            <section className="mb-8 flex flex-wrap gap-4 gap-x-12">
               {Array.isArray(material.materialTypes) && material.materialTypes.length > 0 && (
                 <div>
                   <h3 className="text-sm font-semibold text-gray-700">{dict.materialTypesTitle}</h3>
@@ -312,9 +323,7 @@ export default async function CourseMaterialPage({
 
               {Array.isArray(material.competences) && material.competences.length > 0 && (
                 <div>
-                  <h3 className="text-sm font-semibold text-gray-700">
-                    {dict.competencesTitle}
-                  </h3>
+                  <h3 className="text-sm font-semibold text-gray-700">{dict.competencesTitle}</h3>
                   <div className="mt-2 flex flex-wrap gap-2">
                     {material.competences.map((c) => (
                       <span
@@ -391,7 +400,7 @@ export default async function CourseMaterialPage({
 
             {/* Actions */}
             {material.attachments && material.attachments.length > 0 && (
-              <section className="mb-10">
+              <section className="mb-10 clear-both">
                 <h2 className="mb-3 text-lg font-semibold text-gray-900">Downloads</h2>
                 <div className="flex flex-col gap-2">
                   {Array.isArray(material.attachments) &&

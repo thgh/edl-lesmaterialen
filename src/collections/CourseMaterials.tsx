@@ -35,6 +35,12 @@ export const CourseMaterials: CollectionConfig = {
       type: 'textarea',
     }),
     {
+      name: 'preview',
+      label: 'Preview',
+      type: 'upload',
+      relationTo: 'course-material-attachments',
+    },
+    {
       name: 'link',
       type: 'text',
       label: 'Link',

@@ -176,9 +176,12 @@ export function CourseMaterialCard({
     return ''
   }
 
-  const thumbnail = ((material.attachments as CourseMaterialAttachment[]) || []).find(
-    (a) => a && typeof a === 'object' && a.mimeType?.startsWith('image/'),
-  )
+  const preview =
+    material.preview &&
+    typeof material.preview === 'object' &&
+    material.preview.mimeType?.startsWith('image/')
+      ? (material.preview as CourseMaterialAttachment)
+      : null
   const slug = material.slug || `id:${material.id}`
   const { displayed: displayedTypes, remaining: remainingTypes } = getMaterialTypes()
 
@@ -208,10 +211,10 @@ export function CourseMaterialCard({
   return (
     <Link href={buildDetailUrl()} className="block">
       <article className="rounded-xl border border-gray-200 bg-white shadow-sm transition hover:shadow-md overflow-visible">
-        {thumbnail && (
+        {preview && (
           <div className="relative aspect-[3/2] w-full overflow-hidden bg-gray-50 rounded-t-xl">
             <Image
-              src={thumbnail.url!}
+              src={preview.url!}
               alt={getTitle()}
               fill
               sizes="(min-width: 768px) 33vw, 100vw"

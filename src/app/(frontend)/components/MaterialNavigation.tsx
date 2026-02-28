@@ -70,7 +70,6 @@
 'use client'
 
 import { getDictionary } from '@/i18n/dictionaries'
-import { getLocaleUrl } from '@/lib/domains'
 import { CourseMaterial } from '@/payload-types'
 import Link from 'next/link'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
@@ -336,52 +335,26 @@ export function MaterialNavigation({
         </div>
       </div>
 
-      {/* Language picker and admin button */}
-      <div className="flex items-center gap-2">
-        <nav className="flex items-center gap-2 text-sm">
-          <a
-            href={
-              locale === 'nl'
-                ? '#'
-                : `${getLocaleUrl('nl', path)}${searchParams.toString() ? `?${searchParams}` : ''}`
-            }
-            className={`inline-flex items-center gap-1.5 rounded font-medium px-2 py-1 hover:bg-gray-200 ${locale === 'nl' ? 'border bg-gray-100 border-gray-300' : 'border text-gray-400 border-gray-200'}`}
+      {/* Aadmin button */}
+      {isAuthenticated && (
+        <Link
+          href={`/admin/collections/course-materials/${currentMaterial.id}`}
+          className="text-sm items-center gap-2 rounded-md bg-green-600 px-4 py-2 text-white hover:bg-green-700 hidden md:inline-flex"
+        >
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
           >
-            <span>🇳🇱</span>
-            NL
-          </a>
-          <a
-            href={
-              locale === 'de'
-                ? '#'
-                : `${getLocaleUrl('de', path)}${searchParams.toString() ? `?${searchParams}` : ''}`
-            }
-            className={`inline-flex items-center gap-1.5 rounded font-medium px-2 py-1 hover:bg-gray-200 ${locale === 'de' ? 'border bg-gray-100 border-gray-300' : 'border text-gray-400 border-gray-200'}`}
-          >
-            <span>🇩🇪</span>
-            DE
-          </a>
-        </nav>
-        {isAuthenticated && (
-          <Link
-            href={`/admin/collections/course-materials/${currentMaterial.id}`}
-            className="text-sm items-center gap-2 rounded-md bg-green-600 px-4 py-2 text-white hover:bg-green-700 hidden md:inline-flex"
-          >
-            <svg
-              width="16"
-              height="16"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-            >
-              <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
-              <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
-            </svg>
-            {locale === 'de' ? 'Bearbeiten' : 'Bewerken'}
-          </Link>
-        )}
-      </div>
+            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
+          </svg>
+          {locale === 'de' ? 'Bearbeiten' : 'Bewerken'}
+        </Link>
+      )}
     </div>
   )
 }
