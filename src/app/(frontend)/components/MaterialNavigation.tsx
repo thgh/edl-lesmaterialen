@@ -70,6 +70,7 @@
 'use client'
 
 import { getDictionary } from '@/i18n/dictionaries'
+import { getLocaleUrl } from '@/lib/domains'
 import { CourseMaterial } from '@/payload-types'
 import Link from 'next/link'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
@@ -102,7 +103,7 @@ export function MaterialNavigation({
   const searchParams = useSearchParams()
   const dict = getDictionary(locale)
   const isAuthenticated = useSWR('/api/users/me', fetcher).data?.user
-  const withoutLocale = pathname.replace(`/${locale}`, '')
+  const path = pathname ?? ''
   const filteredMaterials = useMemo(() => {
     const query = filters.searchQuery.trim()
 
@@ -191,7 +192,7 @@ export function MaterialNavigation({
 
   const buildMaterialUrl = (material: CourseMaterial) => {
     const slug = material.slug || `id:${material.id}`
-    const baseUrl = `/${locale}/lesmateriaal/${slug}`
+    const baseUrl = `/lesmateriaal/${slug}`
 
     const params = new URLSearchParams()
 
@@ -237,7 +238,7 @@ export function MaterialNavigation({
     <div className="flex flex-wrap items-center justify-between gap-4 mb-3">
       <div>
         <Link
-          href={`/${locale}?${new URLSearchParams({
+          href={`/?${new URLSearchParams({
             ...(filters.searchQuery && { q: filters.searchQuery }),
             ...(filters.selectedTypes.length > 0 && { types: filters.selectedTypes.join(',') }),
             ...(filters.selectedSchoolTypes.length > 0 && {
@@ -339,14 +340,22 @@ export function MaterialNavigation({
       <div className="flex items-center gap-2">
         <nav className="flex items-center gap-2 text-sm">
           <a
-            href={locale === 'nl' ? '#' : `/nl${withoutLocale}?${searchParams.toString()}`}
+            href={
+              locale === 'nl'
+                ? '#'
+                : `${getLocaleUrl('nl', path)}${searchParams.toString() ? `?${searchParams}` : ''}`
+            }
             className={`inline-flex items-center gap-1.5 rounded font-medium px-2 py-1 hover:bg-gray-200 ${locale === 'nl' ? 'border bg-gray-100 border-gray-300' : 'border text-gray-400 border-gray-200'}`}
           >
             <span>🇳🇱</span>
             NL
           </a>
           <a
-            href={locale === 'de' ? '#' : `/de${withoutLocale}?${searchParams.toString()}`}
+            href={
+              locale === 'de'
+                ? '#'
+                : `${getLocaleUrl('de', path)}${searchParams.toString() ? `?${searchParams}` : ''}`
+            }
             className={`inline-flex items-center gap-1.5 rounded font-medium px-2 py-1 hover:bg-gray-200 ${locale === 'de' ? 'border bg-gray-100 border-gray-300' : 'border text-gray-400 border-gray-200'}`}
           >
             <span>🇩🇪</span>

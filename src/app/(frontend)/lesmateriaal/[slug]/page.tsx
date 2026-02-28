@@ -1,15 +1,16 @@
 import { getDictionary } from '@/i18n/dictionaries'
+import { getLocaleFromHeaders } from '@/lib/domains'
 import { CourseMaterial, CourseMaterialAttachment } from '@/payload-types'
 import config from '@/payload.config'
 import Image from 'next/image'
 import Link from 'next/link'
 import { getPayload } from 'payload'
-import { Footer } from '../../../components/Footer'
-import { Header } from '../../../components/Header'
-import { MaterialNavigation } from '../../../components/MaterialNavigation'
-import '../../../styles.css'
-import { considerPDF } from '../../../utils/pdf'
-import { renderTextWithEmailLinks } from '../../../utils/text'
+import { Footer } from '../../components/Footer'
+import { Header } from '../../components/Header'
+import { MaterialNavigation } from '../../components/MaterialNavigation'
+import '../../styles.css'
+import { considerPDF } from '../../utils/pdf'
+import { renderTextWithEmailLinks } from '../../utils/text'
 
 export const dynamic = 'force-dynamic'
 
@@ -20,13 +21,19 @@ function PDFEmbed({ url }: { url: string }) {
   return (
     <div className="mt-3 mb-4">
       <div className="rounded-lg border border-gray-200 overflow-hidden">
-        <iframe src={proxyUrl} className="w-full h-screen" title="PDF Document" frameBorder="0" />
+        <iframe
+          src={proxyUrl}
+          className="w-full h-screen"
+          title="PDF Document"
+          frameBorder="0"
+          loading="lazy"
+        />
       </div>
     </div>
   )
 }
 
-type Params = { lang: 'nl' | 'de'; slug: string }
+type Params = { slug: string }
 type SearchParams = {
   q?: string
   types?: string
@@ -104,7 +111,7 @@ export default async function CourseMaterialPage({
 }) {
   const p = await params
   const sp = await searchParams
-  const lang = p.lang === 'de' ? 'de' : 'nl'
+  const lang = await getLocaleFromHeaders()
   const dict = getDictionary(lang)
 
   // Fetch current material and all materials for navigation
@@ -117,7 +124,7 @@ export default async function CourseMaterialPage({
     return (
       <main className="px-4 py-6 sm:px-6 lg:px-8">
         <p className="text-gray-600">Not found</p>
-        <Link href={`/${lang}`} className="mt-4 inline-block text-blue-600 hover:underline">
+        <Link href="/" className="mt-4 inline-block text-blue-600 hover:underline">
           {dict.detailBackToOverview}
         </Link>
       </main>
@@ -278,7 +285,9 @@ export default async function CourseMaterialPage({
 
               {Array.isArray(material.competences) && material.competences.length > 0 && (
                 <div>
-                  <h3 className="text-sm font-semibold text-gray-700">{dict.competencesTitle}</h3>
+                  <h3 className="text-sm font-semibold text-gray-700">
+                    {dict.competencesTitle}
+                  </h3>
                   <div className="mt-2 flex flex-wrap gap-2">
                     {material.competences.map((c) => (
                       <span
@@ -550,7 +559,7 @@ export default async function CourseMaterialPage({
               </section>
             )}
           </article>
-          <Footer />
+          <Footer locale={lang} />
         </main>
       </div>
     </div>

@@ -1,6 +1,7 @@
 'use client'
 
 import { getDictionary } from '@/i18n/dictionaries'
+import { getLocaleUrl } from '@/lib/domains'
 import Link from 'next/link'
 import { usePathname, useSearchParams } from 'next/navigation'
 
@@ -11,7 +12,7 @@ interface HeaderProps {
 export function Header({ locale }: HeaderProps) {
   const pathname = usePathname()
   const searchParams = useSearchParams()
-  const withoutLocale = pathname?.replace(`/${locale}`, '') ?? ''
+  const path = pathname ?? ''
   const dict = getDictionary(locale)
 
   return (
@@ -25,14 +26,22 @@ export function Header({ locale }: HeaderProps) {
             </h1>
             <nav className="flex items-center gap-2 text-sm">
               <a
-                href={locale === 'nl' ? '#' : `/nl${withoutLocale}?${searchParams.toString()}`}
+                href={
+                  locale === 'nl'
+                    ? '#'
+                    : `${getLocaleUrl('nl', path)}${searchParams.toString() ? `?${searchParams}` : ''}`
+                }
                 className={`inline-flex items-center gap-1.5 rounded font-medium px-2 py-1 bg-gray-100 hover:bg-gray-200 ${locale === 'nl' ? 'border-2 border-gray-400' : 'border-2 border-transparent'}`}
               >
                 <span>🇳🇱</span>
                 NL
               </a>
               <a
-                href={locale === 'de' ? '#' : `/de${withoutLocale}?${searchParams.toString()}`}
+                href={
+                  locale === 'de'
+                    ? '#'
+                    : `${getLocaleUrl('de', path)}${searchParams.toString() ? `?${searchParams}` : ''}`
+                }
                 className={`inline-flex items-center gap-1.5 rounded font-medium px-2 py-1 bg-gray-100 hover:bg-gray-200 ${locale === 'de' ? 'border-2 border-gray-400' : 'border-2 border-transparent'}`}
               >
                 <span>🇩🇪</span>
@@ -44,11 +53,11 @@ export function Header({ locale }: HeaderProps) {
         </div>
         {/* Right: logos (desktop only; on mobile they're in the footer) */}
         <div className="hidden md:flex shrink-0 items-center gap-6 md:gap-8">
-          <Link href={`/${locale}`} className="flex items-center gap-2" prefetch={false}>
+          <Link href="/" className="flex items-center gap-2" prefetch={false}>
             <img src="/assets/logo-edl.png" alt="EDL" className="h-10 md:h-12" />
             <span className="sr-only">EDL Münster</span>
           </Link>
-          <Link href={`/${locale}`} className="flex items-center gap-2" prefetch={false}>
+          <Link href="/" className="flex items-center gap-2" prefetch={false}>
             <img src="/assets/logo-zns.svg" alt="ZNS" className="h-10 md:h-12" />
             <span className="sr-only">ZNS Zentrum für Niederländen-Studien</span>
           </Link>

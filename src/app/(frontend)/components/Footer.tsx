@@ -1,13 +1,18 @@
 'use client'
 
 import { getDictionary } from '@/i18n/dictionaries'
+import { getLocaleFromHost } from '@/lib/domains'
 import Link from 'next/link'
-import { usePathname } from 'next/navigation'
 import { renderTextWithEmailLinks } from '../utils/text'
 
-export function Footer() {
-  const pathname = usePathname()
-  const locale = (pathname?.split('/')[1] === 'de' ? 'de' : 'nl') as 'nl' | 'de'
+interface FooterProps {
+  locale?: 'nl' | 'de'
+}
+
+export function Footer({ locale: localeProp }: FooterProps) {
+  const locale =
+    localeProp ??
+    (typeof window !== 'undefined' ? getLocaleFromHost(window.location.host) : 'nl')
   const dict = getDictionary(locale)
 
   return (
@@ -23,11 +28,11 @@ export function Footer() {
           <div className="text-sm basis-0 grow">{dict.fundingText}</div>
         </div>
         <div className="flex items-center justify-center gap-6 my-8 md:gap-12">
-          <Link href={`/${locale}`} className="flex items-center gap-2" prefetch={false}>
+          <Link href="/" className="flex items-center gap-2" prefetch={false}>
             <img src="/assets/logo-edl.png" alt="EDL" className="h-12 md:h-20" />
             <span className="sr-only">EDL Münster</span>
           </Link>
-          <Link href={`/${locale}`} className="flex items-center gap-2" prefetch={false}>
+          <Link href="/" className="flex items-center gap-2" prefetch={false}>
             <img src="/assets/logo-zns.svg" alt="ZNS" className="h-12 md:h-20" />
             <span className="sr-only">ZNS Zentrum für Niederländen-Studien</span>
           </Link>

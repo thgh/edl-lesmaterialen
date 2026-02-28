@@ -184,7 +184,7 @@ export function CourseMaterialCard({
 
   // Build URL with filters
   const buildDetailUrl = () => {
-    const baseUrl = `/${locale}/lesmateriaal/${slug}`
+    const baseUrl = `/lesmateriaal/${slug}`
     if (!filters) return baseUrl
 
     const params = new URLSearchParams()

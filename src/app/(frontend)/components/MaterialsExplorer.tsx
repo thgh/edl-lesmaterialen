@@ -936,7 +936,7 @@ export function MaterialsExplorer({
           )}
         </main>
       </div>
-      <Footer />
+      <Footer locale={lang} />
     </div>
   )
 }

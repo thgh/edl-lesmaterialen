@@ -1,4 +1,5 @@
 import React from 'react'
+import { getLocaleFromHeaders } from '@/lib/domains'
 import './styles.css'
 
 export const metadata = {
@@ -6,19 +7,8 @@ export const metadata = {
   title: 'Lesmaterialen',
 }
 
-export function generateStaticParams() {
-  return [{ lang: 'nl' }, { lang: 'de' }]
-}
-
-export default async function LocaleLayout({
-  children,
-  params,
-}: {
-  children: React.ReactNode
-  params: Promise<{ lang?: 'nl' | 'de' }>
-}) {
-  const p = await params
-  const lang = p.lang === 'de' ? 'de' : 'nl'
+export default async function LocaleLayout({ children }: { children: React.ReactNode }) {
+  const lang = await getLocaleFromHeaders()
   return (
     <html lang={lang}>
       <body>{children}</body>

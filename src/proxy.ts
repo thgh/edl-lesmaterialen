@@ -1,42 +1,15 @@
-import { NextRequest, NextResponse } from 'next/server'
+import { NextRequest } from 'next/server'
 
-const locales = ['nl', 'de']
-
-export function proxy(request: NextRequest) {
-  const { pathname } = request.nextUrl
-
-  // Skip redirect for special paths like .well-known, favicon, robots.txt, etc.
-  if (
-    pathname.startsWith('/.well-known/') ||
-    pathname === '/favicon.ico' ||
-    pathname === '/robots.txt' ||
-    pathname === '/sitemap.xml' ||
-    pathname === '/manifest.json'
-  ) {
-    return
-  }
-
-  // Check if there is any supported locale in the pathname
-  const pathnameHasLocale = locales.some(
-    (locale) => pathname.startsWith(`/${locale}/`) || pathname === `/${locale}`,
-  )
-
-  if (pathnameHasLocale) return
-
-  // Redirect if there is no locale
-  const locale = request.nextUrl.locale || 'nl'
-  request.nextUrl.pathname = `/${locale}${pathname}`
-  // e.g. incoming request is /products
-  // The new URL is now /en-US/products
-  console.log('redirecting to', request.nextUrl.pathname)
-  return NextResponse.redirect(request.nextUrl)
+/**
+ * Proxy/middleware hook. With domain-based routing (no /nl or /de in paths),
+ * locale is determined by host. No redirect needed - pass through.
+ */
+export function proxy(_request: NextRequest) {
+  return
 }
 
 export const config = {
   matcher: [
-    // Skip all internal paths (_next)
     '/((?!_next|assets|admin|api|import).*)',
-    // Optional: only run on root (/) URL
-    // '/'
   ],
 }

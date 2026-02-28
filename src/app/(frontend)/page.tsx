@@ -1,15 +1,15 @@
 import { getDictionary } from '@/i18n/dictionaries'
+import { getLocaleFromHeaders } from '@/lib/domains'
 import config from '@/payload.config'
 import { getPayload } from 'payload'
-import { MaterialsExplorer } from '../components/MaterialsExplorer'
-import '../styles.css'
+import { MaterialsExplorer } from './components/MaterialsExplorer'
+import './styles.css'
 
 export const revalidate = 1
 export const dynamic = 'force-dynamic'
 
-export default async function HomePage({ params }: { params: Promise<{ lang: 'nl' | 'de' }> }) {
-  const p = await params
-  const lang = p.lang === 'de' ? 'de' : 'nl'
+export default async function HomePage() {
+  const lang = await getLocaleFromHeaders()
   const dict = getDictionary(lang)
   const payloadConfig = await config
   const payload = await getPayload({ config: payloadConfig })
