@@ -30,6 +30,8 @@ const dictionaries = {
       'Deze website is ontwikkeld binnen de Euregionale Doorlopende Leerlijn (EDL) en wordt beheerd door het Zentrum für Niederlande-Studien (ZNS). Het materiaal is deels eigen werk, deels afkomstig uit externe bronnen – eigen materiaal is als zodanig vermeld. Alle rechten berusten bij de auteurs. Gebruik uitsluitend voor educatieve doeleinden.',
     contactLabel: 'Contactgegevens',
     licenseLabel: 'Licentie',
+    fundingText:
+      'Het project Euregionale Doorlopende Leerlijn (EDL) wordt uitgevoerd in het kader van het Interreg VI-programma Deutschland-Nederland en wordt medegefinancierd door de Europese Unie, MWIKE NRW en MB Niedersachsen, alsmede de provincies Overijssel en Gelderland.',
   },
   de: {
     siteTitle: 'Unterrichtsmaterialien',
@@ -60,6 +62,8 @@ const dictionaries = {
       'Diese Website wurde im Rahmen der Euregionalen Bildungskette (EDL) erstellt und wird vom Zentrum für Niederlande-Studien (ZNS) betreut. Die Materialien stammen teils vom ZNS und EDL, teils aus externen Quellen – eigene Inhalte sind entsprechend gekennzeichnet. Alle Rechte liegen bei den jeweiligen Autor*innen. Nutzung nur zu Bildungszwecken.',
     contactLabel: 'Kontaktdaten',
     licenseLabel: 'Lizenz',
+    fundingText:
+      'Das Projekt Euregionale Bildungskette (EDL) wird im Rahmen des Interreg VI-Programms Deutschland-Nederland durchgeführt und durch die Europäische Union, das MWIKE NRW und das MB Niedersachsen sowie die Provinzen Overijssel und Gelderland mitfinanziert.',
   },
 } as const
 

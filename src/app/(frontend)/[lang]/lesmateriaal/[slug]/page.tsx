@@ -5,8 +5,8 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { getPayload } from 'payload'
 import { Footer } from '../../../components/Footer'
+import { Header } from '../../../components/Header'
 import { MaterialNavigation } from '../../../components/MaterialNavigation'
-import { Sidebar } from '../../../components/Sidebar'
 import '../../../styles.css'
 import { considerPDF } from '../../../utils/pdf'
 import { renderTextWithEmailLinks } from '../../../utils/text'
@@ -212,170 +212,188 @@ export default async function CourseMaterialPage({
     : []
 
   return (
-    <div className="block md:flex">
-      <Sidebar locale={lang} />
-      <main className="px-4 py-6 sm:px-6 lg:px-8 flex-1">
-        <aside className="mb-4 max-w-5xl">
-          <MaterialNavigation
-            currentMaterial={material}
-            materials={allMaterials}
-            locale={lang}
-            filters={filters}
-          />
-        </aside>
+    <div className="min-h-screen flex flex-col">
+      <Header locale={lang} />
+      <div className="block md:flex flex-1">
+        <main className="px-4 py-6 sm:px-6 lg:px-8 flex-1">
+          <aside className="mb-4 max-w-6xl mx-auto">
+            <MaterialNavigation
+              currentMaterial={material}
+              materials={allMaterials}
+              locale={lang}
+              filters={filters}
+            />
+          </aside>
 
-        <article className="max-w-5xl">
-          <header className="mb-6 pt-4">
-            <h1 className="text-2xl lg:text-3xl xl:text-4xl font-bold text-gray-900">{title}</h1>
-            <div className="mt-2 flex flex-wrap items-center gap-3 text-sm text-gray-600">
-              {cefr && (
-                <span className="rounded bg-gray-100 px-2 py-0.5">
-                  {dict.cefrLabel} {cefr}
-                </span>
-              )}
-              {Array.isArray(material.schoolTypes) && material.schoolTypes.length > 0 && (
-                <span className="rounded bg-gray-100 px-2 py-0.5">
-                  {getLocalized(material.schoolTypes[0] as any, lang)}
-                </span>
-              )}
-            </div>
-          </header>
-
-          {/* Meta */}
-          <section className="mb-8 grid gap-4 md:grid-cols-2">
-            {Array.isArray(material.materialTypes) && material.materialTypes.length > 0 && (
-              <div>
-                <h3 className="text-sm font-semibold text-gray-700">{dict.materialTypesTitle}</h3>
-                <div className="mt-2 flex flex-wrap gap-2">
-                  {material.materialTypes.map((t) => (
-                    <span
-                      key={typeof t === 'string' ? t : (t as any).id}
-                      className="rounded bg-gray-100 px-2 py-0.5 text-sm"
-                    >
-                      {getLocalized(t as any, lang)}
-                    </span>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {Array.isArray(material.topics) && material.topics.length > 0 && (
-              <div>
-                <h3 className="text-sm font-semibold text-gray-700">{dict.topicsTitle}</h3>
-                <div className="mt-2 flex flex-wrap gap-2">
-                  {material.topics.map((t) => (
-                    <span
-                      key={typeof t === 'string' ? t : (t as any).id}
-                      className="rounded bg-gray-100 px-2 py-0.5 text-sm"
-                    >
-                      {getLocalized(t as any, lang)}
-                    </span>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {Array.isArray(material.competences) && material.competences.length > 0 && (
-              <div>
-                <h3 className="text-sm font-semibold text-gray-700">{dict.competencesTitle}</h3>
-                <div className="mt-2 flex flex-wrap gap-2">
-                  {material.competences.map((c) => (
-                    <span
-                      key={typeof c === 'string' ? c : (c as any).id}
-                      className="rounded bg-gray-100 px-2 py-0.5 text-sm"
-                    >
-                      {getLocalized(c as any, lang)}
-                    </span>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {material.description_nl || material.description_de ? (
-              <div className="md:col-span-2">
-                <h3 className="text-sm font-semibold text-gray-700">
-                  {lang === 'de' ? 'Beschreibung' : 'Beschrijving'}
-                </h3>
-                <p className="mt-2 whitespace-pre-line text-gray-800">
-                  {(lang === 'de' ? material.description_de : material.description_nl) ||
-                    material.description_nl ||
-                    material.description_de}
-                </p>
-              </div>
-            ) : null}
-
-            {material.contact ? (
-              <div>
-                <h3 className="text-sm font-semibold text-gray-700">{dict.contactLabel}</h3>
-                <div className="mt-2 text-gray-800">
-                  {renderTextWithEmailLinks(material.contact)}
-                </div>
-              </div>
-            ) : null}
-
-            {material.license ? (
-              <div>
-                <h3 className="text-sm font-semibold text-gray-700">{dict.licenseLabel}</h3>
-                <p className="mt-2 text-gray-800">{material.license}</p>
-              </div>
-            ) : null}
-          </section>
-
-          {/* Main Link */}
-          {material.link && (
-            <section className="mb-6">
-              <a
-                href={material.link}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex flex-col items-center gap-1 rounded-md bg-brand px-6 py-3 text-lg font-semibold text-black shadow-md hover:bg-opacity-90 transition-colors"
-              >
-                <span className="flex items-center gap-2">
-                  {dict.detailOpenWebsite}
-                  <svg
-                    width="20"
-                    height="20"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                  >
-                    <path d="M7 17L17 7M17 7H7M17 7V17" />
-                  </svg>
-                </span>
-                {getHostname(material.link) && (
-                  <span className="text-xs font-normal opacity-80">
-                    {getHostname(material.link)}
+          <article className="max-w-6xl mx-auto">
+            <header className="mb-6 pt-4">
+              <h1 className="text-2xl lg:text-3xl xl:text-4xl font-bold text-gray-900">{title}</h1>
+              <div className="mt-2 flex flex-wrap items-center gap-3 text-sm text-gray-600">
+                {cefr && (
+                  <span className="rounded bg-gray-100 px-2 py-0.5">
+                    {dict.cefrLabel} {cefr}
                   </span>
                 )}
-              </a>
+                {Array.isArray(material.schoolTypes) && material.schoolTypes.length > 0 && (
+                  <span className="rounded bg-gray-100 px-2 py-0.5">
+                    {getLocalized(material.schoolTypes[0] as any, lang)}
+                  </span>
+                )}
+              </div>
+            </header>
+
+            {/* Meta */}
+            <section className="mb-8 grid gap-4 md:grid-cols-2">
+              {Array.isArray(material.materialTypes) && material.materialTypes.length > 0 && (
+                <div>
+                  <h3 className="text-sm font-semibold text-gray-700">{dict.materialTypesTitle}</h3>
+                  <div className="mt-2 flex flex-wrap gap-2">
+                    {material.materialTypes.map((t) => (
+                      <span
+                        key={typeof t === 'string' ? t : (t as any).id}
+                        className="rounded bg-gray-100 px-2 py-0.5 text-sm"
+                      >
+                        {getLocalized(t as any, lang)}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {Array.isArray(material.topics) && material.topics.length > 0 && (
+                <div>
+                  <h3 className="text-sm font-semibold text-gray-700">{dict.topicsTitle}</h3>
+                  <div className="mt-2 flex flex-wrap gap-2">
+                    {material.topics.map((t) => (
+                      <span
+                        key={typeof t === 'string' ? t : (t as any).id}
+                        className="rounded bg-gray-100 px-2 py-0.5 text-sm"
+                      >
+                        {getLocalized(t as any, lang)}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {Array.isArray(material.competences) && material.competences.length > 0 && (
+                <div>
+                  <h3 className="text-sm font-semibold text-gray-700">{dict.competencesTitle}</h3>
+                  <div className="mt-2 flex flex-wrap gap-2">
+                    {material.competences.map((c) => (
+                      <span
+                        key={typeof c === 'string' ? c : (c as any).id}
+                        className="rounded bg-gray-100 px-2 py-0.5 text-sm"
+                      >
+                        {getLocalized(c as any, lang)}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {material.description_nl || material.description_de ? (
+                <div className="md:col-span-2">
+                  <h3 className="text-sm font-semibold text-gray-700">
+                    {lang === 'de' ? 'Beschreibung' : 'Beschrijving'}
+                  </h3>
+                  <p className="mt-2 whitespace-pre-line text-gray-800">
+                    {(lang === 'de' ? material.description_de : material.description_nl) ||
+                      material.description_nl ||
+                      material.description_de}
+                  </p>
+                </div>
+              ) : null}
+
+              {material.contact ? (
+                <div>
+                  <h3 className="text-sm font-semibold text-gray-700">{dict.contactLabel}</h3>
+                  <div className="mt-2 text-gray-800">
+                    {renderTextWithEmailLinks(material.contact)}
+                  </div>
+                </div>
+              ) : null}
+
+              {material.license ? (
+                <div>
+                  <h3 className="text-sm font-semibold text-gray-700">{dict.licenseLabel}</h3>
+                  <p className="mt-2 text-gray-800">{material.license}</p>
+                </div>
+              ) : null}
             </section>
-          )}
 
-          {/* Actions */}
-          {material.attachments && material.attachments.length > 0 && (
-            <section className="mb-10">
-              <h2 className="mb-3 text-lg font-semibold text-gray-900">Downloads</h2>
-              <div className="flex flex-col gap-2">
-                {Array.isArray(material.attachments) &&
-                  material.attachments.map((att) => {
-                    const id = typeof att === 'string' ? att : (att as any).id
-                    const mime =
-                      typeof att === 'string' ? null : ((att as any).mimeType as string | null)
-                    const filename =
-                      typeof att === 'string'
-                        ? undefined
-                        : ((att as any).filename as string | undefined)
-                    const url = typeof att === 'string' ? null : ((att as any).url as string | null)
-                    if (!url) return null
+            {/* Main Link */}
+            {material.link && (
+              <section className="mb-6">
+                <a
+                  href={material.link}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex flex-col items-center gap-1 rounded-md bg-brand px-6 py-3 text-lg font-semibold text-black shadow-md hover:bg-opacity-90 transition-colors"
+                >
+                  <span className="flex items-center gap-2">
+                    {dict.detailOpenWebsite}
+                    <svg
+                      width="20"
+                      height="20"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                    >
+                      <path d="M7 17L17 7M17 7H7M17 7V17" />
+                    </svg>
+                  </span>
+                  {getHostname(material.link) && (
+                    <span className="text-xs font-normal opacity-80">
+                      {getHostname(material.link)}
+                    </span>
+                  )}
+                </a>
+              </section>
+            )}
 
-                    const isImage = mime?.startsWith('image/') ?? false
-                    // Skip images in downloads section - they're shown separately
-                    if (isImage) return null
+            {/* Actions */}
+            {material.attachments && material.attachments.length > 0 && (
+              <section className="mb-10">
+                <h2 className="mb-3 text-lg font-semibold text-gray-900">Downloads</h2>
+                <div className="flex flex-col gap-2">
+                  {Array.isArray(material.attachments) &&
+                    material.attachments.map((att) => {
+                      const id = typeof att === 'string' ? att : (att as any).id
+                      const mime =
+                        typeof att === 'string' ? null : ((att as any).mimeType as string | null)
+                      const filename =
+                        typeof att === 'string'
+                          ? undefined
+                          : ((att as any).filename as string | undefined)
+                      const url =
+                        typeof att === 'string' ? null : ((att as any).url as string | null)
+                      if (!url) return null
 
-                    // File type icon
-                    const FileIcon = () => {
-                      if (isImage) {
+                      const isImage = mime?.startsWith('image/') ?? false
+                      // Skip images in downloads section - they're shown separately
+                      if (isImage) return null
+
+                      // File type icon
+                      const FileIcon = () => {
+                        if (isImage) {
+                          return (
+                            <svg
+                              width="20"
+                              height="20"
+                              viewBox="0 0 24 24"
+                              fill="none"
+                              stroke="currentColor"
+                              strokeWidth="2"
+                              className="text-gray-600"
+                            >
+                              <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+                              <circle cx="8.5" cy="8.5" r="1.5" />
+                              <polyline points="21 15 16 10 5 21" />
+                            </svg>
+                          )
+                        }
                         return (
                           <svg
                             width="20"
@@ -386,13 +404,17 @@ export default async function CourseMaterialPage({
                             strokeWidth="2"
                             className="text-gray-600"
                           >
-                            <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
-                            <circle cx="8.5" cy="8.5" r="1.5" />
-                            <polyline points="21 15 16 10 5 21" />
+                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                            <polyline points="14 2 14 8 20 8" />
+                            <line x1="16" y1="13" x2="8" y2="13" />
+                            <line x1="16" y1="17" x2="8" y2="17" />
+                            <polyline points="10 9 9 9 8 9" />
                           </svg>
                         )
                       }
-                      return (
+
+                      // Download icon
+                      const DownloadIcon = () => (
                         <svg
                           width="20"
                           height="20"
@@ -402,154 +424,135 @@ export default async function CourseMaterialPage({
                           strokeWidth="2"
                           className="text-gray-600"
                         >
-                          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-                          <polyline points="14 2 14 8 20 8" />
-                          <line x1="16" y1="13" x2="8" y2="13" />
-                          <line x1="16" y1="17" x2="8" y2="17" />
-                          <polyline points="10 9 9 9 8 9" />
+                          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                          <polyline points="7 10 12 15 17 10" />
+                          <line x1="12" y1="15" x2="12" y2="3" />
                         </svg>
                       )
-                    }
 
-                    // Download icon
-                    const DownloadIcon = () => (
-                      <svg
-                        width="20"
-                        height="20"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                        className="text-gray-600"
-                      >
-                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-                        <polyline points="7 10 12 15 17 10" />
-                        <line x1="12" y1="15" x2="12" y2="3" />
-                      </svg>
-                    )
+                      return (
+                        <div key={id} className="flex items-center gap-2">
+                          <a
+                            href={url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex items-center gap-3 flex-1 rounded-md border border-gray-300 bg-white p-3 text-gray-800 shadow-sm hover:bg-gray-50 hover:text-gray-900 leading-none"
+                          >
+                            <FileIcon />
+                            <span>{filename || dict.detailDownload}</span>
+                          </a>
+                          <a
+                            href={url}
+                            download={filename || undefined}
+                            className="flex items-center justify-center rounded-md border border-gray-300 bg-white p-3 shadow-sm hover:bg-gray-50 transition-colors min-w-[48px]"
+                            aria-label="Download"
+                          >
+                            <DownloadIcon />
+                          </a>
+                        </div>
+                      )
+                    })}
+                </div>
+              </section>
+            )}
 
+            {/* Additional links */}
+            {externalLinks.length > 0 && !hasExternalOnly && (
+              <section className="mb-10">
+                <h2 className="mb-3 text-lg font-semibold text-gray-900">
+                  {dict.detailExternalLinksTitle}
+                </h2>
+                <ul className="list-inside list-disc space-y-2">
+                  {externalLinks
+                    .filter((lnk) => !considerPDF(lnk.url))
+                    .map((lnk) => {
+                      const label =
+                        (lang === 'de' ? lnk.label_de : lnk.label_nl) ||
+                        lnk.label_nl ||
+                        lnk.label_de ||
+                        lnk.url
+                      const url = lnk.url || '#'
+                      return (
+                        <li key={lnk.id || lnk.url}>
+                          <a
+                            href={url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-blue-700 hover:underline"
+                          >
+                            {label}
+                          </a>
+                        </li>
+                      )
+                    })}
+                </ul>
+              </section>
+            )}
+
+            {/* PDF embeds */}
+            {pdfLinks.length > 0 && (
+              <section className="mb-10">
+                <h2 className="mb-3 text-lg font-semibold text-gray-900">PDF</h2>
+                {pdfLinks.map((lnk) => (
+                  <PDFEmbed key={lnk.id || lnk.url} url={lnk.url || ''} />
+                ))}
+              </section>
+            )}
+
+            {/* PDF attachment embeds */}
+            {pdfAttachments.length > 0 && (
+              <section className="mb-10">
+                <h2 className="mb-3 text-lg font-semibold text-gray-900">
+                  {pdfLinks.length > 0 ? 'Additional PDFs' : 'PDF'}
+                </h2>
+                {pdfAttachments.map((att) => {
+                  if (!att || typeof att !== 'object' || !att.url) return null
+                  return (
+                    <div key={att.id} className="mb-6">
+                      <PDFEmbed url={att.url} />
+                    </div>
+                  )
+                })}
+              </section>
+            )}
+
+            {/* Image attachments */}
+            {imageAttachments.length > 0 && (
+              <section className="mb-10">
+                <h2 className="mb-3 text-lg font-semibold text-gray-900">Afbeeldingen</h2>
+                <div className="flex flex-col gap-6">
+                  {imageAttachments.map((att) => {
+                    if (!att || typeof att !== 'object' || !att.url) return null
+                    const filename = att.filename as string | undefined
                     return (
-                      <div key={id} className="flex items-center gap-2">
+                      <div key={att.id} className="flex justify-center">
                         <a
-                          href={url}
+                          href={att.url}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="flex items-center gap-3 flex-1 rounded-md border border-gray-300 bg-white p-3 text-gray-800 shadow-sm hover:bg-gray-50 hover:text-gray-900 leading-none"
+                          className="relative w-full cursor-pointer"
+                          style={{ maxWidth: '100vw', maxHeight: '100vh' }}
                         >
-                          <FileIcon />
-                          <span>{filename || dict.detailDownload}</span>
-                        </a>
-                        <a
-                          href={url}
-                          download={filename || undefined}
-                          className="flex items-center justify-center rounded-md border border-gray-300 bg-white p-3 shadow-sm hover:bg-gray-50 transition-colors min-w-[48px]"
-                          aria-label="Download"
-                        >
-                          <DownloadIcon />
+                          <Image
+                            src={att.url}
+                            alt={filename || 'Afbeelding'}
+                            width={0}
+                            height={0}
+                            sizes="100vw"
+                            className="w-full h-auto max-h-[100vh] object-contain"
+                            style={{ maxWidth: '100vw', height: 'auto' }}
+                          />
                         </a>
                       </div>
                     )
                   })}
-              </div>
-            </section>
-          )}
-
-          {/* Additional links */}
-          {externalLinks.length > 0 && !hasExternalOnly && (
-            <section className="mb-10">
-              <h2 className="mb-3 text-lg font-semibold text-gray-900">
-                {dict.detailExternalLinksTitle}
-              </h2>
-              <ul className="list-inside list-disc space-y-2">
-                {externalLinks
-                  .filter((lnk) => !considerPDF(lnk.url))
-                  .map((lnk) => {
-                    const label =
-                      (lang === 'de' ? lnk.label_de : lnk.label_nl) ||
-                      lnk.label_nl ||
-                      lnk.label_de ||
-                      lnk.url
-                    const url = lnk.url || '#'
-                    return (
-                      <li key={lnk.id || lnk.url}>
-                        <a
-                          href={url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-blue-700 hover:underline"
-                        >
-                          {label}
-                        </a>
-                      </li>
-                    )
-                  })}
-              </ul>
-            </section>
-          )}
-
-          {/* PDF embeds */}
-          {pdfLinks.length > 0 && (
-            <section className="mb-10">
-              <h2 className="mb-3 text-lg font-semibold text-gray-900">PDF</h2>
-              {pdfLinks.map((lnk) => (
-                <PDFEmbed key={lnk.id || lnk.url} url={lnk.url || ''} />
-              ))}
-            </section>
-          )}
-
-          {/* PDF attachment embeds */}
-          {pdfAttachments.length > 0 && (
-            <section className="mb-10">
-              <h2 className="mb-3 text-lg font-semibold text-gray-900">
-                {pdfLinks.length > 0 ? 'Additional PDFs' : 'PDF'}
-              </h2>
-              {pdfAttachments.map((att) => {
-                if (!att || typeof att !== 'object' || !att.url) return null
-                return (
-                  <div key={att.id} className="mb-6">
-                    <PDFEmbed url={att.url} />
-                  </div>
-                )
-              })}
-            </section>
-          )}
-
-          {/* Image attachments */}
-          {imageAttachments.length > 0 && (
-            <section className="mb-10">
-              <h2 className="mb-3 text-lg font-semibold text-gray-900">Afbeeldingen</h2>
-              <div className="flex flex-col gap-6">
-                {imageAttachments.map((att) => {
-                  if (!att || typeof att !== 'object' || !att.url) return null
-                  const filename = att.filename as string | undefined
-                  return (
-                    <div key={att.id} className="flex justify-center">
-                      <a
-                        href={att.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="relative w-full cursor-pointer"
-                        style={{ maxWidth: '100vw', maxHeight: '100vh' }}
-                      >
-                        <Image
-                          src={att.url}
-                          alt={filename || 'Afbeelding'}
-                          width={0}
-                          height={0}
-                          sizes="100vw"
-                          className="w-full h-auto max-h-[100vh] object-contain"
-                          style={{ maxWidth: '100vw', height: 'auto' }}
-                        />
-                      </a>
-                    </div>
-                  )
-                })}
-              </div>
-            </section>
-          )}
-        </article>
-        <Footer />
-      </main>
+                </div>
+              </section>
+            )}
+          </article>
+          <Footer />
+        </main>
+      </div>
     </div>
   )
 }

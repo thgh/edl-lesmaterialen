@@ -4,11 +4,11 @@ import { CEFRLevels } from '@/collections/CEFRLevels'
 import { getDictionary } from '@/i18n/dictionaries'
 import { CourseMaterial } from '@/payload-types'
 import Link from 'next/link'
-import { usePathname, useSearchParams } from 'next/navigation'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import useSWR from 'swr'
 import { CourseMaterialCard } from './CourseMaterialCard'
 import { Footer } from './Footer'
+import { Header } from './Header'
 import { SearchAndFilters } from './SearchAndFilters'
 import { Sidebar } from './Sidebar'
 import { fetcher } from './fetcher'
@@ -66,9 +66,6 @@ export function MaterialsExplorer({
   const [filtersOpen, setFiltersOpen] = useState(false)
 
   const isAuthenticated = useSWR('/api/users/me', fetcher).data?.user
-  const pathname = usePathname()
-  const searchParams = useSearchParams()
-  const withoutLocale = pathname.replace(`/${lang}`, '')
 
   // Validate and remove invalid selections from taxonomy lists
   useEffect(() => {
@@ -827,111 +824,91 @@ export function MaterialsExplorer({
   ])
 
   return (
-    <div className="block md:flex">
-      <Sidebar locale={lang}>
-        <div className="md:hidden">
-          <button
-            type="button"
-            aria-expanded={filtersOpen}
-            className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm shadow-sm hover:bg-gray-50"
-            onClick={() => setFiltersOpen((v) => !v)}
-          >
-            {filtersOpen ? labels.hideFilters : labels.showFilters}
-          </button>
-        </div>
+    <div className="min-h-screen flex flex-col">
+      <Header locale={lang} />
+      <div className="block md:flex flex-1">
+        <Sidebar locale={lang}>
+          <div className="md:hidden">
+            <button
+              type="button"
+              aria-expanded={filtersOpen}
+              className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm shadow-sm hover:bg-gray-50"
+              onClick={() => setFiltersOpen((v) => !v)}
+            >
+              {filtersOpen ? labels.hideFilters : labels.showFilters}
+            </button>
+          </div>
 
-        <div className={`${filtersOpen ? 'block mt-4' : 'hidden'} md:block`}>
-          <SearchAndFilters
-            materialTypes={materialTypes}
-            schoolTypes={schoolTypes}
-            competences={competences}
-            topics={topics}
-            searchQuery={searchQuery}
-            selectedTypes={selectedTypes}
-            selectedSchoolTypes={selectedSchoolTypes}
-            selectedCompetences={selectedCompetences}
-            selectedTopics={selectedTopics}
-            selectedLanguages={selectedLanguages}
-            selectedCefrLevels={selectedCefrLevels}
-            onChange={({
-              query,
-              types,
-              schoolTypes,
-              competences,
-              topics,
-              languages,
-              cefrLevels,
-            }) => {
-              setSearchQuery(query)
-              setSelectedTypes(types)
-              setSelectedSchoolTypes(schoolTypes)
-              setSelectedCompetences(competences)
-              setSelectedTopics(topics)
-              setSelectedLanguages(languages)
-              setSelectedCefrLevels(cefrLevels)
-            }}
-            labels={{
-              searchTitle: labels.searchTitle,
-              searchPlaceholder: labels.searchPlaceholder,
-              materialTypesTitle: labels.materialTypesTitle,
-              schoolTypesTitle: labels.schoolTypesTitle,
-              competencesTitle: labels.competencesTitle,
-              topicsTitle: labels.topicsTitle,
-              cefrTitle: labels.cefrTitle,
-              languagesTitle: labels.languagesTitle,
-              languageDutchLabel: labels.languageDutchLabel,
-              languageGermanLabel: labels.languageGermanLabel,
-            }}
-            typeCounts={typeCounts}
-            schoolTypeCounts={schoolTypeCounts}
-            competenceCounts={competenceCounts}
-            topicCounts={topicCounts}
-            languageCounts={languageCounts}
-            cefrCounts={cefrCounts}
-            locale={lang}
-          />
-        </div>
-      </Sidebar>
-      <main className="px-4 py-6 sm:p-6 lg:p-8">
-        {/* Language picker and admin button for authenticated users */}
-        <div className="float-right flex items-center gap-2 mb-4">
-          <nav className="flex items-center gap-2 text-sm">
-            <a
-              href={lang === 'nl' ? '#' : `/nl${withoutLocale}?${searchParams.toString()}`}
-              className={`inline-flex items-center gap-1.5 rounded font-medium px-2 py-1 bg-gray-100 hover:bg-gray-200 ${lang === 'nl' ? 'border-2 border-gray-400' : 'border-2 border-transparent'}`}
-            >
-              <span>🇳🇱</span>
-              NL
-            </a>
-            <a
-              href={lang === 'de' ? '#' : `/de${withoutLocale}?${searchParams.toString()}`}
-              className={`inline-flex items-center gap-1.5 rounded font-medium px-2 py-1 bg-gray-100 hover:bg-gray-200 ${lang === 'de' ? 'border-2 border-gray-400' : 'border-2 border-transparent'}`}
-            >
-              <span>🇩🇪</span>
-              DE
-            </a>
-          </nav>
+          <div className={`${filtersOpen ? 'block mt-4' : 'hidden'} md:block`}>
+            <SearchAndFilters
+              materialTypes={materialTypes}
+              schoolTypes={schoolTypes}
+              competences={competences}
+              topics={topics}
+              searchQuery={searchQuery}
+              selectedTypes={selectedTypes}
+              selectedSchoolTypes={selectedSchoolTypes}
+              selectedCompetences={selectedCompetences}
+              selectedTopics={selectedTopics}
+              selectedLanguages={selectedLanguages}
+              selectedCefrLevels={selectedCefrLevels}
+              onChange={({
+                query,
+                types,
+                schoolTypes,
+                competences,
+                topics,
+                languages,
+                cefrLevels,
+              }) => {
+                setSearchQuery(query)
+                setSelectedTypes(types)
+                setSelectedSchoolTypes(schoolTypes)
+                setSelectedCompetences(competences)
+                setSelectedTopics(topics)
+                setSelectedLanguages(languages)
+                setSelectedCefrLevels(cefrLevels)
+              }}
+              labels={{
+                searchTitle: labels.searchTitle,
+                searchPlaceholder: labels.searchPlaceholder,
+                materialTypesTitle: labels.materialTypesTitle,
+                schoolTypesTitle: labels.schoolTypesTitle,
+                competencesTitle: labels.competencesTitle,
+                topicsTitle: labels.topicsTitle,
+                cefrTitle: labels.cefrTitle,
+                languagesTitle: labels.languagesTitle,
+                languageDutchLabel: labels.languageDutchLabel,
+                languageGermanLabel: labels.languageGermanLabel,
+              }}
+              typeCounts={typeCounts}
+              schoolTypeCounts={schoolTypeCounts}
+              competenceCounts={competenceCounts}
+              topicCounts={topicCounts}
+              languageCounts={languageCounts}
+              cefrCounts={cefrCounts}
+              locale={lang}
+            />
+          </div>
+        </Sidebar>
+        <main className="px-4 py-6 sm:p-6 lg:p-8">
           {isAuthenticated && (
-            <Link
-              href={`/admin`}
-              className="text-sm items-center gap-2 rounded-md bg-green-600 px-4 py-2 text-white hover:bg-green-700 hidden md:inline-flex"
-            >
-              {lang === 'de' ? 'Beheren' : 'Beheren'}
-            </Link>
+            <div className="float-right mb-4">
+              <Link
+                href={`/admin`}
+                className="text-sm items-center gap-2 rounded-md bg-green-600 px-4 py-2 text-white hover:bg-green-700 hidden md:inline-flex"
+              >
+                {lang === 'de' ? 'Beheren' : 'Beheren'}
+              </Link>
+            </div>
           )}
-        </div>
-        <h1 className="pt-2 text-2xl lg:text-3xl xl:text-4xl font-bold text-gray-900">
-          {dict.siteTitle}
-        </h1>
-        <p className="text-lg text-gray-600">{dict.siteTagline}</p>
-        <div className="mb-8 text-sm text-gray-600">
-          {filtered.length === 1
-            ? dict.materialFound
-            : dict.materialsFound.replace('{count}', filtered.length.toString())}
-        </div>
-        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 3xl:grid-cols-5">
-          {visibleMaterials.flatMap((material, index) => {
-            const cards = [
+          <div className="mb-8 text-sm text-gray-600">
+            {filtered.length === 1
+              ? dict.materialFound
+              : dict.materialsFound.replace('{count}', filtered.length.toString())}
+          </div>
+          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 3xl:grid-cols-5">
+            {visibleMaterials.map((material) => (
               <CourseMaterialCard
                 key={material.id}
                 material={material}
@@ -946,40 +923,20 @@ export function MaterialsExplorer({
                   selectedLanguages,
                   selectedCefrLevels,
                 }}
-              />,
-            ]
-
-            // Insert the Euregionale Doorlopende Leerlijn image as the 10th card (after 9 materials)
-            if (index === 3) {
-              cards.push(
-                <div
-                  key="edl-image-card"
-                  className="rounded-xl border border-gray-200 bg-white shadow-sm overflow-hidden"
-                >
-                  <div className="relative w-full h-full overflow-hidden">
-                    <img
-                      src="/assets/Euregionale Doorlopende Leerlijn.png"
-                      alt="Euregionale Doorlopende Leerlijn"
-                      className="w-full h-full object-contain mix-blend-multiply"
-                    />
-                  </div>
-                </div>,
-              )
-            }
-
-            return cards
-          })}
-        </div>
-        {limit < filtered.length && (
-          <button
-            className="mt-6 font-medium rounded-md bg-brand px-4 py-2 text-black hover:bg-brand-dark"
-            onClick={() => setLimit(limit * 5)}
-          >
-            {dict.loadMore}
-          </button>
-        )}
-        <Footer />
-      </main>
+              />
+            ))}
+          </div>
+          {limit < filtered.length && (
+            <button
+              className="mt-6 font-medium rounded-md bg-brand px-4 py-2 text-black hover:bg-brand-dark"
+              onClick={() => setLimit(limit * 5)}
+            >
+              {dict.loadMore}
+            </button>
+          )}
+        </main>
+      </div>
+      <Footer />
     </div>
   )
 }
