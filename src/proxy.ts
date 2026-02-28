@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 
 const locales = ['nl', 'de']
 
-export function middleware(request: NextRequest) {
+export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl
 
   // Skip redirect for special paths like .well-known, favicon, robots.txt, etc.
