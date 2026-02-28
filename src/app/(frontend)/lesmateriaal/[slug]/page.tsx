@@ -44,13 +44,17 @@ type SearchParams = {
 }
 
 async function fetchMaterialBySlugOrId(slugOrId: string) {
+  const startTime = performance.now()
   const payloadConfig = await config
+  console.log(`config: ${performance.now() - startTime}ms`)
   const payload = await getPayload({ config: payloadConfig })
+  console.log(`getPayload: ${performance.now() - startTime}ms`)
 
   if (slugOrId.startsWith('id:')) {
     const id = slugOrId.slice(3)
     try {
       const doc = await payload.findByID({ collection: 'course-materials', id, depth: 1 })
+      console.log(`findByID: ${performance.now() - startTime}ms`)
       return doc as unknown as CourseMaterial | null
     } catch {
       return null
@@ -64,7 +68,30 @@ async function fetchMaterialBySlugOrId(slugOrId: string) {
     },
     limit: 1,
     depth: 1,
+    populate: {
+      competences: {
+        slug: true,
+        title_nl: true,
+        title_de: true,
+      },
+      topics: {
+        slug: true,
+        title_nl: true,
+        title_de: true,
+      },
+      'material-types': {
+        slug: true,
+        title_nl: true,
+        title_de: true,
+      },
+      'school-types': {
+        slug: true,
+        title_nl: true,
+        title_de: true,
+      },
+    },
   })
+  console.log(`find: ${performance.now() - startTime}ms`, res.docs?.[0])
   return (res.docs?.[0] as unknown as CourseMaterial) || null
 }
 
