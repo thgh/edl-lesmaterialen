@@ -72,14 +72,29 @@
 import { getDictionary } from '@/i18n/dictionaries'
 import { CourseMaterial } from '@/payload-types'
 import Link from 'next/link'
-import { usePathname, useRouter, useSearchParams } from 'next/navigation'
+import { useRouter } from 'next/navigation'
 import { useEffect, useMemo } from 'react'
 import useSWR from 'swr'
 import { fetcher } from './fetcher'
 
+/** Minimal material shape for navigation (from API) */
+type MaterialNavItem = Pick<
+  CourseMaterial,
+  | 'id'
+  | 'slug'
+  | 'title_nl'
+  | 'title_de'
+  | 'description_nl'
+  | 'description_de'
+  | 'language'
+  | 'materialTypes'
+  | 'schoolTypes'
+  | 'competences'
+  | 'topics'
+>
+
 interface MaterialNavigationProps {
   currentMaterial: CourseMaterial
-  materials: CourseMaterial[]
   locale: 'nl' | 'de'
   filters: {
     searchQuery: string
@@ -93,17 +108,19 @@ interface MaterialNavigationProps {
 
 export function MaterialNavigation({
   currentMaterial,
-  materials,
   locale,
   filters,
 }: MaterialNavigationProps) {
   const router = useRouter()
-  const pathname = usePathname()
-  const searchParams = useSearchParams()
   const dict = getDictionary(locale)
+  const { data: materials, isLoading } = useSWR<MaterialNavItem[]>(
+    '/api/materials-navigation',
+    fetcher,
+  )
   const isAuthenticated = useSWR('/api/users/me', fetcher).data?.user
-  const path = pathname ?? ''
+
   const filteredMaterials = useMemo(() => {
+    if (!materials || materials.length === 0) return []
     const query = filters.searchQuery.trim()
 
     // Normalize text by removing accents and converting to lowercase
@@ -186,10 +203,20 @@ export function MaterialNavigation({
   }, [materials, filters, locale])
 
   const currentIndex = filteredMaterials.findIndex((m) => m.id === currentMaterial.id)
-  const hasPrevious = currentIndex > 0
-  const hasNext = currentIndex < filteredMaterials.length - 1
+  const hasPrevious = !isLoading && materials && currentIndex > 0
+  const hasNext = !isLoading && materials && currentIndex >= 0 && currentIndex < filteredMaterials.length - 1
+  const positionText =
+    isLoading || !materials
+      ? '...'
+      : currentIndex >= 0
+        ? locale === 'de'
+          ? `${currentIndex + 1} von ${filteredMaterials.length}`
+          : `${currentIndex + 1} van ${filteredMaterials.length}`
+        : locale === 'de'
+          ? `? von ${filteredMaterials.length}`
+          : `? van ${filteredMaterials.length}`
 
-  const buildMaterialUrl = (material: CourseMaterial) => {
+  const buildMaterialUrl = (material: { id: string; slug?: string | null }) => {
     const slug = material.slug || `id:${material.id}`
     const baseUrl = `/lesmateriaal/${slug}`
 
@@ -229,10 +256,6 @@ export function MaterialNavigation({
     return () => window.removeEventListener('keydown', handleKeyDown)
   }, [currentIndex, filteredMaterials, hasPrevious, hasNext, router])
 
-  if (filteredMaterials.length <= 1) {
-    return null
-  }
-
   return (
     <div className="flex flex-wrap items-center justify-between gap-4 mb-3">
       <div>
@@ -259,11 +282,7 @@ export function MaterialNavigation({
           {dict.detailBackToOverview}
         </Link>
       </div>
-      <div className="text-sm md:text-right grow text-gray-500">
-        {locale === 'de'
-          ? `${currentIndex + 1} von ${filteredMaterials.length}`
-          : `${currentIndex + 1} van ${filteredMaterials.length}`}
-      </div>
+      <div className="text-sm md:text-right grow text-gray-500">{positionText}</div>
       <div className="flex items-center gap-2">
         <div className="flex items-center gap-2">
           {hasPrevious ? (

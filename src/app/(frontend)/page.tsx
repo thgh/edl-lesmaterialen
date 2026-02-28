@@ -1,5 +1,9 @@
 import { getDictionary } from '@/i18n/dictionaries'
 import { getLocaleFromHeaders } from '@/lib/domains'
+import {
+  filterAndSortMaterials,
+  parseFiltersFromSearchParams,
+} from '@/lib/filterMaterials'
 import config from '@/payload.config'
 import { getPayload } from 'payload'
 import { MaterialsExplorer } from './components/MaterialsExplorer'
@@ -8,45 +12,35 @@ import './styles.css'
 export const revalidate = 1
 export const dynamic = 'force-dynamic'
 
-export default async function HomePage() {
+export default async function HomePage({
+  searchParams,
+}: {
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>
+}) {
   const lang = await getLocaleFromHeaders()
   const dict = getDictionary(lang)
+  const sp = await searchParams
+
+  const filters = parseFiltersFromSearchParams(sp ?? {})
+
   const payloadConfig = await config
   const payload = await getPayload({ config: payloadConfig })
 
-  // Fetch course materials
   const materialsResponse = await payload.find({
     collection: 'course-materials',
-    where: {
-      status: { not_equals: 'draft' },
-    },
+    where: { status: { not_equals: 'draft' } },
     depth: 1,
-    limit: 9999,
+    limit: 300,
     sort: '-createdAt',
   })
 
-  // Fetch material types for filtering
-  const [materialTypesResponse, schoolTypesResponse, competencesResponse, topicsResponse] =
-    await Promise.all([
-      payload.find({ collection: 'material-types', limit: 999 }),
-      payload.find({ collection: 'school-types', limit: 999 }),
-      payload.find({ collection: 'competences', limit: 999 }),
-      payload.find({ collection: 'topics', limit: 999 }),
-    ])
-
-  const materials = materialsResponse.docs
-  const materialTypes = materialTypesResponse.docs
-  const schoolTypes = schoolTypesResponse.docs
-  const competences = competencesResponse.docs
-  const topics = topicsResponse.docs
+  const allFetched = materialsResponse.docs as any[]
+  const filteredAndSorted = filterAndSortMaterials(allFetched, filters, lang)
+  const initialMaterials = filteredAndSorted.slice(0, 12)
 
   return (
     <MaterialsExplorer
-      materials={materials as any}
-      materialTypes={materialTypes as any}
-      schoolTypes={schoolTypes as any}
-      competences={competences as any}
-      topics={topics as any}
+      initialMaterials={initialMaterials as any}
       lang={lang}
       labels={{
         searchTitle: dict.searchTitle,

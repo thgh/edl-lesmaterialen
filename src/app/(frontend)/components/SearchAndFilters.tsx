@@ -73,6 +73,8 @@ interface SearchAndFiltersProps {
   schoolTypes: MaterialType[]
   competences: MaterialType[]
   topics: MaterialType[]
+  taxonomiesLoading?: boolean
+  materialsLoading?: boolean
   searchQuery: string
   selectedTypes: string[]
   selectedSchoolTypes: string[]
@@ -105,12 +107,24 @@ interface FilterSectionProps {
     id: string
     title: string
     count: number
+    countLoading?: boolean
   }>
   selectedIds: string[]
   onToggle: (id: string) => void
+  isLoading?: boolean
 }
 
-function FilterSection({ title, options, selectedIds, onToggle }: FilterSectionProps) {
+function FilterSection({ title, options, selectedIds, onToggle, isLoading }: FilterSectionProps) {
+  if (isLoading && !options.length) {
+    return (
+      <div>
+        <h3 className="mb-2 text-sm font-medium text-gray-700">{title}</h3>
+        <div className="rounded-md border border-gray-200 shadow-sm px-3 py-4">
+          <span className="text-sm text-gray-400 animate-pulse">Loading...</span>
+        </div>
+      </div>
+    )
+  }
   if (!options.length) return null
   return (
     <div>
@@ -130,7 +144,9 @@ function FilterSection({ title, options, selectedIds, onToggle }: FilterSectionP
               />
               <span className="text-sm text-gray-800 group-hover:underline">{option.title}</span>
             </span>
-            <span className="text-xs text-gray-500">{option.count}</span>
+            <span className="text-xs text-gray-500">
+              {option.countLoading ? '...' : option.count}
+            </span>
           </label>
         ))}
       </div>
@@ -143,6 +159,8 @@ export function SearchAndFilters({
   schoolTypes,
   competences,
   topics,
+  taxonomiesLoading = false,
+  materialsLoading = false,
   searchQuery,
   selectedTypes,
   selectedSchoolTypes,
@@ -299,10 +317,11 @@ export function SearchAndFilters({
   }, [materialTypes, typeCounts, locale, getLocalizedTitleForSort])
 
   const visibleMaterialTypes = useMemo(() => {
+    if (materialsLoading) return sortedMaterialTypes
     return sortedMaterialTypes.filter(
       (type) => (typeCounts[type.id] ?? 0) > 0 || selectedTypes.includes(type.id),
     )
-  }, [sortedMaterialTypes, typeCounts, selectedTypes])
+  }, [sortedMaterialTypes, typeCounts, selectedTypes, materialsLoading])
 
   const sortedSchoolTypes = useMemo(() => {
     return [...schoolTypes].sort((a, b) => {
@@ -316,10 +335,11 @@ export function SearchAndFilters({
   }, [schoolTypes, schoolTypeCounts, locale, getLocalizedTitleForSort])
 
   const visibleSchoolTypes = useMemo(() => {
+    if (materialsLoading) return sortedSchoolTypes
     return sortedSchoolTypes.filter(
       (item) => (schoolTypeCounts[item.id] ?? 0) > 0 || selectedSchoolTypes.includes(item.id),
     )
-  }, [sortedSchoolTypes, schoolTypeCounts, selectedSchoolTypes])
+  }, [sortedSchoolTypes, schoolTypeCounts, selectedSchoolTypes, materialsLoading])
 
   const sortedCompetences = useMemo(() => {
     return [...competences].sort((a, b) => {
@@ -333,10 +353,11 @@ export function SearchAndFilters({
   }, [competences, competenceCounts, locale, getLocalizedTitleForSort])
 
   const visibleCompetences = useMemo(() => {
+    if (materialsLoading) return sortedCompetences
     return sortedCompetences.filter(
       (item) => (competenceCounts[item.id] ?? 0) > 0 || selectedCompetences.includes(item.id),
     )
-  }, [sortedCompetences, competenceCounts, selectedCompetences])
+  }, [sortedCompetences, competenceCounts, selectedCompetences, materialsLoading])
 
   const sortedTopics = useMemo(() => {
     return [...topics].sort((a, b) => {
@@ -350,10 +371,11 @@ export function SearchAndFilters({
   }, [topics, topicCounts, locale, getLocalizedTitleForSort])
 
   const visibleTopics = useMemo(() => {
+    if (materialsLoading) return sortedTopics
     return sortedTopics.filter(
       (item) => (topicCounts[item.id] ?? 0) > 0 || selectedTopics.includes(item.id),
     )
-  }, [sortedTopics, topicCounts, selectedTopics])
+  }, [sortedTopics, topicCounts, selectedTopics, materialsLoading])
 
   const handleLanguageToggle = useCallback(
     (code: 'nl' | 'de') => {
@@ -419,10 +441,11 @@ export function SearchAndFilters({
   }, [cefrCounts])
 
   const visibleCefrLevels = useMemo(() => {
+    if (materialsLoading) return sortedCefrLevels
     return sortedCefrLevels.filter(
       (level) => (cefrCounts[level.value] ?? 0) > 0 || selectedCefrLevels.includes(level.value),
     )
-  }, [sortedCefrLevels, cefrCounts, selectedCefrLevels])
+  }, [sortedCefrLevels, cefrCounts, selectedCefrLevels, materialsLoading])
 
   return (
     <div className="space-y-4">
@@ -454,13 +477,18 @@ export function SearchAndFilters({
             id: 'nl',
             title: labels.languageDutchLabel,
             count: languageCounts['nl'] ?? 0,
+            countLoading: materialsLoading,
           },
           {
             id: 'de',
             title: labels.languageGermanLabel,
             count: languageCounts['de'] ?? 0,
+            countLoading: materialsLoading,
           },
-        ].filter((option) => option.count > 0 || selectedLanguages.includes(option.id))}
+        ].filter(
+          (option) =>
+            materialsLoading || option.count > 0 || selectedLanguages.includes(option.id),
+        )}
         selectedIds={selectedLanguages}
         onToggle={(id) => handleLanguageToggle(id as 'nl' | 'de')}
       />
@@ -471,9 +499,11 @@ export function SearchAndFilters({
           id: item.id,
           title: getLocalizedTitle(item),
           count: schoolTypeCounts[item.id] ?? 0,
+          countLoading: materialsLoading,
         }))}
         selectedIds={selectedSchoolTypes}
         onToggle={handleSchoolTypeToggle}
+        isLoading={taxonomiesLoading}
       />
 
       <FilterSection
@@ -482,9 +512,11 @@ export function SearchAndFilters({
           id: item.id,
           title: getLocalizedTitle(item),
           count: topicCounts[item.id] ?? 0,
+          countLoading: materialsLoading,
         }))}
         selectedIds={selectedTopics}
         onToggle={handleTopicToggle}
+        isLoading={taxonomiesLoading}
       />
 
       <FilterSection
@@ -493,9 +525,11 @@ export function SearchAndFilters({
           id: item.id,
           title: getLocalizedTitle(item),
           count: competenceCounts[item.id] ?? 0,
+          countLoading: materialsLoading,
         }))}
         selectedIds={selectedCompetences}
         onToggle={handleCompetenceToggle}
+        isLoading={taxonomiesLoading}
       />
 
       <FilterSection
@@ -504,6 +538,7 @@ export function SearchAndFilters({
           id: level.value,
           title: level.label,
           count: cefrCounts[level.value] ?? 0,
+          countLoading: materialsLoading,
         }))}
         selectedIds={selectedCefrLevels}
         onToggle={handleCefrToggle}
@@ -515,9 +550,11 @@ export function SearchAndFilters({
           id: type.id,
           title: getLocalizedTitle(type),
           count: typeCounts[type.id] ?? 0,
+          countLoading: materialsLoading,
         }))}
         selectedIds={selectedTypes}
         onToggle={handleTypeToggle}
+        isLoading={taxonomiesLoading}
       />
     </div>
   )

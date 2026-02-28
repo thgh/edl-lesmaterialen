@@ -21,9 +21,11 @@ export function Header({ locale }: HeaderProps) {
         {/* Left: title, tagline under it, language switcher inline after title */}
         <div className="flex flex-col gap-2">
           <div className="flex flex-wrap items-start gap-3">
-            <h1 className="text-xl lg:text-2xl xl:text-3xl font-bold text-gray-900">
-              {dict.siteTitle}
-            </h1>
+            <a href="/">
+              <h1 className="text-xl lg:text-2xl xl:text-3xl font-bold text-gray-900">
+                {dict.siteTitle}
+              </h1>
+            </a>
             <nav className="flex items-center gap-2 text-sm">
               <a
                 href={

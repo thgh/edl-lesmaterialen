@@ -2,10 +2,18 @@ import { CourseMaterial, CourseMaterialAttachment } from '@/payload-types'
 import Image from 'next/image'
 import Link from 'next/link'
 
+type TaxonomyItem = { id: string; title_nl?: string | null; title_de?: string | null }
+
 interface CourseMaterialCardProps {
   material: CourseMaterial
   locale: 'nl' | 'de'
   cefrLabel: string
+  taxonomies?: {
+    materialTypes: TaxonomyItem[]
+    schoolTypes: TaxonomyItem[]
+    competences: TaxonomyItem[]
+    topics: TaxonomyItem[]
+  }
   filters?: {
     searchQuery: string
     selectedTypes: string[]
@@ -17,10 +25,16 @@ interface CourseMaterialCardProps {
   }
 }
 
+function getLocalizedTitle(item: TaxonomyItem | null | undefined, locale: 'nl' | 'de'): string {
+  if (!item) return ''
+  return (locale === 'de' ? item.title_de : item.title_nl) || item.title_nl || item.title_de || ''
+}
+
 export function CourseMaterialCard({
   material,
   locale,
   cefrLabel,
+  taxonomies,
   filters,
 }: CourseMaterialCardProps) {
   const getTitle = () => {
@@ -47,15 +61,20 @@ export function CourseMaterialCard({
       return null
     }
 
-    // Helper to get localized title from a material type
+    // Helper to get localized title (object with titles, or resolve ID via taxonomies)
     const getTypeTitle = (type: any): string | null => {
       if (typeof type === 'object' && type) {
-        return (
+        const title =
           (locale === 'de' ? type.title_de : type.title_nl) ||
           type.title_nl ||
           type.title_de ||
           null
-        )
+        if (title) return title
+      }
+      const id = getTypeId(type)
+      if (id && taxonomies?.materialTypes) {
+        const found = taxonomies.materialTypes.find((t) => t.id === id)
+        return found ? getLocalizedTitle(found, locale) : null
       }
       return null
     }
@@ -131,13 +150,16 @@ export function CourseMaterialCard({
       material.schoolTypes.length > 0
     ) {
       return material.schoolTypes
-        .map((st) =>
-          typeof st === 'object'
-            ? locale === 'de'
-              ? (st as any).title_de
-              : (st as any).title_nl
-            : '',
-        )
+        .map((st) => {
+          if (typeof st === 'object' && st) {
+            return (locale === 'de' ? (st as any).title_de : (st as any).title_nl) || ''
+          }
+          if (typeof st === 'string' && taxonomies?.schoolTypes) {
+            const found = taxonomies.schoolTypes.find((t) => t.id === st)
+            return found ? getLocalizedTitle(found, locale) : ''
+          }
+          return ''
+        })
         .filter(Boolean)
         .join(', ')
     }
@@ -147,13 +169,16 @@ export function CourseMaterialCard({
   const getTopics = () => {
     if (material.topics && material.topics.length > 0) {
       return material.topics
-        .map((topic) =>
-          typeof topic === 'object'
-            ? locale === 'de'
-              ? (topic as any).title_de
-              : (topic as any).title_nl
-            : '',
-        )
+        .map((topic) => {
+          if (typeof topic === 'object' && topic) {
+            return (locale === 'de' ? (topic as any).title_de : (topic as any).title_nl) || ''
+          }
+          if (typeof topic === 'string' && taxonomies?.topics) {
+            const found = taxonomies.topics.find((t) => t.id === topic)
+            return found ? getLocalizedTitle(found, locale) : ''
+          }
+          return ''
+        })
         .filter(Boolean)
         .join(', ')
     }
@@ -163,13 +188,16 @@ export function CourseMaterialCard({
   const getCompetences = () => {
     if (material.competences && material.competences.length > 0) {
       return material.competences
-        .map((comp) =>
-          typeof comp === 'object'
-            ? locale === 'de'
-              ? (comp as any).title_de
-              : (comp as any).title_nl
-            : '',
-        )
+        .map((comp) => {
+          if (typeof comp === 'object' && comp) {
+            return (locale === 'de' ? (comp as any).title_de : (comp as any).title_nl) || ''
+          }
+          if (typeof comp === 'string' && taxonomies?.competences) {
+            const found = taxonomies.competences.find((t) => t.id === comp)
+            return found ? getLocalizedTitle(found, locale) : ''
+          }
+          return ''
+        })
         .filter(Boolean)
         .join(', ')
     }

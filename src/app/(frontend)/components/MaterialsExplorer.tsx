@@ -2,6 +2,7 @@
 
 import { CEFRLevels } from '@/collections/CEFRLevels'
 import { getDictionary } from '@/i18n/dictionaries'
+import { filterAndSortMaterials } from '@/lib/filterMaterials'
 import { CourseMaterial } from '@/payload-types'
 import Link from 'next/link'
 import { useEffect, useMemo, useRef, useState } from 'react'
@@ -35,25 +36,42 @@ type Labels = {
   hideFilters: string
 }
 
-interface MaterialsExplorerProps {
-  materials: CourseMaterial[]
+type TaxonomiesData = {
   materialTypes: MaterialType[]
   schoolTypes: MaterialType[]
   competences: MaterialType[]
   topics: MaterialType[]
+}
+
+const MATERIALS_SWR_KEY = '/api/materials'
+
+interface MaterialsExplorerProps {
+  initialMaterials: CourseMaterial[]
   lang: 'nl' | 'de'
   labels: Labels
 }
 
+const emptyTaxonomies: TaxonomiesData = {
+  materialTypes: [],
+  schoolTypes: [],
+  competences: [],
+  topics: [],
+}
+
 export function MaterialsExplorer({
-  materials,
-  materialTypes,
-  schoolTypes,
-  competences,
-  topics,
+  initialMaterials,
   lang,
   labels,
 }: MaterialsExplorerProps) {
+  const { data: materials } = useSWR<CourseMaterial[]>(MATERIALS_SWR_KEY, fetcher)
+
+  const materialsForDisplay = materials ?? initialMaterials
+  const hasFullMaterials = materials !== undefined
+
+  const { data: taxonomies = emptyTaxonomies, isLoading: taxonomiesLoading } =
+    useSWR<TaxonomiesData>('/api/taxonomies', fetcher)
+
+  const { materialTypes, schoolTypes, competences, topics } = taxonomies
   const dict = getDictionary(lang)
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedTypes, setSelectedTypes] = useState<string[]>([])
@@ -67,12 +85,13 @@ export function MaterialsExplorer({
 
   const isAuthenticated = useSWR('/api/users/me', fetcher).data?.user
 
-  // Validate and remove invalid selections from taxonomy lists
+  // Validate and remove invalid selections from taxonomy lists (skip while loading)
   useEffect(() => {
+    if (taxonomiesLoading) return
+
     const validLanguageValues = ['nl', 'de', 'en']
     const validCefrValues = CEFRLevels.map((level) => level.value)
 
-    // Get valid IDs from taxonomy arrays
     const validTypeIds = new Set(materialTypes.map((t) => t.id))
     const validSchoolTypeIds = new Set(schoolTypes.map((t) => t.id))
     const validCompetenceIds = new Set(competences.map((c) => c.id))
@@ -110,6 +129,7 @@ export function MaterialsExplorer({
       setSelectedCefrLevels(filteredCefrLevels)
     }
   }, [
+    taxonomiesLoading,
     materialTypes,
     schoolTypes,
     competences,
@@ -224,150 +244,19 @@ export function MaterialsExplorer({
     selectedCefrLevels,
   ])
 
-  const filtered = useMemo(() => {
-    const query = searchQuery.trim()
-    // Normalize text by removing accents and converting to lowercase
-    const normalizeText = (text: string) => {
-      return text
-        .normalize('NFD')
-        .replace(/[\u0300-\u036f]/g, '') // Remove diacritics/accents
-        .toLowerCase()
-    }
-
-    const normalizedQuery = normalizeText(query)
-    const queryWords = normalizedQuery.split(/\s+/).filter((word) => word.length > 0)
-
-    const filteredMaterials = materials.filter((m) => {
-      // Get title with fallback to other language
-      const title =
-        (lang === 'de' ? m.title_de : m.title_nl) || (lang === 'de' ? m.title_nl : m.title_de) || ''
-      // Get description with fallback to other language
-      const description =
-        (lang === 'de' ? m.description_de : m.description_nl) ||
-        (lang === 'de' ? m.description_nl : m.description_de) ||
-        ''
-
-      // Concatenate title and description, then normalize
-      const primarySearchText = normalizeText(title + ' ' + description)
-
-      // Extract topic titles for secondary search (lower priority) with fallback
-      const topicTitles = Array.isArray(m.topics)
-        ? m.topics
-            .map((t) => {
-              if (typeof t === 'string') return ''
-              const topic = t as any
-              const topicTitle =
-                (lang === 'de' ? topic.title_de : topic.title_nl) ||
-                (lang === 'de' ? topic.title_nl : topic.title_de) ||
-                ''
-              return topicTitle
-            })
-            .join(' ')
-        : ''
-      const topicSearchText = normalizeText(topicTitles)
-
-      // Check if all query words are present in primary fields (title/description)
-      const matchesPrimary =
-        query === '' || queryWords.every((word) => primarySearchText.includes(word))
-
-      // If not matching primary, check topic titles (lower priority)
-      const matchesQueryInTopicTitles =
-        query === '' || queryWords.every((word) => topicSearchText.includes(word))
-
-      const matchesQuery = matchesPrimary || matchesQueryInTopicTitles
-      const matchesLanguage =
-        selectedLanguages.length === 0 ||
-        (Array.isArray(m.language) &&
-          m.language.some((l) => selectedLanguages.includes(l as string)))
-      const matchesType =
-        selectedTypes.length === 0 ||
-        (Array.isArray(m.materialTypes) &&
-          m.materialTypes.some((t) => {
-            if (typeof t === 'string') return selectedTypes.includes(t)
-            return t && 'id' in t && selectedTypes.includes(String((t as any).id))
-          }))
-      const matchesSchoolType =
-        selectedSchoolTypes.length === 0 ||
-        (Array.isArray(m.schoolTypes) &&
-          m.schoolTypes.some((st) => {
-            if (typeof st === 'string') return selectedSchoolTypes.includes(st)
-            return st && 'id' in st && selectedSchoolTypes.includes(String((st as any).id))
-          }))
-      const matchesCompetences =
-        selectedCompetences.length === 0 ||
-        (Array.isArray(m.competences) &&
-          m.competences.some((c) => {
-            if (typeof c === 'string') return selectedCompetences.includes(c)
-            return c && 'id' in c && selectedCompetences.includes(String((c as any).id))
-          }))
-      const matchesTopics =
-        selectedTopics.length === 0 ||
-        (Array.isArray(m.topics) &&
-          m.topics.some((t) => {
-            if (typeof t === 'string') return selectedTopics.includes(t)
-            return t && 'id' in t && selectedTopics.includes(String((t as any).id))
-          }))
-      const matchesCefr =
-        selectedCefrLevels.length === 0 ||
-        (Array.isArray(m.cefr) &&
-          m.cefr.some((level) => selectedCefrLevels.includes(level as string)))
-      return (
-        matchesQuery &&
-        matchesLanguage &&
-        matchesType &&
-        matchesSchoolType &&
-        matchesCompetences &&
-        matchesTopics &&
-        matchesCefr
-      )
-    })
-
-    // Sort: featured first, then by relevance (primary matches before topic matches), then by createdAt (newest first)
-    return filteredMaterials.sort((a, b) => {
-      // First sort by featured (featured items first)
-      const aFeatured = (a as any).featured === true ? 1 : 0
-      const bFeatured = (b as any).featured === true ? 1 : 0
-      if (aFeatured !== bFeatured) {
-        return bFeatured - aFeatured
-      }
-
-      // Then sort by relevance (primary matches before topic-only matches)
-      if (query !== '') {
-        // Get titles with fallback for relevance sorting
-        const aTitle =
-          (lang === 'de' ? a.title_de : a.title_nl) ||
-          (lang === 'de' ? a.title_nl : a.title_de) ||
-          ''
-        const aDescription =
-          (lang === 'de' ? a.description_de : a.description_nl) ||
-          (lang === 'de' ? a.description_nl : a.description_de) ||
-          ''
-        const aPrimaryText = normalizeText(aTitle + ' ' + aDescription)
-
-        const bTitle =
-          (lang === 'de' ? b.title_de : b.title_nl) ||
-          (lang === 'de' ? b.title_nl : b.title_de) ||
-          ''
-        const bDescription =
-          (lang === 'de' ? b.description_de : b.description_nl) ||
-          (lang === 'de' ? b.description_nl : b.description_de) ||
-          ''
-        const bPrimaryText = normalizeText(bTitle + ' ' + bDescription)
-
-        const aMatchesPrimary = queryWords.every((word) => aPrimaryText.includes(word))
-        const bMatchesPrimary = queryWords.every((word) => bPrimaryText.includes(word))
-        if (aMatchesPrimary !== bMatchesPrimary) {
-          return Number(bMatchesPrimary) - Number(aMatchesPrimary) // Primary matches come first
-        }
-      }
-
-      // Finally sort by createdAt (newest first)
-      const aDate = a.createdAt ? new Date(a.createdAt).getTime() : 0
-      const bDate = b.createdAt ? new Date(b.createdAt).getTime() : 0
-      return bDate - aDate
-    })
-  }, [
-    materials,
+  const filtered = useMemo(
+    () =>
+      filterAndSortMaterials(materialsForDisplay, {
+        searchQuery,
+        selectedTypes,
+        selectedSchoolTypes,
+        selectedCompetences,
+        selectedTopics,
+        selectedLanguages,
+        selectedCefrLevels,
+      }, lang),
+    [
+    materialsForDisplay,
     searchQuery,
     lang,
     selectedLanguages,
@@ -389,6 +278,16 @@ export function MaterialsExplorer({
     languageCounts,
     cefrCounts,
   } = useMemo(() => {
+    if (!materials) {
+      return {
+        typeCounts: {},
+        schoolTypeCounts: {},
+        competenceCounts: {},
+        topicCounts: {},
+        languageCounts: {},
+        cefrCounts: {},
+      }
+    }
     const query = searchQuery.trim()
 
     // Normalize text by removing accents and converting to lowercase
@@ -828,23 +727,27 @@ export function MaterialsExplorer({
       <Header locale={lang} />
       <div className="block md:flex flex-1">
         <Sidebar locale={lang}>
-          <div className="md:hidden">
-            <button
-              type="button"
-              aria-expanded={filtersOpen}
-              className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm shadow-sm hover:bg-gray-50"
-              onClick={() => setFiltersOpen((v) => !v)}
-            >
-              {filtersOpen ? labels.hideFilters : labels.showFilters}
-            </button>
-          </div>
+          {hasFullMaterials ? (
+            <>
+              <div className="md:hidden">
+                <button
+                  type="button"
+                  aria-expanded={filtersOpen}
+                  className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm shadow-sm hover:bg-gray-50"
+                  onClick={() => setFiltersOpen((v) => !v)}
+                >
+                  {filtersOpen ? labels.hideFilters : labels.showFilters}
+                </button>
+              </div>
 
-          <div className={`${filtersOpen ? 'block mt-4' : 'hidden'} md:block`}>
-            <SearchAndFilters
+              <div className={`${filtersOpen ? 'block mt-4' : 'hidden'} md:block`}>
+                <SearchAndFilters
               materialTypes={materialTypes}
               schoolTypes={schoolTypes}
               competences={competences}
               topics={topics}
+              taxonomiesLoading={taxonomiesLoading}
+              materialsLoading={!hasFullMaterials}
               searchQuery={searchQuery}
               selectedTypes={selectedTypes}
               selectedSchoolTypes={selectedSchoolTypes}
@@ -881,15 +784,19 @@ export function MaterialsExplorer({
                 languageDutchLabel: labels.languageDutchLabel,
                 languageGermanLabel: labels.languageGermanLabel,
               }}
-              typeCounts={typeCounts}
-              schoolTypeCounts={schoolTypeCounts}
-              competenceCounts={competenceCounts}
-              topicCounts={topicCounts}
-              languageCounts={languageCounts}
-              cefrCounts={cefrCounts}
+              typeCounts={hasFullMaterials ? typeCounts : {}}
+              schoolTypeCounts={hasFullMaterials ? schoolTypeCounts : {}}
+              competenceCounts={hasFullMaterials ? competenceCounts : {}}
+              topicCounts={hasFullMaterials ? topicCounts : {}}
+              languageCounts={hasFullMaterials ? languageCounts : {}}
+              cefrCounts={hasFullMaterials ? cefrCounts : {}}
               locale={lang}
-            />
-          </div>
+                />
+              </div>
+            </>
+          ) : (
+            <div className="w-full min-h-[200px] animate-pulse rounded-md bg-gray-100" aria-hidden />
+          )}
         </Sidebar>
         <main className="px-4 py-6 sm:p-6 lg:p-8">
           {isAuthenticated && (
@@ -902,10 +809,12 @@ export function MaterialsExplorer({
               </Link>
             </div>
           )}
-          <div className="mb-8 text-sm text-gray-600">
-            {filtered.length === 1
-              ? dict.materialFound
-              : dict.materialsFound.replace('{count}', filtered.length.toString())}
+          <div className="mb-8 text-sm text-gray-600 min-h-[1.25rem]">
+            {hasFullMaterials
+              ? filtered.length === 1
+                ? dict.materialFound
+                : dict.materialsFound.replace('{count}', filtered.length.toString())
+              : '\u00A0'}
           </div>
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 3xl:grid-cols-5">
             {visibleMaterials.map((material) => (
@@ -914,6 +823,7 @@ export function MaterialsExplorer({
                 material={material}
                 locale={lang}
                 cefrLabel={labels.cefrLabel}
+                taxonomies={{ materialTypes, schoolTypes, competences, topics }}
                 filters={{
                   searchQuery,
                   selectedTypes,

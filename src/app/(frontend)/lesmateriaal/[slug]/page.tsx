@@ -95,22 +95,6 @@ async function fetchMaterialBySlugOrId(slugOrId: string) {
   return (res.docs?.[0] as unknown as CourseMaterial) || null
 }
 
-async function fetchAllMaterials() {
-  const payloadConfig = await config
-  const payload = await getPayload({ config: payloadConfig })
-
-  const res = await payload.find({
-    collection: 'course-materials',
-    where: {
-      status: { not_equals: 'draft' },
-    },
-    limit: 9999,
-    sort: '-createdAt',
-  })
-
-  return res.docs as unknown as CourseMaterial[]
-}
-
 function getLocalized<T extends { title_nl?: string | null; title_de?: string | null }>(
   obj: T | string | null | undefined,
   locale: 'nl' | 'de',
@@ -141,11 +125,7 @@ export default async function CourseMaterialPage({
   const lang = await getLocaleFromHeaders()
   const dict = getDictionary(lang)
 
-  // Fetch current material and all materials for navigation
-  const [material, allMaterials] = await Promise.all([
-    fetchMaterialBySlugOrId(p.slug),
-    fetchAllMaterials(),
-  ])
+  const material = await fetchMaterialBySlugOrId(p.slug)
 
   if (!material) {
     return (
@@ -253,7 +233,6 @@ export default async function CourseMaterialPage({
           <aside className="mb-4 max-w-6xl mx-auto">
             <MaterialNavigation
               currentMaterial={material}
-              materials={allMaterials}
               locale={lang}
               filters={filters}
             />
