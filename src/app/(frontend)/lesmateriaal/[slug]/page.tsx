@@ -12,8 +12,6 @@ import '../../styles.css'
 import { considerPDF } from '../../utils/pdf'
 import { renderTextWithEmailLinks } from '../../utils/text'
 
-export const dynamic = 'force-dynamic'
-
 // PDF Embed Component
 function PDFEmbed({ url }: { url: string }) {
   const proxyUrl = url.startsWith('http') ? `/api/pdf-proxy?url=${encodeURIComponent(url)}` : url

@@ -1,3 +1,4 @@
+import { revalidateTag } from 'next/cache'
 import { CollectionConfig, RelationshipField } from 'payload'
 import { CEFRLevels } from './CEFRLevels'
 import { hiddenTitle, localize, localizedTitle } from './field'
@@ -15,6 +16,18 @@ export const materialStatusOptions = [
 
 export const CourseMaterials: CollectionConfig = {
   slug: 'course-materials',
+  hooks: {
+    afterChange: [
+      () => {
+        revalidateTag('materials', 'default')
+      },
+    ],
+    afterDelete: [
+      () => {
+        revalidateTag('materials', 'default')
+      },
+    ],
+  },
   labels: {
     singular: 'Lesmateriaal',
     plural: 'Lesmaterialen',

@@ -1,8 +1,21 @@
+import { revalidateTag } from 'next/cache'
 import { CollectionConfig } from 'payload'
 import { hiddenTitle, localizedTitle } from './field'
 import { beforeChangeSlug } from './formatSlug'
 
 const base: Omit<CollectionConfig, 'slug'> = {
+  hooks: {
+    afterChange: [
+      () => {
+        revalidateTag('taxonomies', 'default')
+      },
+    ],
+    afterDelete: [
+      () => {
+        revalidateTag('taxonomies', 'default')
+      },
+    ],
+  },
   admin: {
     useAsTitle: 'title',
     hideAPIURL: true,

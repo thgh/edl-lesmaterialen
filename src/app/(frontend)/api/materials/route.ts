@@ -1,23 +1,13 @@
-import config from '@/payload.config'
+import { getCachedMaterials } from '@/lib/cachedData'
 import { NextResponse } from 'next/server'
-import { getPayload } from 'payload'
 
 /**
  * Returns all published materials with depth 0.
  * Taxonomies (materialTypes, schoolTypes, competences, topics) are IDs only -
  * resolve via /api/taxonomies. Use for lazy-loaded homepage grid.
+ * Cached incrementally via Next.js 16 use cache; invalidated on material changes.
  */
 export async function GET() {
-  const payloadConfig = await config
-  const payload = await getPayload({ config: payloadConfig })
-
-  const res = await payload.find({
-    collection: 'course-materials',
-    where: { status: { not_equals: 'draft' } },
-    limit: 9999,
-    sort: '-createdAt',
-    depth: 0,
-  })
-
-  return NextResponse.json(res.docs)
+  const docs = await getCachedMaterials()
+  return NextResponse.json(docs)
 }

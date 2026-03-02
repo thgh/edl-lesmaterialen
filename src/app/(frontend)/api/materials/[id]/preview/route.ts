@@ -4,8 +4,6 @@ import { NextRequest, NextResponse } from 'next/server'
 import path from 'path'
 import { getPayload } from 'payload'
 
-export const revalidate = 3600 // 1 hour
-
 /**
  * Serves the preview image for a course material by material ID.
  * Use when material.preview is only populated as an ID (depth 0).

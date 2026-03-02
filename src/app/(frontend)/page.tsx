@@ -10,9 +10,6 @@ import { getPayload } from 'payload'
 import { MaterialsExplorer } from './components/MaterialsExplorer'
 import './styles.css'
 
-export const revalidate = 1
-export const dynamic = 'force-dynamic'
-
 export default async function HomePage({
   searchParams,
 }: {
