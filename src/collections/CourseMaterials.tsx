@@ -1,4 +1,4 @@
-import { CollectionConfig, FieldAccess, RelationshipField } from 'payload'
+import { CollectionConfig, RelationshipField } from 'payload'
 import { CEFRLevels } from './CEFRLevels'
 import { hiddenTitle, localize, localizedTitle } from './field'
 import { beforeChangeSlug } from './formatSlug'

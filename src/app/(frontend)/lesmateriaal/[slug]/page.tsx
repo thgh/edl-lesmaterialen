@@ -1,6 +1,6 @@
 import { getDictionary } from '@/i18n/dictionaries'
 import { getLocaleFromHeaders } from '@/lib/domains'
-import { CourseMaterial, CourseMaterialAttachment } from '@/payload-types'
+import { CourseMaterial } from '@/payload-types'
 import config from '@/payload.config'
 import Image from 'next/image'
 import Link from 'next/link'
@@ -41,6 +41,7 @@ type SearchParams = {
   competences?: string
   topics?: string
   langs?: string
+  cefr?: string
 }
 
 async function fetchMaterialBySlugOrId(slugOrId: string) {
@@ -171,6 +172,12 @@ export default async function CourseMaterialPage({
           .map((t) => t.trim())
           .filter(Boolean)
       : [],
+    selectedCefrLevels: sp.cefr
+      ? sp.cefr
+          .split(',')
+          .map((t) => t.trim())
+          .filter(Boolean)
+      : [],
   }
 
   const title =
@@ -180,12 +187,7 @@ export default async function CourseMaterialPage({
     material.title ||
     'Untitled'
 
-  const preview =
-    material.preview &&
-    typeof material.preview === 'object' &&
-    material.preview.mimeType?.startsWith('image/')
-      ? (material.preview as CourseMaterialAttachment)
-      : null
+  const previewUrl = material.preview ? `/api/materials/${material.id}/preview` : null
 
   const externalLinks = material.links || []
   const hasExternalOnly =
@@ -239,10 +241,10 @@ export default async function CourseMaterialPage({
           </aside>
 
           <article className="max-w-6xl mx-auto mt-10">
-            {preview && (
+            {previewUrl && (
               <div className="mb-8 relative aspect-[3/2] w-full max-w-1/2 float-right overflow-hidden rounded-xl border border-gray-200 bg-gray-50">
                 <Image
-                  src={preview.url!}
+                  src={previewUrl}
                   alt={title}
                   fill
                   sizes="(min-width: 1024px) 896px, 100vw"

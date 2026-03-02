@@ -1,4 +1,4 @@
-import { CourseMaterial, CourseMaterialAttachment } from '@/payload-types'
+import { CourseMaterial } from '@/payload-types'
 import Image from 'next/image'
 import Link from 'next/link'
 
@@ -204,12 +204,8 @@ export function CourseMaterialCard({
     return ''
   }
 
-  const preview =
-    material.preview &&
-    typeof material.preview === 'object' &&
-    material.preview.mimeType?.startsWith('image/')
-      ? (material.preview as CourseMaterialAttachment)
-      : null
+  const previewUrl =
+    material.preview ? `/api/materials/${material.id}/preview` : null
   const slug = material.slug || `id:${material.id}`
   const { displayed: displayedTypes, remaining: remainingTypes } = getMaterialTypes()
 
@@ -239,10 +235,10 @@ export function CourseMaterialCard({
   return (
     <Link href={buildDetailUrl()} className="block">
       <article className="rounded-xl border border-gray-200 bg-white shadow-sm transition hover:shadow-md overflow-visible">
-        {preview && (
+        {previewUrl && (
           <div className="relative aspect-[3/2] w-full overflow-hidden bg-gray-50 rounded-t-xl">
             <Image
-              src={preview.url!}
+              src={previewUrl}
               alt={getTitle()}
               fill
               sizes="(min-width: 768px) 33vw, 100vw"

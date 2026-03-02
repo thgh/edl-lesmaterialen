@@ -2,7 +2,7 @@
 
 import { CEFRLevels } from '@/collections/CEFRLevels'
 import { getDictionary } from '@/i18n/dictionaries'
-import { filterAndSortMaterials } from '@/lib/filterMaterials'
+import { filterAndSortMaterials, type FilterParams } from '@/lib/filterMaterials'
 import { CourseMaterial } from '@/payload-types'
 import Link from 'next/link'
 import { useEffect, useMemo, useRef, useState } from 'react'
@@ -20,22 +20,6 @@ type MaterialType = {
   title_de?: string
 }
 
-type Labels = {
-  searchTitle: string
-  searchPlaceholder: string
-  materialTypesTitle: string
-  schoolTypesTitle: string
-  competencesTitle: string
-  topicsTitle: string
-  cefrTitle: string
-  cefrLabel: string
-  languagesTitle: string
-  languageDutchLabel: string
-  languageGermanLabel: string
-  showFilters: string
-  hideFilters: string
-}
-
 type TaxonomiesData = {
   materialTypes: MaterialType[]
   schoolTypes: MaterialType[]
@@ -47,8 +31,8 @@ const MATERIALS_SWR_KEY = '/api/materials'
 
 interface MaterialsExplorerProps {
   initialMaterials: CourseMaterial[]
+  initialFilters?: FilterParams
   lang: 'nl' | 'de'
-  labels: Labels
 }
 
 const emptyTaxonomies: TaxonomiesData = {
@@ -60,8 +44,8 @@ const emptyTaxonomies: TaxonomiesData = {
 
 export function MaterialsExplorer({
   initialMaterials,
+  initialFilters,
   lang,
-  labels,
 }: MaterialsExplorerProps) {
   const { data: materials } = useSWR<CourseMaterial[]>(MATERIALS_SWR_KEY, fetcher)
 
@@ -73,14 +57,22 @@ export function MaterialsExplorer({
 
   const { materialTypes, schoolTypes, competences, topics } = taxonomies
   const dict = getDictionary(lang)
-  const [searchQuery, setSearchQuery] = useState('')
-  const [selectedTypes, setSelectedTypes] = useState<string[]>([])
-  const [selectedSchoolTypes, setSelectedSchoolTypes] = useState<string[]>([])
-  const [selectedCompetences, setSelectedCompetences] = useState<string[]>([])
-  const [selectedTopics, setSelectedTopics] = useState<string[]>([])
-  const [selectedLanguages, setSelectedLanguages] = useState<string[]>([])
-  const [selectedCefrLevels, setSelectedCefrLevels] = useState<string[]>([])
-  const [limit, setLimit] = useState(30)
+  const [searchQuery, setSearchQuery] = useState(initialFilters?.searchQuery ?? '')
+  const [selectedTypes, setSelectedTypes] = useState(initialFilters?.selectedTypes ?? [])
+  const [selectedSchoolTypes, setSelectedSchoolTypes] = useState(
+    initialFilters?.selectedSchoolTypes ?? [],
+  )
+  const [selectedCompetences, setSelectedCompetences] = useState(
+    initialFilters?.selectedCompetences ?? [],
+  )
+  const [selectedTopics, setSelectedTopics] = useState(initialFilters?.selectedTopics ?? [])
+  const [selectedLanguages, setSelectedLanguages] = useState(
+    initialFilters?.selectedLanguages ?? [],
+  )
+  const [selectedCefrLevels, setSelectedCefrLevels] = useState(
+    initialFilters?.selectedCefrLevels ?? [],
+  )
+  const [limit, setLimit] = useState(12)
   const [filtersOpen, setFiltersOpen] = useState(false)
 
   const isAuthenticated = useSWR('/api/users/me', fetcher).data?.user
@@ -246,26 +238,31 @@ export function MaterialsExplorer({
 
   const filtered = useMemo(
     () =>
-      filterAndSortMaterials(materialsForDisplay, {
-        searchQuery,
-        selectedTypes,
-        selectedSchoolTypes,
-        selectedCompetences,
-        selectedTopics,
-        selectedLanguages,
-        selectedCefrLevels,
-      }, lang),
+      filterAndSortMaterials(
+        materialsForDisplay,
+        {
+          searchQuery,
+          selectedTypes,
+          selectedSchoolTypes,
+          selectedCompetences,
+          selectedTopics,
+          selectedLanguages,
+          selectedCefrLevels,
+        },
+        lang,
+      ),
     [
-    materialsForDisplay,
-    searchQuery,
-    lang,
-    selectedLanguages,
-    selectedTypes,
-    selectedSchoolTypes,
-    selectedCompetences,
-    selectedTopics,
-    selectedCefrLevels,
-  ])
+      materialsForDisplay,
+      searchQuery,
+      lang,
+      selectedLanguages,
+      selectedTypes,
+      selectedSchoolTypes,
+      selectedCompetences,
+      selectedTopics,
+      selectedCefrLevels,
+    ],
+  )
 
   const visibleMaterials = filtered.slice(0, limit)
 
@@ -736,69 +733,60 @@ export function MaterialsExplorer({
                   className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm shadow-sm hover:bg-gray-50"
                   onClick={() => setFiltersOpen((v) => !v)}
                 >
-                  {filtersOpen ? labels.hideFilters : labels.showFilters}
+                  {filtersOpen ? dict.hideFilters : dict.showFilters}
                 </button>
               </div>
 
               <div className={`${filtersOpen ? 'block mt-4' : 'hidden'} md:block`}>
                 <SearchAndFilters
-              materialTypes={materialTypes}
-              schoolTypes={schoolTypes}
-              competences={competences}
-              topics={topics}
-              taxonomiesLoading={taxonomiesLoading}
-              materialsLoading={!hasFullMaterials}
-              searchQuery={searchQuery}
-              selectedTypes={selectedTypes}
-              selectedSchoolTypes={selectedSchoolTypes}
-              selectedCompetences={selectedCompetences}
-              selectedTopics={selectedTopics}
-              selectedLanguages={selectedLanguages}
-              selectedCefrLevels={selectedCefrLevels}
-              onChange={({
-                query,
-                types,
-                schoolTypes,
-                competences,
-                topics,
-                languages,
-                cefrLevels,
-              }) => {
-                setSearchQuery(query)
-                setSelectedTypes(types)
-                setSelectedSchoolTypes(schoolTypes)
-                setSelectedCompetences(competences)
-                setSelectedTopics(topics)
-                setSelectedLanguages(languages)
-                setSelectedCefrLevels(cefrLevels)
-              }}
-              labels={{
-                searchTitle: labels.searchTitle,
-                searchPlaceholder: labels.searchPlaceholder,
-                materialTypesTitle: labels.materialTypesTitle,
-                schoolTypesTitle: labels.schoolTypesTitle,
-                competencesTitle: labels.competencesTitle,
-                topicsTitle: labels.topicsTitle,
-                cefrTitle: labels.cefrTitle,
-                languagesTitle: labels.languagesTitle,
-                languageDutchLabel: labels.languageDutchLabel,
-                languageGermanLabel: labels.languageGermanLabel,
-              }}
-              typeCounts={hasFullMaterials ? typeCounts : {}}
-              schoolTypeCounts={hasFullMaterials ? schoolTypeCounts : {}}
-              competenceCounts={hasFullMaterials ? competenceCounts : {}}
-              topicCounts={hasFullMaterials ? topicCounts : {}}
-              languageCounts={hasFullMaterials ? languageCounts : {}}
-              cefrCounts={hasFullMaterials ? cefrCounts : {}}
-              locale={lang}
+                  materialTypes={materialTypes}
+                  schoolTypes={schoolTypes}
+                  competences={competences}
+                  topics={topics}
+                  taxonomiesLoading={taxonomiesLoading}
+                  materialsLoading={!hasFullMaterials}
+                  searchQuery={searchQuery}
+                  selectedTypes={selectedTypes}
+                  selectedSchoolTypes={selectedSchoolTypes}
+                  selectedCompetences={selectedCompetences}
+                  selectedTopics={selectedTopics}
+                  selectedLanguages={selectedLanguages}
+                  selectedCefrLevels={selectedCefrLevels}
+                  onChange={({
+                    query,
+                    types,
+                    schoolTypes,
+                    competences,
+                    topics,
+                    languages,
+                    cefrLevels,
+                  }) => {
+                    setSearchQuery(query)
+                    setSelectedTypes(types)
+                    setSelectedSchoolTypes(schoolTypes)
+                    setSelectedCompetences(competences)
+                    setSelectedTopics(topics)
+                    setSelectedLanguages(languages)
+                    setSelectedCefrLevels(cefrLevels)
+                  }}
+                  typeCounts={hasFullMaterials ? typeCounts : {}}
+                  schoolTypeCounts={hasFullMaterials ? schoolTypeCounts : {}}
+                  competenceCounts={hasFullMaterials ? competenceCounts : {}}
+                  topicCounts={hasFullMaterials ? topicCounts : {}}
+                  languageCounts={hasFullMaterials ? languageCounts : {}}
+                  cefrCounts={hasFullMaterials ? cefrCounts : {}}
+                  locale={lang}
                 />
               </div>
             </>
           ) : (
-            <div className="w-full min-h-[200px] animate-pulse rounded-md bg-gray-100" aria-hidden />
+            <div
+              className="w-full min-h-[200px] animate-pulse rounded-md bg-gray-100"
+              aria-hidden
+            />
           )}
         </Sidebar>
-        <main className="px-4 py-6 sm:p-6 lg:p-8">
+        <main className="px-4 py-6 sm:p-6 lg:p-8 grow">
           {isAuthenticated && (
             <div className="float-right mb-4">
               <Link
@@ -822,7 +810,7 @@ export function MaterialsExplorer({
                 key={material.id}
                 material={material}
                 locale={lang}
-                cefrLabel={labels.cefrLabel}
+                cefrLabel={dict.cefrLabel}
                 taxonomies={{ materialTypes, schoolTypes, competences, topics }}
                 filters={{
                   searchQuery,

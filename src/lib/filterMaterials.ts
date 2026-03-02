@@ -169,6 +169,68 @@ function readList(raw: string | string[] | undefined): string[] {
     .filter((v) => v.length > 0)
 }
 
+/**
+ * Builds a Payload CMS where clause from FilterParams.
+ * Use with payload.find({ collection, where: { and: [baseWhere, ...buildWhereFromFilters(filters)] } })
+ */
+export function buildWhereFromFilters(filters: FilterParams): object[] {
+  const conditions: object[] = []
+  const {
+    searchQuery,
+    selectedTypes,
+    selectedSchoolTypes,
+    selectedCompetences,
+    selectedTopics,
+    selectedLanguages,
+    selectedCefrLevels,
+  } = filters
+
+  const query = searchQuery.trim()
+  if (query.length > 0) {
+    conditions.push({
+      or: [
+        { title_nl: { like: query } },
+        { title_de: { like: query } },
+        { description_nl: { like: query } },
+        { description_de: { like: query } },
+      ],
+    })
+  }
+
+  if (selectedTypes.length > 0) {
+    conditions.push({
+      or: selectedTypes.map((id) => ({ materialTypes: { contains: id } })),
+    })
+  }
+  if (selectedSchoolTypes.length > 0) {
+    conditions.push({
+      or: selectedSchoolTypes.map((id) => ({ schoolTypes: { contains: id } })),
+    })
+  }
+  if (selectedCompetences.length > 0) {
+    conditions.push({
+      or: selectedCompetences.map((id) => ({ competences: { contains: id } })),
+    })
+  }
+  if (selectedTopics.length > 0) {
+    conditions.push({
+      or: selectedTopics.map((id) => ({ topics: { contains: id } })),
+    })
+  }
+  if (selectedLanguages.length > 0) {
+    conditions.push({
+      or: selectedLanguages.map((l) => ({ language: { contains: l } })),
+    })
+  }
+  if (selectedCefrLevels.length > 0) {
+    conditions.push({
+      or: selectedCefrLevels.map((level) => ({ cefr: { contains: level } })),
+    })
+  }
+
+  return conditions
+}
+
 export function parseFiltersFromSearchParams(
   sp: URLSearchParams | Record<string, string | string[] | undefined>,
 ): FilterParams {

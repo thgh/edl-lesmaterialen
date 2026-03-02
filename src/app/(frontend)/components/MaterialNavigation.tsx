@@ -91,6 +91,7 @@ type MaterialNavItem = Pick<
   | 'schoolTypes'
   | 'competences'
   | 'topics'
+  | 'cefr'
 >
 
 interface MaterialNavigationProps {
@@ -103,6 +104,7 @@ interface MaterialNavigationProps {
     selectedCompetences: string[]
     selectedTopics: string[]
     selectedLanguages: string[]
+    selectedCefrLevels: string[]
   }
 }
 
@@ -189,9 +191,15 @@ export function MaterialNavigation({
             return t && 'id' in t && filters.selectedTopics.includes(String((t as any).id))
           }))
 
+      const matchesCefr =
+        filters.selectedCefrLevels.length === 0 ||
+        (Array.isArray(m.cefr) &&
+          m.cefr.some((level: string) => filters.selectedCefrLevels.includes(level)))
+
       return (
         matchesQuery &&
         matchesLanguage &&
+        matchesCefr &&
         matchesType &&
         matchesSchoolType &&
         matchesCompetences &&
@@ -231,6 +239,8 @@ export function MaterialNavigation({
     if (filters.selectedTopics.length > 0) params.set('topics', filters.selectedTopics.join(','))
     if (filters.selectedLanguages.length > 0)
       params.set('langs', filters.selectedLanguages.join(','))
+    if (filters.selectedCefrLevels.length > 0)
+      params.set('cefr', filters.selectedCefrLevels.join(','))
 
     const queryString = params.toString()
     return queryString ? `${baseUrl}?${queryString}` : baseUrl
@@ -260,6 +270,7 @@ export function MaterialNavigation({
     <div className="flex flex-wrap items-center justify-between gap-4 mb-3">
       <div>
         <Link
+        
           href={`/?${new URLSearchParams({
             ...(filters.searchQuery && { q: filters.searchQuery }),
             ...(filters.selectedTypes.length > 0 && { types: filters.selectedTypes.join(',') }),
@@ -274,6 +285,9 @@ export function MaterialNavigation({
             }),
             ...(filters.selectedLanguages.length > 0 && {
               langs: filters.selectedLanguages.join(','),
+            }),
+            ...(filters.selectedCefrLevels.length > 0 && {
+              cefr: filters.selectedCefrLevels.join(','),
             }),
           }).toString()}`}
           // className="text-sm text-blue-600 hover:underline"

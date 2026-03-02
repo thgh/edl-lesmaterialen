@@ -47,25 +47,13 @@
 'use client'
 
 import { CEFRLevels } from '@/collections/CEFRLevels'
+import { getDictionary } from '@/i18n/dictionaries'
 import { useCallback, useMemo } from 'react'
 
 interface MaterialType {
   id: string
   title_nl?: string
   title_de?: string
-}
-
-interface Labels {
-  searchTitle: string
-  searchPlaceholder: string
-  materialTypesTitle: string
-  schoolTypesTitle: string
-  competencesTitle: string
-  topicsTitle: string
-  cefrTitle: string
-  languagesTitle: string
-  languageDutchLabel: string
-  languageGermanLabel: string
 }
 
 interface SearchAndFiltersProps {
@@ -91,7 +79,6 @@ interface SearchAndFiltersProps {
     languages: string[]
     cefrLevels: string[]
   }) => void
-  labels: Labels
   typeCounts: Record<string, number>
   schoolTypeCounts: Record<string, number>
   competenceCounts: Record<string, number>
@@ -169,7 +156,6 @@ export function SearchAndFilters({
   selectedLanguages,
   selectedCefrLevels,
   onChange,
-  labels,
   typeCounts,
   schoolTypeCounts,
   competenceCounts,
@@ -178,6 +164,7 @@ export function SearchAndFilters({
   cefrCounts,
   locale,
 }: SearchAndFiltersProps) {
+  const dict = getDictionary(locale)
   const handleTypeToggle = useCallback(
     (typeId: string) => {
       const next = selectedTypes.includes(typeId)
@@ -450,10 +437,10 @@ export function SearchAndFilters({
   return (
     <div className="space-y-4">
       <div>
-        <h3 className="mb-2 text-sm font-medium text-gray-700">{labels.searchTitle}</h3>
+        <h3 className="mb-2 text-sm font-medium text-gray-700">{dict.searchTitle}</h3>
         <input
           type="text"
-          placeholder={labels.searchPlaceholder}
+          placeholder={dict.searchPlaceholder}
           value={searchQuery}
           onChange={(e) =>
             onChange({
@@ -471,17 +458,17 @@ export function SearchAndFilters({
       </div>
 
       <FilterSection
-        title={labels.languagesTitle}
+        title={dict.languagesTitle}
         options={[
           {
             id: 'nl',
-            title: labels.languageDutchLabel,
+            title: dict.languageDutch,
             count: languageCounts['nl'] ?? 0,
             countLoading: materialsLoading,
           },
           {
             id: 'de',
-            title: labels.languageGermanLabel,
+            title: dict.languageGerman,
             count: languageCounts['de'] ?? 0,
             countLoading: materialsLoading,
           },
@@ -494,7 +481,7 @@ export function SearchAndFilters({
       />
 
       <FilterSection
-        title={labels.schoolTypesTitle}
+        title={dict.schoolTypesTitle}
         options={visibleSchoolTypes.map((item) => ({
           id: item.id,
           title: getLocalizedTitle(item),
@@ -507,7 +494,7 @@ export function SearchAndFilters({
       />
 
       <FilterSection
-        title={labels.topicsTitle}
+        title={dict.topicsTitle}
         options={visibleTopics.map((item) => ({
           id: item.id,
           title: getLocalizedTitle(item),
@@ -520,7 +507,7 @@ export function SearchAndFilters({
       />
 
       <FilterSection
-        title={labels.competencesTitle}
+        title={dict.competencesTitle}
         options={visibleCompetences.map((item) => ({
           id: item.id,
           title: getLocalizedTitle(item),
@@ -533,7 +520,7 @@ export function SearchAndFilters({
       />
 
       <FilterSection
-        title={labels.cefrTitle}
+        title={dict.cefrTitle}
         options={visibleCefrLevels.map((level) => ({
           id: level.value,
           title: level.label,
@@ -545,7 +532,7 @@ export function SearchAndFilters({
       />
 
       <FilterSection
-        title={labels.materialTypesTitle}
+        title={dict.materialTypesTitle}
         options={visibleMaterialTypes.map((type) => ({
           id: type.id,
           title: getLocalizedTitle(type),

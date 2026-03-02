@@ -29,6 +29,7 @@ export async function GET() {
       schoolTypes: true,
       competences: true,
       topics: true,
+      cefr: true,
     },
   })
 
