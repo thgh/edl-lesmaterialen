@@ -1,5 +1,5 @@
-import Link from 'next/link'
 import { SITE_DOMAIN_NL } from '@/lib/domains'
+import Link from 'next/link'
 
 export default function AdminBeforeNav() {
   return (

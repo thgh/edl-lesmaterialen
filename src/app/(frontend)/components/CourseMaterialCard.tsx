@@ -204,8 +204,7 @@ export function CourseMaterialCard({
     return ''
   }
 
-  const previewUrl =
-    material.preview ? `/api/materials/${material.id}/preview` : null
+  const previewUrl = material.preview ? `/api/materials/${material.id}/preview` : null
   const slug = material.slug || `id:${material.id}`
   const { displayed: displayedTypes, remaining: remainingTypes } = getMaterialTypes()
 

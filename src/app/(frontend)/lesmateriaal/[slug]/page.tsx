@@ -233,11 +233,7 @@ export default async function CourseMaterialPage({
       <div className="block md:flex flex-1">
         <main className="px-4 py-6 sm:px-6 lg:px-8 flex-1">
           <aside className="mb-4 max-w-6xl mx-auto">
-            <MaterialNavigation
-              currentMaterial={material}
-              locale={lang}
-              filters={filters}
-            />
+            <MaterialNavigation currentMaterial={material} locale={lang} filters={filters} />
           </aside>
 
           <article className="max-w-6xl mx-auto mt-10">

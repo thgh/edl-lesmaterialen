@@ -1,8 +1,8 @@
 import config from '@/payload.config'
-import { getPayload } from 'payload'
-import { NextRequest, NextResponse } from 'next/server'
 import { readFile } from 'fs/promises'
+import { NextRequest, NextResponse } from 'next/server'
 import path from 'path'
+import { getPayload } from 'payload'
 
 export const revalidate = 3600 // 1 hour
 
@@ -10,10 +10,7 @@ export const revalidate = 3600 // 1 hour
  * Serves the preview image for a course material by material ID.
  * Use when material.preview is only populated as an ID (depth 0).
  */
-export async function GET(
-  _request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function GET(_request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const { id: materialId } = await params
   if (!materialId) {
     return NextResponse.json({ error: 'Material ID is required' }, { status: 400 })

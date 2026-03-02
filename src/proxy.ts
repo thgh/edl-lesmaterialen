@@ -9,7 +9,5 @@ export function proxy(_request: NextRequest) {
 }
 
 export const config = {
-  matcher: [
-    '/((?!_next|assets|admin|api|import).*)',
-  ],
+  matcher: ['/((?!_next|assets|admin|api|import).*)'],
 }

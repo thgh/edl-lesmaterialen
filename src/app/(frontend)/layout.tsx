@@ -1,5 +1,5 @@
-import React from 'react'
 import { getLocaleFromHeaders } from '@/lib/domains'
+import React from 'react'
 import './styles.css'
 
 export const metadata = {

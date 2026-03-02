@@ -11,8 +11,7 @@ interface FooterProps {
 
 export function Footer({ locale: localeProp }: FooterProps) {
   const locale =
-    localeProp ??
-    (typeof window !== 'undefined' ? getLocaleFromHost(window.location.host) : 'nl')
+    localeProp ?? (typeof window !== 'undefined' ? getLocaleFromHost(window.location.host) : 'nl')
   const dict = getDictionary(locale)
 
   return (

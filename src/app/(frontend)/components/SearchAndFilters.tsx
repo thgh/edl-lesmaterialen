@@ -473,8 +473,7 @@ export function SearchAndFilters({
             countLoading: materialsLoading,
           },
         ].filter(
-          (option) =>
-            materialsLoading || option.count > 0 || selectedLanguages.includes(option.id),
+          (option) => materialsLoading || option.count > 0 || selectedLanguages.includes(option.id),
         )}
         selectedIds={selectedLanguages}
         onToggle={(id) => handleLanguageToggle(id as 'nl' | 'de')}

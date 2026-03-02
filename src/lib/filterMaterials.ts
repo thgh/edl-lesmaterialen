@@ -86,27 +86,25 @@ export function filterAndSortMaterials<T extends MaterialLike>(
       : ''
     const topicSearchText = normalizeText(topicTitles)
 
-    const matchesPrimary = query === '' || queryWords.every((word) => primarySearchText.includes(word))
+    const matchesPrimary =
+      query === '' || queryWords.every((word) => primarySearchText.includes(word))
     const matchesQueryInTopicTitles =
       query === '' || queryWords.every((word) => topicSearchText.includes(word))
     const matchesQuery = matchesPrimary || matchesQueryInTopicTitles
 
     const matchesLanguage =
       selectedLanguages.length === 0 ||
-      (Array.isArray(m.language) &&
-        m.language.some((l) => selectedLanguages.includes(l as string)))
+      (Array.isArray(m.language) && m.language.some((l) => selectedLanguages.includes(l as string)))
     const matchesType =
       selectedTypes.length === 0 ||
-      (Array.isArray(m.materialTypes) &&
-        m.materialTypes.some((t) => matchesId(t, selectedTypes)))
+      (Array.isArray(m.materialTypes) && m.materialTypes.some((t) => matchesId(t, selectedTypes)))
     const matchesSchoolType =
       selectedSchoolTypes.length === 0 ||
       (Array.isArray(m.schoolTypes) &&
         m.schoolTypes.some((st) => matchesId(st, selectedSchoolTypes)))
     const matchesCompetences =
       selectedCompetences.length === 0 ||
-      (Array.isArray(m.competences) &&
-        m.competences.some((c) => matchesId(c, selectedCompetences)))
+      (Array.isArray(m.competences) && m.competences.some((c) => matchesId(c, selectedCompetences)))
     const matchesTopics =
       selectedTopics.length === 0 ||
       (Array.isArray(m.topics) && m.topics.some((t) => matchesId(t, selectedTopics)))
@@ -235,7 +233,7 @@ export function parseFiltersFromSearchParams(
   sp: URLSearchParams | Record<string, string | string[] | undefined>,
 ): FilterParams {
   const get = (key: string): string | string[] | undefined =>
-    sp instanceof URLSearchParams ? sp.get(key) ?? undefined : sp[key]
+    sp instanceof URLSearchParams ? (sp.get(key) ?? undefined) : sp[key]
 
   const q = get('q')
   return {

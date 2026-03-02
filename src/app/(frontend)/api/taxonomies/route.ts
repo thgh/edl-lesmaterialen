@@ -1,6 +1,6 @@
 import config from '@/payload.config'
-import { getPayload } from 'payload'
 import { NextResponse } from 'next/server'
+import { getPayload } from 'payload'
 
 type TaxonomyItem = { id: string; title_nl?: string | null; title_de?: string | null }
 

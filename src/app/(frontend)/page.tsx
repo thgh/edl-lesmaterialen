@@ -39,7 +39,7 @@ export default async function HomePage({
     collection: 'course-materials',
     where,
     depth: 1,
-    limit: 24,
+    limit: 12,
     sort: '-createdAt',
   })
   console.log(`find: ${performance.now() - start}ms`)
