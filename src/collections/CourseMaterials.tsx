@@ -200,7 +200,7 @@ export const CourseMaterials: CollectionConfig = {
       name: 'notes',
       type: 'textarea',
       access: {
-        read: (({ req }) => !!req.user) as FieldAccess,
+        read: ({ req }: { req: { user?: unknown } }) => !!req.user,
       },
       admin: {
         position: 'sidebar',

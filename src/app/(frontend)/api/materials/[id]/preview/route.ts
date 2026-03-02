@@ -64,7 +64,7 @@ export async function GET(
 
   try {
     const buffer = await readFile(filePath)
-    return new NextResponse(buffer, {
+    return new NextResponse(new Uint8Array(buffer), {
       headers: {
         'Content-Type': mimeType,
         'Cache-Control': 'public, max-age=2592000, stale-while-revalidate=2592000',

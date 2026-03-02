@@ -75,7 +75,7 @@ export function MaterialsExplorer({
   const [limit, setLimit] = useState(12)
   const [filtersOpen, setFiltersOpen] = useState(false)
 
-  const isAuthenticated = useSWR('/api/users/me', fetcher).data?.user
+  const isAuthenticated = !!useSWR<{ user?: unknown }>('/api/users/me', fetcher).data?.user
 
   // Validate and remove invalid selections from taxonomy lists (skip while loading)
   useEffect(() => {

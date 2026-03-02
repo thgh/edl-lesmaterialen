@@ -108,18 +108,14 @@ interface MaterialNavigationProps {
   }
 }
 
-export function MaterialNavigation({
-  currentMaterial,
-  locale,
-  filters,
-}: MaterialNavigationProps) {
+export function MaterialNavigation({ currentMaterial, locale, filters }: MaterialNavigationProps) {
   const router = useRouter()
   const dict = getDictionary(locale)
   const { data: materials, isLoading } = useSWR<MaterialNavItem[]>(
     '/api/materials-navigation',
     fetcher,
   )
-  const isAuthenticated = useSWR('/api/users/me', fetcher).data?.user
+  const isAuthenticated = !!useSWR<{ user?: unknown }>('/api/users/me', fetcher).data?.user
 
   const filteredMaterials = useMemo(() => {
     if (!materials || materials.length === 0) return []
@@ -212,7 +208,8 @@ export function MaterialNavigation({
 
   const currentIndex = filteredMaterials.findIndex((m) => m.id === currentMaterial.id)
   const hasPrevious = !isLoading && materials && currentIndex > 0
-  const hasNext = !isLoading && materials && currentIndex >= 0 && currentIndex < filteredMaterials.length - 1
+  const hasNext =
+    !isLoading && materials && currentIndex >= 0 && currentIndex < filteredMaterials.length - 1
   const positionText =
     isLoading || !materials
       ? '...'
@@ -270,7 +267,6 @@ export function MaterialNavigation({
     <div className="flex flex-wrap items-center justify-between gap-4 mb-3">
       <div>
         <Link
-        
           href={`/?${new URLSearchParams({
             ...(filters.searchQuery && { q: filters.searchQuery }),
             ...(filters.selectedTypes.length > 0 && { types: filters.selectedTypes.join(',') }),
@@ -368,7 +364,7 @@ export function MaterialNavigation({
         </div>
       </div>
 
-      {/* Aadmin button */}
+      {/* Admin button */}
       {isAuthenticated && (
         <Link
           href={`/admin/collections/course-materials/${currentMaterial.id}`}
