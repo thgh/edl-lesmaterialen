@@ -16,7 +16,7 @@ export function Footer({ locale: localeProp }: FooterProps) {
 
   return (
     <div className="mt-8 pt-6 border-t border-gray-200 text-gray-700">
-      <div className="mx-auto max-w-6xl">
+      <div className="mx-auto max-w-[1400px] px-4 sm:px-6 lg:px-8">
         {/* Logos: mobile only (on desktop they're in the header) */}
         <div className="mb-4 flex items-center gap-6 my-8">
           <img

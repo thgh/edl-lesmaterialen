@@ -85,7 +85,7 @@ export default function ImportXLSXPage() {
   }
 
   return (
-    <div className="container mx-auto p-6 max-w-4xl">
+    <div className="container mx-auto p-6 max-w-[1400px]">
       <h1 className="text-3xl font-bold mb-6">Import XLSX File</h1>
 
       <div className="bg-white rounded-lg shadow-md p-6 mb-6">

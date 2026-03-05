@@ -722,7 +722,7 @@ export function MaterialsExplorer({
   return (
     <div className="min-h-screen flex flex-col">
       <Header locale={lang} />
-      <div className="block md:flex flex-1">
+      <div className="block md:flex flex-1 max-w-[1400px] mx-auto">
         <Sidebar locale={lang}>
           {hasFullMaterials ? (
             <>

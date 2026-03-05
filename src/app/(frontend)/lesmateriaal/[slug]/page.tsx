@@ -185,8 +185,6 @@ export default async function CourseMaterialPage({
     material.title ||
     'Untitled'
 
-  const previewUrl = material.preview ? `/api/materials/${material.id}/preview` : null
-
   const externalLinks = material.links || []
   const hasExternalOnly =
     externalLinks.length > 0 && (!material.attachments || material.attachments.length === 0)
@@ -229,25 +227,12 @@ export default async function CourseMaterialPage({
     <div className="min-h-screen flex flex-col">
       <Header locale={lang} />
       <div className="block md:flex flex-1">
-        <main className="px-4 py-6 sm:px-6 lg:px-8 flex-1">
-          <aside className="mb-4 max-w-6xl mx-auto">
+        <main className="px-4 max-w-[1400px] mx-auto py-6 sm:px-6 lg:px-8 flex-1">
+          <aside className="mb-4 mx-auto">
             <MaterialNavigation currentMaterial={material} locale={lang} filters={filters} />
           </aside>
 
-          <article className="max-w-6xl mx-auto mt-10">
-            {previewUrl && (
-              <div className="mb-8 relative aspect-[3/2] w-full max-w-1/2 float-right overflow-hidden rounded-xl border border-gray-200 bg-gray-50">
-                <Image
-                  src={previewUrl}
-                  alt={title}
-                  fill
-                  sizes="(min-width: 1024px) 896px, 100vw"
-                  className="object-cover"
-                  priority
-                />
-              </div>
-            )}
-
+          <article className="mx-auto mt-10">
             <h1 className="text-2xl lg:text-3xl xl:text-4xl font-bold text-gray-900">{title}</h1>
             <div className="mb-6 mt-2 flex flex-wrap items-center gap-3 text-sm">
               {cefr && (
