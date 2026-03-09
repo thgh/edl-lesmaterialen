@@ -555,9 +555,9 @@ export default async function CourseMaterialPage({
               </section>
             )}
           </article>
-          <Footer locale={lang} />
         </main>
       </div>
+      <Footer locale={lang} />
     </div>
   )
 }
