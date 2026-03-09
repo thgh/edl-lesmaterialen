@@ -2,6 +2,8 @@ import { getLocaleFromHeaders } from '@/lib/domains'
 import React, { Suspense } from 'react'
 import './styles.css'
 
+export const dynamic = 'force-dynamic'
+
 export const metadata = {
   description: 'Lesmaterialen explorer',
   title: 'Lesmaterialen',

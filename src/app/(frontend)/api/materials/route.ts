@@ -1,6 +1,9 @@
 import { getCachedMaterials } from '@/lib/cachedData'
 import { NextResponse } from 'next/server'
 
+export const dynamic = 'force-dynamic'
+export const revalidate = 0
+
 /**
  * Returns all published materials with depth 0.
  * Taxonomies (materialTypes, schoolTypes, competences, topics) are IDs only -

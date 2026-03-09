@@ -1,5 +1,4 @@
 import config from '@/payload.config'
-import { cacheTag } from 'next/cache'
 import { getPayload } from 'payload'
 
 export const CACHE_TAG_MATERIALS = 'materials'
@@ -12,9 +11,6 @@ type TaxonomyItem = { id: string; title_nl?: string | null; title_de?: string | 
  * Invalidated when materials change via revalidateTag(CACHE_TAG_MATERIALS).
  */
 export async function getCachedMaterials() {
-  'use cache'
-  cacheTag(CACHE_TAG_MATERIALS)
-
   const payloadConfig = await config
   const payload = await getPayload({ config: payloadConfig })
 
@@ -34,8 +30,6 @@ export async function getCachedMaterials() {
  * Invalidated when any taxonomy changes via revalidateTag(CACHE_TAG_TAXONOMIES).
  */
 export async function getCachedTaxonomies() {
-  'use cache'
-  cacheTag(CACHE_TAG_TAXONOMIES)
 
   const payloadConfig = await config
   const payload = await getPayload({ config: payloadConfig })
