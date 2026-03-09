@@ -13,7 +13,7 @@ jobs:
       - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: 22
+          node-version: 24
           cache: pnpm
       - run: pnpm install
       - run: pnpm build
@@ -23,7 +23,7 @@ jobs:
       - name: Caprover Deploy
         run: rm -r .next/cache && git add -f .next public && git commit -m "build" && npx caprover deploy
         env:
-          CAPROVER_URL: https://captain.caprover.thomasg.be
+          CAPROVER_URL: https://captain.hive.thomasg.be
           CAPROVER_APP_TOKEN: ${{ secrets.CAPROVER_APP_TOKEN_MAIN }}
           CAPROVER_BRANCH: main
-          CAPROVER_APP: edl-lesmaterialen-main
+          CAPROVER_APP: onderwijsmateriaal-buurtaal-main
