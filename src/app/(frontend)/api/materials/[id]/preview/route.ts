@@ -5,7 +5,7 @@ import path from 'path'
 import { getPayload } from 'payload'
 
 export const dynamic = 'force-dynamic'
-export const revalidate = 0
+export const revalidate =  3600
 
 /**
  * Serves the preview image for a course material by material ID.

@@ -1,5 +1,9 @@
 import { getCachedTaxonomies } from '@/lib/cachedData'
+import { SWR_CACHE } from '@/lib/apiCache'
 import { NextResponse } from 'next/server'
+
+export const dynamic = 'force-dynamic'
+export const revalidate = 1
 
 /**
  * Lightweight API for sidebar taxonomies.
@@ -9,5 +13,7 @@ import { NextResponse } from 'next/server'
  */
 export async function GET() {
   const taxonomies = await getCachedTaxonomies()
-  return NextResponse.json(taxonomies)
+  return NextResponse.json(taxonomies, {
+    headers: { 'Cache-Control': SWR_CACHE },
+  })
 }

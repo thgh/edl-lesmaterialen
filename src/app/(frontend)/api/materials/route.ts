@@ -1,8 +1,9 @@
 import { getCachedMaterials } from '@/lib/cachedData'
+import {  SWR_CACHE } from '@/lib/apiCache'
 import { NextResponse } from 'next/server'
 
 export const dynamic = 'force-dynamic'
-export const revalidate = 0
+export const revalidate = 1
 
 /**
  * Returns all published materials with depth 0.
@@ -12,5 +13,7 @@ export const revalidate = 0
  */
 export async function GET() {
   const docs = await getCachedMaterials()
-  return NextResponse.json(docs)
+  return NextResponse.json(docs, {
+    headers: { 'Cache-Control': SWR_CACHE },
+  })
 }

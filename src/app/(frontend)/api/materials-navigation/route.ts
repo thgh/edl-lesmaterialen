@@ -1,6 +1,10 @@
+import { SWR_CACHE } from '@/lib/apiCache'
 import config from '@/payload.config'
 import { NextResponse } from 'next/server'
 import { getPayload } from 'payload'
+
+export const dynamic = 'force-dynamic'
+export const revalidate = 1
 
 /**
  * Lightweight API for MaterialNavigation.
@@ -33,5 +37,7 @@ export async function GET() {
     },
   })
 
-  return NextResponse.json(res.docs)
+  return NextResponse.json(res.docs, {
+    headers: { 'Cache-Control': SWR_CACHE },
+  })
 }
