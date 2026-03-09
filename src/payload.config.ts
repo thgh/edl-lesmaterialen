@@ -1,9 +1,11 @@
 // storage-adapter-import-placeholder
+import { nodemailerAdapter } from '@payloadcms/email-nodemailer'
 import { mongooseAdapter } from '@payloadcms/db-mongodb'
 import { payloadCloudPlugin } from '@payloadcms/payload-cloud'
 import { lexicalEditor } from '@payloadcms/richtext-lexical'
 import path from 'path'
 import { buildConfig } from 'payload'
+import nodemailer from 'nodemailer'
 import sharp from 'sharp'
 import { fileURLToPath } from 'url'
 import { Competences } from './collections/Competences'
@@ -48,6 +50,13 @@ export default buildConfig({
     url: process.env.DATABASE_URI || '',
   }),
   sharp,
+  email: process.env.MAIL_SMTP
+    ? nodemailerAdapter({
+        defaultFromAddress: process.env.MAIL_FROM_ADDRESS || 'onderwijsmateriaal-buurtaal@thomasg.be',
+        defaultFromName: process.env.MAIL_FROM_NAME || 'Onderwijsmateriaal Buurtaal',
+        transport: nodemailer.createTransport(process.env.MAIL_SMTP),
+      })
+    : undefined,
   plugins: [
     payloadCloudPlugin(),
     // storage-adapter-placeholder
