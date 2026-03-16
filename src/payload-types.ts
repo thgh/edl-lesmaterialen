@@ -79,7 +79,20 @@ export interface Config {
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
   };
-  collectionsJoins: {};
+  collectionsJoins: {
+    'material-types': {
+      materials: 'course-materials';
+    };
+    competences: {
+      materials: 'course-materials';
+    };
+    'school-types': {
+      materials: 'course-materials';
+    };
+    topics: {
+      materials: 'course-materials';
+    };
+  };
   collectionsSelect: {
     'course-materials': CourseMaterialsSelect<false> | CourseMaterialsSelect<true>;
     'course-material-attachments': CourseMaterialAttachmentsSelect<false> | CourseMaterialAttachmentsSelect<true>;
@@ -196,6 +209,11 @@ export interface SchoolType {
   title_nl?: string | null;
   title_de?: string | null;
   slug?: string | null;
+  materials?: {
+    docs?: (string | CourseMaterial)[];
+    hasNextPage?: boolean;
+    totalDocs?: number;
+  };
   updatedAt: string;
   createdAt: string;
 }
@@ -209,6 +227,11 @@ export interface Competence {
   title_nl?: string | null;
   title_de?: string | null;
   slug?: string | null;
+  materials?: {
+    docs?: (string | CourseMaterial)[];
+    hasNextPage?: boolean;
+    totalDocs?: number;
+  };
   updatedAt: string;
   createdAt: string;
 }
@@ -222,6 +245,11 @@ export interface Topic {
   title_nl?: string | null;
   title_de?: string | null;
   slug?: string | null;
+  materials?: {
+    docs?: (string | CourseMaterial)[];
+    hasNextPage?: boolean;
+    totalDocs?: number;
+  };
   updatedAt: string;
   createdAt: string;
 }
@@ -235,6 +263,11 @@ export interface MaterialType {
   title_nl?: string | null;
   title_de?: string | null;
   slug?: string | null;
+  materials?: {
+    docs?: (string | CourseMaterial)[];
+    hasNextPage?: boolean;
+    totalDocs?: number;
+  };
   updatedAt: string;
   createdAt: string;
 }
@@ -421,6 +454,7 @@ export interface MaterialTypesSelect<T extends boolean = true> {
   title_nl?: T;
   title_de?: T;
   slug?: T;
+  materials?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -433,6 +467,7 @@ export interface CompetencesSelect<T extends boolean = true> {
   title_nl?: T;
   title_de?: T;
   slug?: T;
+  materials?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -445,6 +480,7 @@ export interface SchoolTypesSelect<T extends boolean = true> {
   title_nl?: T;
   title_de?: T;
   slug?: T;
+  materials?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -457,6 +493,7 @@ export interface TopicsSelect<T extends boolean = true> {
   title_nl?: T;
   title_de?: T;
   slug?: T;
+  materials?: T;
   updatedAt?: T;
   createdAt?: T;
 }

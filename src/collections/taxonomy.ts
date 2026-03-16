@@ -1,3 +1,4 @@
+import { CourseMaterial } from '@/payload-types'
 import { CollectionConfig } from 'payload'
 import { hiddenTitle, localizedTitle } from './field'
 import { beforeChangeSlug } from './formatSlug'
@@ -22,7 +23,6 @@ const base: Omit<CollectionConfig, 'slug'> = {
       name: 'slug',
       label: 'Slug',
       unique: true,
-      admin: { position: 'sidebar' },
       hooks: {
         beforeChange: [beforeChangeSlug('title_nl')],
       },
@@ -32,6 +32,26 @@ const base: Omit<CollectionConfig, 'slug'> = {
 
 export function createTaxonomy(
   options: Partial<CollectionConfig> & { slug: string },
+  joinOn: keyof CourseMaterial,
 ): CollectionConfig {
-  return { ...base, ...options }
+  return {
+    ...base,
+    ...options,
+    fields: joinOn
+      ? [
+          ...base.fields,
+          {
+            type: 'join',
+            name: 'materials',
+            collection: 'course-materials',
+            on: joinOn,
+            defaultLimit: 100,
+            defaultSort: '-updatedAt',
+            admin: {
+              defaultColumns: ['title', 'slug', 'updatedAt'],
+            },
+          },
+        ]
+      : base.fields,
+  }
 }
