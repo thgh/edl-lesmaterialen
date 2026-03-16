@@ -1,5 +1,5 @@
 import configPromise from '@payload-config'
-import { getPayload } from 'payload'
+import { createPayloadRequest } from 'payload'
 import * as XLSX from 'xlsx'
 
 // Language mapping from Dutch to the select options
@@ -92,9 +92,9 @@ export const POST = async (request: Request) => {
       return Response.json({ error: 'No file provided' }, { status: 400 })
     }
 
-    const payload = await getPayload({
-      config: configPromise,
-    })
+    // Authorize
+    const { payload, user } = await createPayloadRequest({ config: configPromise, request })
+    if (!user) return Response.json({ error: 'Unauthorized' }, { status: 401 })
 
     // Delete all existing course materials if requested
     if (deleteAll) {
@@ -252,6 +252,10 @@ export const POST = async (request: Request) => {
 
         if (materialTypeIds.length > 0) {
           courseMaterialData.materialTypes = materialTypeIds
+        }
+
+        if (!competenceIds.length && !topicIds.length && !materialTypeIds.length) {
+          continue
         }
 
         // Check for duplicate: same title + same link
