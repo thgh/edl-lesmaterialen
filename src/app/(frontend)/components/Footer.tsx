@@ -96,6 +96,17 @@ export function Footer({ locale: localeProp }: FooterProps) {
         </div>
         <div className="text-sm mb-4">{renderTextWithEmailLinks(dict.contactText)}</div>
         <div className="text-xs mb-4">{dict.disclaimerText}</div>
+        {/* ESKIDOOS attribution */}
+        <div className="mt-8 -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8 py-3 bg-black text-white text-center text-sm">
+          <a
+            href="https://eskidoos.be/app-laten-maken/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="hover:underline focus:underline"
+          >
+            Webapplicatie door ESKIDOOS.be
+          </a>
+        </div>
       </div>
     </div>
   )
